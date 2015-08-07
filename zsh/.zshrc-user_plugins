@@ -1,0 +1,2 @@
+PLUGINS=($PLUGINS vi-mode git gitfast virtualenvwrapper django django-custom rvm rails trans)
+export PLUGINS

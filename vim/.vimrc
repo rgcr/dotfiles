@@ -105,8 +105,13 @@ set modelines=5
 """ COLORS
 syntax on
 syntax enable
-"colorscheme elflord
-colorscheme molokai
+
+try
+    colorscheme molokai
+catch /^Vim\%((\a\+)\)\=:E185/
+    colorscheme elflord
+endtry
+
 "let g:rehash256 = 1
 
 

@@ -5,10 +5,16 @@ if ! which stow >/dev/null 2>&1; then
     exit 1
 fi
 
+echo ""
+echo "delete previous symlinks..."
+for f in $(find $HOME/.zshrc* $HOME/.vim* $HOME/.i3 $HOME/.tmux* -type l); do
+    rm -rvf $f
+done
+
 # backup 
 echo ""
 echo "backup..."
-for f in $HOME/.zshrc* $HOME/.vimrc $HOME/.oh-my-zsh $HOME/.vim $HOME/.i3 $HOME/.tmux.conf; do
+for f in $HOME/.zshrc* $HOME/.vim* $HOME/.oh-my-zsh $HOME/.i3 $HOME/.tmux*; do
     mv -vf $f ${f}.bak 2>/dev/null
 done
 
@@ -31,4 +37,5 @@ for d in $(find . -maxdepth 1 -path ./.git -prune -o -type d -printf "%f " | sed
 done
 
 rm -fv $HOME/.zcompdump*
+echo "installing vim plugins..."
 vim +PluginInstall +qall

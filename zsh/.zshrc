@@ -49,7 +49,7 @@ unset PLUGINS
 export PLUGINS=$plugins
 
 # User configuration
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH=$HOME/bin:/usr/local/bin:/usr/local/sbin:$PATH
 export MANPATH="/usr/local/man:$MANPATH"
 
 for f in $HOME/.zshrc-*_plugins; do

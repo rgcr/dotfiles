@@ -3,3 +3,4 @@ bindkey '^R' history-incremental-search-backward
 setopt histignorespace
 
 export EDITOR=vim
+export WORKON_HOME=$HOME/.venvs

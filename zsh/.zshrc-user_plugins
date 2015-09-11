@@ -1,2 +1,2 @@
-PLUGINS=($PLUGINS vi-mode git gitfast virtualenvwrapper django django-custom rvm rails trans)
+PLUGINS=($PLUGINS vi-mode git gitfast virtualenvwrapper django django-custom rvm rails trans vagrant tmux)
 export PLUGINS

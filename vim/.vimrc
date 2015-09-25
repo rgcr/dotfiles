@@ -62,10 +62,10 @@ Plugin 'troydm/easybuffer.vim'
 Plugin 'MarcWeber/vim-addon-mw-utils'
 """vim's utilities
 Plugin 'tomtom/tlib_vim'
-"""vimproc interactive command
-"Plugin 'Shougo/vimproc.vim'
-"""vimshell
-"Plugin 'Shougo/vimshell.vim'
+"""Tagbar 
+Plugin 'majutsushi/tagbar'
+"""Network reding and writing
+Plugin 'netrw.vim'
 
 
 "Config
@@ -182,6 +182,10 @@ let g:neocomplcache_enable_at_startup = 1
 "show identation
 "<Leader>ig
 
+
 "Toggle mark bar 
 nmap <Leader>m :SignatureToggle<CR>
+
+"Toggle tagbar
+nmap <Leader>tt :TagbarToggle<CR>
 

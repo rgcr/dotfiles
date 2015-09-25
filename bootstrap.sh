@@ -1,5 +1,6 @@
 #!/bin/sh 
 
+
 if ! which stow >/dev/null 2>&1; then
     echo '"stow" not found, you need to install stow'
     exit 1
@@ -15,7 +16,7 @@ done
 echo ""
 echo "backup..."
 for f in $HOME/.zshrc* $HOME/.vim* $HOME/.oh-my-zsh $HOME/.i3 $HOME/.tmux*; do
-    mv -vf $f ${f}.bak 2>/dev/null
+    [ ! -e ${f}.bak ] && mv -vf $f ${f}.bak 2>/dev/null
 done
 
 # install oh-my-zsh

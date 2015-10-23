@@ -1,69 +1,116 @@
-export ZSH=$HOME/.oh-my-zsh
-ZSH_THEME="norm-custom"
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
 
-# Uncomment the following line to use hyphen-insensitive completion. Case
-# sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+if [ ! -e $HOME/.antigen/antigen.zsh ]; then  
+    git clone https://github.com/zsh-users/antigen.git ~/.antigen
+fi
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
+# I hate which with whence function
+if [ -x "/usr/bin/which"  ]; then 
+    alias which='/usr/bin/which'; 
+fi 
 
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
+source ~/.antigen/antigen.zsh
 
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
+# DETECT OS
+case $(uname) in 
+    Linux)
+        IS_LINUX=1 ;;
+    Darwin)
+        IS_MAC=1 ;;
+    *)
+        ;;
+esac
 
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
+if [ -x `which brew`  ]; then HAS_BREW=1; fi 2>/dev/null
+if [ -x `which pacman`  ]; then HAS_PACMAN=1; fi 2>/dev/null
 
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
+# Load the oh-my-zsh's library.
+antigen use oh-my-zsh
+# bundles
+antigen bundles <<EOBUNDLES
+    ## Bundles from the default repo (robbyrussell's oh-my-zsh).
+    vi-mode
+    git
+    gitfast
+    heroku
+    vagrant
+    tmux
+    ## python
+    virtualenvwrapper
+    pip
+    django
+    ## ruby
+    rvm
+    rails
+    ## nodejs
+    node
+    npm
+    ## Syntax highlighting bundle.
+    zsh-users/zsh-syntax-highlighting
+    ## list files
+    rimraf/k
+EOBUNDLES
 
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
+[ $IS_MAC -eq 1 ] && antigen bundle osx
+[ $HAS_BREW -eq 1 ] && antigen bundle brew
+[ $HAS_PACMAN -eq 1 ] && antigen bundle archlinux
 
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
+# Load the theme.
+antigen theme geoffgarside
 
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
+# Tell antigen that you're done.
+antigen apply
 
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=()
-
-#PLUGINS ENV is used by the *_plugins 
-unset PLUGINS
-export PLUGINS=$plugins
-
-# User configuration
-export PATH=$HOME/bin:/usr/local/bin:/usr/local/sbin:$PATH
-export MANPATH="/usr/local/man:$MANPATH"
-
-for f in $HOME/.zshrc-*_plugins; do
-    source $f
-    #echo $f
-done
+###############################################################
+#################### USER PERSONALIZATION  ####################
+###############################################################
+# vi mode
+set -o vi
+# search on history with ctrl+r
+bindkey '^R' history-incremental-search-backward
+setopt histignorespace
+# silent no match 
+unsetopt nomatch
 
 
-plugins=($PLUGINS $plugins)
-source $ZSH/oh-my-zsh.sh
+###### VARIABLES #####
+export EDITOR=vim
+export WORKON_HOME=$HOME/.venvs
 
-for f in $HOME/.zshrc-*_profile; do
-    source $f
-    #echo $f
-done
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+##### PYTHON / DJANGO  #####
+pmrs() { PORT=${1:-8080}; python manage.py runserver 0.0.0.0:${PORT}    }
+pmrsp() { PORT=${1:-8080}; python manage.py runserver_plus 0.0.0.0:${PORT}  }
+
+alias pm='python manage.py'
+alias pmmm='python manage.py makemigrations'
+alias pms='python manage.py syncdb'
+alias pmm='python manage.py migrate'
+alias pmsh='python manage.py shell'
+alias pmshp='python manage.py shell_plus'
+
+##### NVM #####
+export NVM_DIR=~/.nvm
+if [[ $HAS_BREW -eq 1 && -e "$(brew --prefix nvm 2>/dev/null)/nvm.sh" ]]; then
+    source $(brew --prefix nvm)/nvm.sh
+elif [ -e "$HOME/.nvm/nvm.sh" ]; then
+    source $HOME/.nvm/nvm.sh
+fi
+
+##### PROXY #####
+setproxy() {
+    p=${1}; np=${2:-localhost}
+    no_proxy=$np; NO_PROXY=$np;
+    http_proxy=$p; HTTP_PROXY=$p; https_proxy=$p; HTTPS_PROXY=$p; ftp_proxy=$p; FTP_PROXY=$p;
+    export http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ftp_proxy FTP_PROXY no_proxy NO_PROXY;
+}
+
+noproxy() {
+    unset http_proxy https_proxy ftp_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY;
+    echo "unset proxy!";
+}
+
+alias unsetproxy='noproxy'
+
+
+##### TRANSLATION #####
+alias etos='trans -brief en:es'
+alias stoe='trans -brief es:en'

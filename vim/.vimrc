@@ -133,6 +133,7 @@ map <Leader>n :set invnumber<CR>
 
 "NERD Tree
 map <Leader>e :NERDTreeToggle<CR>
+let NERDTreeIgnore = ['\.pyc$']
 
 "Reload vim shortcut
 noremap <silent> <leader>V :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>

@@ -1,4 +1,3 @@
-
 if [ ! -e $HOME/.antigen/antigen.zsh ]; then  
     git clone https://github.com/zsh-users/antigen.git ~/.antigen
 fi
@@ -8,6 +7,9 @@ if [ -x "/usr/bin/which"  ]; then
     alias which='/usr/bin/which'; 
 fi 
 
+###############################################################
+########################## ANTIGEN ############################
+###############################################################
 source ~/.antigen/antigen.zsh
 
 # DETECT OS
@@ -20,8 +22,8 @@ case $(uname) in
         ;;
 esac
 
-if [ -x `which brew`  ]; then HAS_BREW=1; fi 2>/dev/null
-if [ -x `which pacman`  ]; then HAS_PACMAN=1; fi 2>/dev/null
+[ -x `which brew 2>/dev/null`  ] && HAS_BREW=1; 
+[ -x `which pacman 2>/dev/null` ] && HAS_PACMAN=1; 
 
 # Load the oh-my-zsh's library.
 antigen use oh-my-zsh
@@ -48,6 +50,8 @@ antigen bundles <<EOBUNDLES
     zsh-users/zsh-syntax-highlighting
     ## list files
     rimraf/k
+    ## plugin
+    rupa/z
 EOBUNDLES
 
 [ $IS_MAC -eq 1 ] && antigen bundle osx
@@ -55,7 +59,7 @@ EOBUNDLES
 [ $HAS_PACMAN -eq 1 ] && antigen bundle archlinux
 
 # Load the theme.
-antigen theme geoffgarside
+antigen theme ~ .rogerthat
 
 # Tell antigen that you're done.
 antigen apply
@@ -63,6 +67,7 @@ antigen apply
 ###############################################################
 #################### USER PERSONALIZATION  ####################
 ###############################################################
+WORKPROFILE="$HOME/.zshrc-work_profile"
 # vi mode
 set -o vi
 # search on history with ctrl+r
@@ -70,6 +75,7 @@ bindkey '^R' history-incremental-search-backward
 setopt histignorespace
 # silent no match 
 unsetopt nomatch
+
 
 
 ###### VARIABLES #####
@@ -114,3 +120,7 @@ alias unsetproxy='noproxy'
 ##### TRANSLATION #####
 alias etos='trans -brief en:es'
 alias stoe='trans -brief es:en'
+
+
+[ -f "$WORKPROFILE" ] && source "$WORKPROFILE";
+

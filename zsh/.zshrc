@@ -1,5 +1,5 @@
 if [ ! -e $HOME/.antigen/antigen.zsh ]; then  
-    git clone https://github.com/zsh-users/antigen.git ~/.antigen
+    git clone https://github.com/zsh-users/antigen.git $HOME/.antigen
 fi
 
 # I hate which with whence function

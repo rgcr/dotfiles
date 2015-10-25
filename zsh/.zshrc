@@ -1,4 +1,4 @@
-if [ ! -e $HOME/.antigen/antigen.zsh ]; then  
+if [ ! -f $HOME/.antigen/antigen.zsh ]; then
     git clone https://github.com/zsh-users/antigen.git $HOME/.antigen
 fi
 
@@ -112,6 +112,7 @@ setproxy() {
 noproxy() {
     unset http_proxy https_proxy ftp_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY;
     echo "unset proxy!";
+    RPS1="$_PREV_RPS1";
 }
 
 alias unsetproxy='noproxy'
@@ -121,6 +122,12 @@ alias unsetproxy='noproxy'
 alias etos='trans -brief en:es'
 alias stoe='trans -brief es:en'
 
-
 [ -f "$WORKPROFILE" ] && source "$WORKPROFILE";
 
+##### SHOW INFO ABOUT PROXY ######
+if [ $(env 2>&1 | grep -i proxy 2>&1 | grep -v rvm 2>&1 >/dev/null; echo $?) -eq 0 ]; then
+    export _PREV_RPS1=$RPS1
+    RPS1="$RPS1 <proxy: $http_proxy>";
+else
+    RPS1="$_PREV_RPS1";
+fi

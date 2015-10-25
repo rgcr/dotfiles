@@ -1,3 +1,4 @@
+#set ft=zsh
 PROMPT='$(__prompt_time) $(__prompt_userinfo) $(__promtp_path)$(git_prompt_info) $(__promtp_symbol) '
 
 ZSH_THEME_GIT_PROMPT_PREFIX=" %{$fg[yellow]%}<git: "
@@ -15,7 +16,6 @@ function __prompt_time(){
 
 function __prompt_userinfo(){
     echo $(__prompt_color "cyan" "@%n");
-    
 }
 
 function __promtp_path(){

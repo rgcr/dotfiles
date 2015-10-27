@@ -112,22 +112,29 @@ setproxy() {
 noproxy() {
     unset http_proxy https_proxy ftp_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY;
     echo "unset proxy!";
+    # RESTORING RPS1
     RPS1="$_PREV_RPS1";
 }
 
 alias unsetproxy='noproxy'
 
-
 ##### TRANSLATION #####
 alias etos='trans -brief en:es'
 alias stoe='trans -brief es:en'
 
+
+##### vifm #####
+alias vifm='vifm . .'
+
+# LOAD WORK PROFILE
 [ -f "$WORKPROFILE" ] && source "$WORKPROFILE";
 
 ##### SHOW INFO ABOUT PROXY ######
 if [ $(env 2>&1 | grep -i proxy 2>&1 | grep -v rvm 2>&1 >/dev/null; echo $?) -eq 0 ]; then
-    export _PREV_RPS1=$RPS1
-    RPS1="$RPS1 <proxy: $http_proxy>";
+    if [ -z "$(env | grep _PREV_RPS1)" ]; then
+        export _PREV_RPS1=$RPS1
+        RPS1="$RPS1 <proxy: $http_proxy>";
+    fi
 else
     RPS1="$_PREV_RPS1";
 fi

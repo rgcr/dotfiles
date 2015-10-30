@@ -23,7 +23,7 @@ Plugin 'tomasr/molokai'
 Plugin 'scrooloose/syntastic'
 """Html5 syntax and autocomplete
 Plugin 'othree/html5.vim'
-"""Javascript syntax 
+"""Javascript syntax
 Plugin 'pangloss/vim-javascript'
 """Jquery syntax
 Plugin 'nono/jquery.vim'
@@ -62,20 +62,22 @@ Plugin 'troydm/easybuffer.vim'
 Plugin 'MarcWeber/vim-addon-mw-utils'
 """vim's utilities
 Plugin 'tomtom/tlib_vim'
-"""Tagbar 
+"""Tagbar
 Plugin 'majutsushi/tagbar'
 """Network reding and writing
 Plugin 'netrw.vim'
+"""highlight unnecessary spaces
+Plugin 'Ntpeters/vim-better-whitespace'
 
 
 "Config
 """"""""""""""""""""""""""""""""""""
 filetype plugin indent on
 
-set ruler 
+set ruler
 set number
 
-set hlsearch 
+set hlsearch
 set smartindent
 set ignorecase
 set incsearch
@@ -91,14 +93,14 @@ set wildmenu
 set wildmode=list:longest
 
 set laststatus=2
-set tabstop=4 
-set shiftwidth=4  
-set softtabstop=4 
-set expandtab 
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set expandtab
 
 set nowrap
 set noswapfile
-set nocompatible 
+set nocompatible
 set modeline
 set modelines=5
 
@@ -174,7 +176,7 @@ endif
 "nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 "
 
-"Easybuffe
+"Easybuffer
 nmap <Leader>b :EasyBuffer<CR>
 
 "Neocomplcache
@@ -183,10 +185,18 @@ let g:neocomplcache_enable_at_startup = 1
 "show identation
 "<Leader>ig
 
-
-"Toggle mark bar 
-nmap <Leader>m :SignatureToggle<CR>
+"Toggle mark bar
+nmap <Leader>tm :SignatureToggle<CR>
 
 "Toggle tagbar
 nmap <Leader>tt :TagbarToggle<CR>
+
+"Toggle whitespace (vim-better-whitespace)
+nmap <Leader>ts :ToggleWhitespace<CR>
+
+"Strip whitespaces(vim-better-whitespace)
+nmap <Leader>ds :StripWhitespace<CR>
+
+"strip all trailing whitespace everytime
+autocmd BufWritePre * StripWhitespace
 

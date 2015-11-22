@@ -1,7 +1,7 @@
-#!/bin/sh 
+#!/bin/sh
 
 BACKUPDIR=$HOME/.dotfiles.bak
-ANTIGENDIR=$HOME/.antigen/
+ZGENDIR=$HOME/.zgen/
 
 if ! which stow >/dev/null 2>&1; then
     echo '"stow" not found, you need to install stow'
@@ -10,7 +10,7 @@ fi
 
 mkdir -p $BACKUPDIR
 echo "backup in $HOME/..."
-for f in $HOME/.zshrc* $HOME/.vim* $HOME/.oh-my-zsh $HOME/.i3 $HOME/.tmux* $HOME/.antigen*; do
+for f in $HOME/.zshrc* $HOME/.vim* $HOME/.oh-my-zsh $HOME/.i3 $HOME/.tmux* $HOME/.zgen*; do
     mv -vf $f $BACKUPDIR/ 2>/dev/null
 done
 
@@ -19,8 +19,8 @@ echo ""
 echo "vundle..."
 git clone https://github.com/gmarik/vundle.git $HOME/.vim/bundle/vundle
 
-#install antigen
-git clone https://github.com/zsh-users/antigen.git $ANTIGENDIR
+#install zgen
+git clone https://github.com/tarjoilija/zgen.git $ZGENDIR
 
 echo ""
 echo "Restow dotfiles..."

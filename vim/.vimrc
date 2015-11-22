@@ -185,6 +185,9 @@ let g:neocomplcache_enable_at_startup = 1
 "show identation
 "<Leader>ig
 
+"Toggle syntastic mode
+nmap <Leader>sm :SyntasticToggleMode<CR>
+
 "Toggle mark bar
 nmap <Leader>tm :SignatureToggle<CR>
 

@@ -68,6 +68,8 @@ Plugin 'majutsushi/tagbar'
 Plugin 'netrw.vim'
 """highlight unnecessary spaces
 Plugin 'Ntpeters/vim-better-whitespace'
+"""to run commands
+Plugin 'benmills/vimux'
 
 
 "Config
@@ -202,4 +204,8 @@ nmap <Leader>ds :StripWhitespace<CR>
 
 "strip all trailing whitespace everytime
 autocmd BufWritePre * StripWhitespace
+
+"vimux shell
+map <leader>x :VimuxPromptCommand<CR>
+
 

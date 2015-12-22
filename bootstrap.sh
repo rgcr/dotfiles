@@ -2,6 +2,7 @@
 
 BACKUPDIR=$HOME/.dotfiles.bak
 ZGENDIR=$HOME/.zgen/
+TPMDIR=$HOME/.tmux/plugins/tpm
 
 if ! which stow >/dev/null 2>&1; then
     echo '"stow" not found, you need to install stow'
@@ -21,6 +22,11 @@ git clone https://github.com/gmarik/vundle.git $HOME/.vim/bundle/vundle
 
 #install zgen
 git clone https://github.com/tarjoilija/zgen.git $ZGENDIR
+
+#install tpm
+echo ""
+echo "tpm..."
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 echo ""
 echo "Restow dotfiles..."

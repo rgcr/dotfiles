@@ -29,6 +29,10 @@ if ! zgen saved; then
     zgen oh-my-zsh plugins/docker
     zgen oh-my-zsh plugins/tmux
 
+    zgen load zsh-users/zsh-syntax-highlighting
+
+    zgen oh-my-zsh plugins/history-substring-search
+
     zgen oh-my-zsh plugins/virtualenvwrapper
     zgen oh-my-zsh plugins/pip
     zgen oh-my-zsh plugins/django
@@ -43,11 +47,17 @@ if ! zgen saved; then
     [ $HAS_BREW -eq 1 ] && zgen oh-my-zsh plugins/brew
     [ $HAS_PACMAN -eq 1 ] && zgen oh-my-zsh plugins/archlinux
 
-    zgen load zsh-users/zsh-syntax-highlighting
     zgen load rimraf/k
     zgen load rupa/z
     zgen load sharat87/zsh-vim-mode
 
+	#zgen load tarruda/zsh-autosuggestions
+     ##Enable autosuggestions automatically.
+	#zle-line-init() {
+		#zle autosuggest-start
+	#}
+	#zle -N zle-line-init
+    #AUTOSUGGESTION_ACCEPT_RIGHT_ARROW=1
 
     ###############################################################
     #################### USER PERSONALIZATION  ####################
@@ -65,4 +75,3 @@ if ! zgen saved; then
     # save all to init script
     zgen save
 fi
-

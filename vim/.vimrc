@@ -68,6 +68,8 @@ Plugin 'majutsushi/tagbar'
 Plugin 'netrw.vim'
 """highlight unnecessary spaces
 Plugin 'Ntpeters/vim-better-whitespace'
+"""Preview markdown needs to run npm -g install instant-markdown-d
+Plugin 'suan/vim-instant-markdown'
 """to run commands
 Plugin 'benmills/vimux'
 

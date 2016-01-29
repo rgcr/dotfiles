@@ -1,3 +1,4 @@
+#!/bin/zsh
 
 # vi mode
 set -o vi
@@ -9,7 +10,7 @@ unsetopt nomatch
 
 #history
 zmodload zsh/terminfo
-if [ $IS_MAC -eq 1 ]; then
+if [ "$IS_MAC" -eq 1 ]; then
     bindkey '^[[A' history-substring-search-up
     bindkey '^[[B' history-substring-search-down
 fi
@@ -33,7 +34,7 @@ alias pmshp='python manage.py shell_plus'
 
 ##### NVM #####
 export NVM_DIR=~/.nvm
-if [[ $HAS_BREW -eq 1 && -e "$(brew --prefix nvm 2>/dev/null)/nvm.sh" ]]; then
+if [[ "$HAS_BREW" -eq 1 && -e "$(brew --prefix nvm 2>/dev/null)/nvm.sh" ]]; then
     source $(brew --prefix nvm)/nvm.sh
 elif [ -e "$HOME/.nvm/nvm.sh" ]; then
     source $HOME/.nvm/nvm.sh

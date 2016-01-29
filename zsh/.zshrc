@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # I hate which with whence function
 if [ -x "/usr/bin/which"  ]; then
     alias which='/usr/bin/which';
@@ -43,9 +45,9 @@ if ! zgen saved; then
     zgen oh-my-zsh plugins/node
     zgen oh-my-zsh plugins/npm
 
-    [ $IS_MAC -eq 1 ] && zgen oh-my-zsh plugins/osx
-    [ $HAS_BREW -eq 1 ] && zgen oh-my-zsh plugins/brew
-    [ $HAS_PACMAN -eq 1 ] && zgen oh-my-zsh plugins/archlinux
+    [ "$IS_MAC" -eq 1 ] && zgen oh-my-zsh plugins/osx
+    [ "$HAS_BREW" -eq 1 ] && zgen oh-my-zsh plugins/brew
+    [ "$HAS_PACMAN" -eq 1 ] && zgen oh-my-zsh plugins/archlinux
 
     zgen load rimraf/k
     zgen load rupa/z

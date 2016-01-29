@@ -64,3 +64,22 @@ alias stoe='trans -brief es:en'
 ##### vifm #####
 alias vifm='vifm . .'
 
+# OSX CLI VOL
+if [ "$IS_MAC" -eq 1 ]; then
+    vol(){
+        local v=${1:-none}
+        if [ "$v" == "none" ]; then
+            osascript -e 'output volume of (get volume settings)'
+        else
+            osascript -e "set volume output volume $v"
+        fi
+    }
+    alias ismute='osascript -e "output muted of (get volume settings)"'
+    alias mute='osascript -e "set volume output muted true"'
+    alias unmute='osascript -e "set volume output muted false"'
+fi
+
+
+
+
+

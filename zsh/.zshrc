@@ -31,9 +31,7 @@ if ! zgen saved; then
     zgen oh-my-zsh plugins/docker
     zgen oh-my-zsh plugins/tmux
 
-    zgen load zsh-users/zsh-syntax-highlighting
 
-    zgen oh-my-zsh plugins/history-substring-search
 
     zgen oh-my-zsh plugins/virtualenvwrapper
     zgen oh-my-zsh plugins/pip
@@ -53,13 +51,9 @@ if ! zgen saved; then
     zgen load rupa/z
     zgen load sharat87/zsh-vim-mode
 
-	#zgen load tarruda/zsh-autosuggestions
-     ##Enable autosuggestions automatically.
-	#zle-line-init() {
-		#zle autosuggest-start
-	#}
-	#zle -N zle-line-init
-    #AUTOSUGGESTION_ACCEPT_RIGHT_ARROW=1
+    zgen load zsh-users/zsh-syntax-highlighting
+    zgen oh-my-zsh plugins/history-substring-search
+
 
     ###############################################################
     #################### USER PERSONALIZATION  ####################

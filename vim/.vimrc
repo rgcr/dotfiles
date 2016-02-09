@@ -10,6 +10,7 @@ Plugin 'gmarik/vundle'
 """"""""""""""""""""""""""""""""""""
 """Statusline
 Plugin 'bling/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 """Show the identation
 Plugin 'nathanaelkane/vim-indent-guides'
 """Show marks
@@ -72,6 +73,10 @@ Plugin 'Ntpeters/vim-better-whitespace'
 Plugin 'suan/vim-instant-markdown'
 """to run commands
 Plugin 'benmills/vimux'
+"""undo history
+Plugin 'sjl/gundo.vim'
+"""multiple cursors
+Plugin 'terryma/vim-multiple-cursors'
 
 
 "Config
@@ -120,6 +125,12 @@ endtry
 
 "let g:rehash256 = 1
 
+" Airline - select theme
+let g:airline_theme='badwolf'
+" Airline - Enable the list of buffers
+let g:airline#extensions#tabline#enabled = 1
+" Airline Show just the filename
+let g:airline#extensions#tabline#fnamemod = ':t'
 
 
 "##########  General ############
@@ -172,6 +183,12 @@ if executable('ag')
     " bind \ (backward slash) to grep shortcut
     "command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
     nnoremap \ :Ag<SPACE> -i
+    " Setup some default ignores
+	let g:ctrlp_custom_ignore = {
+				\ 'dir':  '\v[\/](\.(git|hg|svn)|\_site)$',
+				\ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg)$',
+				\}
+
 else
     map <F5> :CtrlPClearCache<CR>
 endif
@@ -210,4 +227,6 @@ autocmd BufWritePre * StripWhitespace
 "vimux shell
 map <leader>x :VimuxPromptCommand<CR>
 
+"gundo toggle
+map <leader>u :GundoToggle<CR>
 

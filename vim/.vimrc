@@ -8,112 +8,88 @@ Plugin 'gmarik/vundle'
 
 "Visual
 """"""""""""""""""""""""""""""""""""
-"""Statusline
-Plugin 'bling/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-"""Show the identation
-Plugin 'nathanaelkane/vim-indent-guides'
-"""Show marks
-Plugin 'kshenoy/vim-signature'
-""" color
-Plugin 'tomasr/molokai'
+Plugin 'bling/vim-airline'                  " statusline
+Plugin 'vim-airline/vim-airline-themes'     " theme for statusline
+Plugin 'nathanaelkane/vim-indent-guides'    " identation
+Plugin 'kshenoy/vim-signature'              " show marks
+Plugin 'tomasr/molokai'                     " molokai colorscheme
 
-"Develop
+"Develop tools
 """"""""""""""""""""""""""""""""""""
-"""Syntax checker
-Plugin 'scrooloose/syntastic'
-"""Html5 syntax and autocomplete
-Plugin 'othree/html5.vim'
-"""Javascript syntax
-Plugin 'pangloss/vim-javascript'
-"""Jquery syntax
-Plugin 'nono/jquery.vim'
-"""For fast html development, tags
-Plugin 'mattn/emmet-vim'
-"""Parentheses, brackets, tags
-Plugin 'tpope/vim-surround'
-"""Autocomplete by tab
-Plugin 'ervandew/supertab'
-"""Cache autocomplete
-Plugin 'Shougo/neocomplcache.vim'
-"""Snippet engine
-"Plugin 'garbas/vim-snipmate'
-"""Snippets
-"Plugin 'honza/vim-snippets'
-"""Chef syntax and snippets
-"Plugin 'vadv/vim-chef'
-"""Git plugin for vim
-Plugin 'tpope/vim-fugitive'
-"""nodejs
-Plugin 'myhere/vim-nodejs-complete'
+Plugin 'scrooloose/syntastic'               " syntax checker
+Plugin 'Shougo/neocomplcache.vim'           " cache autocompletion
+Plugin 'ervandew/supertab'                  " autocomplete typing tab
+Plugin 'tpope/vim-surround'                 " autoclose parentheses, brackets, tags
+Plugin 'tpope/vim-fugitive'                 " git plugin
+Plugin 'mattn/emmet-vim'                    " emmet, fast html development
+Plugin 'jiangmiao/auto-pairs'               " autoclose brackets
+Plugin 'majutsushi/tagbar'                  " tagbar
+
+"Syntax
+""""""""""""""""""""""""""""""""""""
+Plugin 'othree/html5.vim'                   " html syntax
+Plugin 'pangloss/vim-javascript'            " js syntax
+Plugin 'myhere/vim-nodejs-complete'         " nodejs syntax
+Plugin 'nono/jquery.vim'                    " jquery syntax
+"Plugin 'garbas/vim-snipmate'               " snippet engine
+"Plugin 'honza/vim-snippets'                " snippets
+"Plugin 'vadv/vim-chef'                     " chef snippets
 """nerd commenter
 Plugin 'scrooloose/nerdcommenter'"
-"""Auto close brackets
-Plugin 'jiangmiao/auto-pairs'"
 
 "Awesome Tools
 """"""""""""""""""""""""""""""""""""
-"""Find files like sublime ctrl+p
-Plugin 'kien/ctrlp.vim'
-"""File explorer
-Plugin 'scrooloose/nerdtree'
-"""Change to any buffer by index number'
-Plugin 'troydm/easybuffer.vim'
-"""cache file to autocomplete
-Plugin 'MarcWeber/vim-addon-mw-utils'
-"""vim's utilities
-Plugin 'tomtom/tlib_vim'
-"""Tagbar
-Plugin 'majutsushi/tagbar'
-"""Network reding and writing
-Plugin 'netrw.vim'
-"""highlight unnecessary spaces
-Plugin 'Ntpeters/vim-better-whitespace'
-"""Preview markdown needs to run npm -g install instant-markdown-d
-Plugin 'suan/vim-instant-markdown'
-"""to run commands
-Plugin 'benmills/vimux'
-"""undo history
-Plugin 'sjl/gundo.vim'
-"""multiple cursors
-Plugin 'terryma/vim-multiple-cursors'
+Plugin 'kien/ctrlp.vim'                     " fuzzy finder like sublime (ctrl + p)
+Plugin 'scrooloose/nerdtree'                " File explorer
+Plugin 'troydm/easybuffer.vim'              " list of buffers
+Plugin 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
+Plugin 'tomtom/tlib_vim'                    " vim libs
+Plugin 'netrw.vim'                          " remote files
+Plugin 'Ntpeters/vim-better-whitespace'     " highlight unnecessary spaces
+Plugin 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
+Plugin 'benmills/vimux'                     " run commands
+Plugin 'sjl/gundo.vim'                      " undo history
+Plugin 'terryma/vim-multiple-cursors'       " multiple cursors
 
 
 "Config
 """"""""""""""""""""""""""""""""""""
 filetype plugin indent on
 
-set ruler
-set number
+set ruler           " cursorline and column
+set number          " linenumber
 
-set hlsearch
-set smartindent
-set ignorecase
-set incsearch
-set smartcase
+set hlsearch        " highlight matches with last search pattern
+set smartindent     " smart autoindenting
+set ignorecase      " ignore case in search patterns
+set smartcase       " no ignore case when pattern has uppercase
+set incsearch       " highlight match while typing search pattern
 
-set showmode
-set showcmd
-set visualbell
-set ttyfast
+set showmode        " message on status line to show current mode
+set showcmd         " show (partial) command in status line
+set visualbell      " use visual bell instead of beeping
+set ttyfast         " indicates a fast terminal connection
+set autoread        " Reload files changed outside vim
+"
 "set undofile
-set cursorline
-set wildmenu
-set wildmode=list:longest
+set cursorline      " highlight the screen line of the cursor
+set gcr=a:blinkon0  " disable cursor blink
+set wildmenu        " use menu for command line completion
+set wildmode=list:longest " mode for 'wildchar' command-line expansion
 
-set laststatus=2
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
-set expandtab
+set laststatus=2    " when last window has status lines
+set tabstop=4       " number of spaces that <tab> in file uses
+set shiftwidth=4    " number of spaces to use for (auto)indent
+set softtabstop=4   " number of spaces that <tab> uses while editing
+set expandtab       " use spaces when <tab> is inserted
 
-set nowrap
-set noswapfile
-set nocompatible
-set modeline
-set modelines=5
+set nowrap          " long lines
+set noswapfile      " whether to use a swapfile for a buffer
+set nocompatible    " behave vi-compatible as much as possible
+set modeline        " recognize modelines at start or end of file
+set modelines=5     " number of lines checked for modelines
 
-""" COLORS
+"turn on syntax highlighting
 syntax on
 syntax enable
 
@@ -125,35 +101,36 @@ endtry
 
 "let g:rehash256 = 1
 
-" Airline - select theme
-let g:airline_theme='badwolf'
-" Airline - Enable the list of buffers
-let g:airline#extensions#tabline#enabled = 1
-" Airline Show just the filename
-let g:airline#extensions#tabline#fnamemod = ':t'
-
-
-"##########  General ############
-let mapleader = ","
+let g:airline_theme='badwolf'                       " Airline - select theme
+let g:airline#extensions#tabline#enabled = 1        " Airline - Enable the list of buffers
+let g:airline#extensions#tabline#fnamemod = ':t'    " Airline Show just the filename
 
 "hi CursorLine term=bold cterm=bold guibg=Grey40
 "hi CursorLine  term=bold cterm=bold ctermbg=8
 
-"Toggle Paste
+""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""
+""
+""           GENERAL
+""
+""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""
+
+let mapleader = ","
+
+"Reload vim shortcut
+noremap <silent> <leader>V :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
+
+" Toggle Paste
 set pastetoggle=<C-p>
-
-"Hidden search hl
+" Hidden search hl
 map <Leader>F :nohls<CR>
-
 "Hidden column number
 map <Leader>n :set invnumber<CR>
 
 "NERD Tree
 map <Leader>e :NERDTreeToggle<CR>
 let NERDTreeIgnore = ['\.pyc$']
-
-"Reload vim shortcut
-noremap <silent> <leader>V :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
 
 "Resize current buffer +/-5
 map <Leader>h :vertical resize -5<cr>
@@ -188,14 +165,12 @@ if executable('ag')
 				\ 'dir':  '\v[\/](\.(git|hg|svn)|\_site)$',
 				\ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg)$',
 				\}
-
 else
     map <F5> :CtrlPClearCache<CR>
 endif
 
 " bind K to grep word under cursor
 "nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
-"
 
 "Easybuffer
 nmap <Leader>b :EasyBuffer<CR>

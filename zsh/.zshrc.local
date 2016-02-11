@@ -80,7 +80,10 @@ if [ "$IS_MAC" -eq 1 ]; then
     alias unmute='osascript -e "set volume output muted false"'
 fi
 
+if [ -x "/usr/local/bin/fzf" ]; then
+    export FZF_DEFAULT_COMMAND='ag -g ""'
+    # runs fuzzyfinder if there is not parameters and
+    # runs the original vim if we need to open specific files
+    vim() { [ $# -gt 0 ] && $(which vim) $@ || $(which vim) $(fzf); }
 
-
-
-
+fi

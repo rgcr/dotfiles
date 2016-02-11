@@ -17,11 +17,16 @@ fi
 #bindkey -M vicmd 'k' history-substring-search-up
 #bindkey -M vicmd 'j' history-substring-search-down
 
-###### VARIABLES #####
+
+##########################################################
+#################### VARIABLES ###########################
+##########################################################
 export EDITOR=vim
 export WORKON_HOME=$HOME/.venvs
 
-##### PYTHON / DJANGO  #####
+##########################################################
+################# PYTHON / DJANGO ########################
+##########################################################
 pmrs() { PORT=${1:-8080}; python manage.py runserver 0.0.0.0:${PORT}    }
 pmrsp() { PORT=${1:-8080}; python manage.py runserver_plus 0.0.0.0:${PORT}  }
 
@@ -32,7 +37,9 @@ alias pmm='python manage.py migrate'
 alias pmsh='python manage.py shell'
 alias pmshp='python manage.py shell_plus'
 
-##### NVM #####
+##########################################################
+#####################  NVM  ##############################
+##########################################################
 export NVM_DIR=~/.nvm
 if [[ "$HAS_BREW" -eq 1 && -e "$(brew --prefix nvm 2>/dev/null)/nvm.sh" ]]; then
     source $(brew --prefix nvm)/nvm.sh
@@ -40,7 +47,9 @@ elif [ -e "$HOME/.nvm/nvm.sh" ]; then
     source $HOME/.nvm/nvm.sh
 fi
 
-##### PROXY #####
+##########################################################
+##################### PROXY ##############################
+##########################################################
 setproxy() {
     p=${1}; np=${2:-localhost}
     no_proxy=$np; NO_PROXY=$np;
@@ -55,17 +64,23 @@ noproxy() {
     # cut proxy info ( osx / gnu linux )
     RPS1=$( (echo $RPS1 2>&1 | sed -E 's|<proxy.+>||g' 2>/dev/null) || (echo $RPS1 2>&1 | sed -r 's|<proxy.+>||g' 2>/dev/null)  )
 }
-
 alias unsetproxy='noproxy'
 
-##### TRANSLATION #####
+
+##########################################################
+############### translate-shell ##########################
+##########################################################
 alias etos='trans -brief en:es'
 alias stoe='trans -brief es:en'
 
-##### vifm #####
+##########################################################
+####################### VIFM #############################
+##########################################################
 alias vifm='vifm . .'
 
-# OSX CLI VOL
+##########################################################
+############# OSX: VOLUME FROM TERMINAL ##################
+##########################################################
 if [ "$IS_MAC" -eq 1 ]; then
     vol(){
         local v=${1:-none}
@@ -80,10 +95,12 @@ if [ "$IS_MAC" -eq 1 ]; then
     alias unmute='osascript -e "set volume output muted false"'
 fi
 
+##########################################################
+########## FUZZYFINDER AND VIM INTEGRATION ###############
+##########################################################
 if [ -x "/usr/local/bin/fzf" ]; then
     export FZF_DEFAULT_COMMAND='ag -g ""'
     # runs fuzzyfinder if there is not parameters and
     # runs the original vim if we need to open specific files
     vim() { [ $# -gt 0 ] && $(which vim) $@ || $(which vim) $(fzf); }
-
 fi

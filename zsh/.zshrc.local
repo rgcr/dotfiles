@@ -104,3 +104,33 @@ if [ -x "/usr/local/bin/fzf" ]; then
     # runs the original vim if we need to open specific files
     vim() { [ $# -gt 0 ] && $(which vim) $@ || $(which vim) $(fzf); }
 fi
+
+
+##########################################################
+########## MPLAYER, PLAY ALL RECURSIVELY   ###############
+##########################################################
+playall() {
+    # play music recursively with mplayer
+    # e.g.
+    #   playall  # play all mp3 in the current directory
+    #   playall -t mp3 .
+    #   playall -t avi /home
+    #   playall -f mp4 /tmp /home .
+    local _params=""
+    local _ext="mp3"
+
+    while [ $# -gt 0  ]; do
+        case $1 in
+            -t|-type|-f|-format) _ext=$2 ; shift ;;
+            -*) _params="${_params}${1}" ;;
+            *) break
+        esac
+        shift
+    done
+    [ ! -z "$@" ] && \
+        find $@ -name "*.${_ext}" -exec mplayer ${_params} '{}' +
+}
+
+ydl(){
+    youtube-dl --extract-audio --audio-format mp3 --audio-quality 5 --ignore-errors $@
+}

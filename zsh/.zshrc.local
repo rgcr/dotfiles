@@ -81,7 +81,7 @@ alias vifm='vifm . .'
 ##########################################################
 ########## FUZZYFINDER AND VIM INTEGRATION ###############
 ##########################################################
-if [ -x "/usr/local/bin/fzf" ]; then
+if type "fzf" >/dev/null 2>&1; then
     export FZF_DEFAULT_COMMAND='ag -g ""'
     # runs fuzzyfinder if there is not parameters and
     # runs the original vim if we need to open specific files
@@ -117,3 +117,4 @@ playall() {
 ydl(){
     youtube-dl --extract-audio --audio-format mp3 --audio-quality 5 --ignore-errors $@
 }
+

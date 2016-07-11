@@ -159,7 +159,7 @@ if executable('ag')
     let g:ctrlp_use_caching = 0
     " bind \ (backward slash) to grep shortcut
     "command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
-    nnoremap \ :Ag<SPACE> -i
+    nnoremap \ :ag<SPACE> -i
     " Setup some default ignores
 	let g:ctrlp_custom_ignore = {
 				\ 'dir':  '\v[\/](\.(git|hg|svn)|\_site)$',

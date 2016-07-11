@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+WORKPROFILE="${HOME}/.zshrc-work_profile"
+LOCALPROFILE="${HOME}"/.zshrc.local
+
 # I hate which with whence function
 if [ -x "/usr/bin/which"  ]; then
     alias which='/usr/bin/which';
@@ -15,10 +18,10 @@ case $(uname) in
         ;;
 esac
 
-[ -x `which brew 2>/dev/null`  ] && HAS_BREW=1;
-[ -x `which pacman 2>/dev/null` ] && HAS_PACMAN=1;
+[ -x "$(which brew 2>/dev/null)" ] && HAS_BREW=1;
+[ -x "$(which pacman 2>/dev/null)" ] && HAS_PACMAN=1;
 
-source "${HOME}/.zgen/zgen.zsh"
+[ -e "${HOME}/.zgen/zgen.zsh" ] && source "${HOME}/.zgen/zgen.zsh"
 
 if ! zgen saved; then
     zgen oh-my-zsh
@@ -30,8 +33,6 @@ if ! zgen saved; then
     zgen oh-my-zsh plugins/vagrant
     zgen oh-my-zsh plugins/docker
     zgen oh-my-zsh plugins/tmux
-
-
 
     zgen oh-my-zsh plugins/virtualenvwrapper
     zgen oh-my-zsh plugins/pip
@@ -54,17 +55,14 @@ if ! zgen saved; then
     zgen load zsh-users/zsh-syntax-highlighting
     zgen oh-my-zsh plugins/history-substring-search
 
-
     ###############################################################
     #################### USER PERSONALIZATION  ####################
     ###############################################################
     # LOAD MY CUSTOM THEME
     zgen load $HOME/.rogerthat.zsh-theme 2>/dev/null
 
-    WORKPROFILE="$HOME/.zshrc-work_profile"
-
     # LOAD MY PROFILE
-    [ -f $HOME/.zshrc.local ] && zgen load $HOME/.zshrc.local 2>/dev/null;
+    [ -f "$LOCALPROFILE" ] && zgen load "$LOCALPROFILE" 2>/dev/null;
     # LOAD WORK PROFILE
     [ -f "$WORKPROFILE" ] && zgen load "$WORKPROFILE" 2>/dev/null;
 

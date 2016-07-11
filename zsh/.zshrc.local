@@ -41,7 +41,7 @@ alias pmshp='python manage.py shell_plus'
 #####################  NVM  ##############################
 ##########################################################
 export NVM_DIR=~/.nvm
-if [[ "$HAS_BREW" -eq 1 && -e "$(brew --prefix nvm 2>/dev/null)/nvm.sh" ]]; then
+if [ "$HAS_BREW" -eq 1 -a -e "$(brew --prefix nvm 2>/dev/null)/nvm.sh" ]; then
     source $(brew --prefix nvm)/nvm.sh
 elif [ -e "$HOME/.nvm/nvm.sh" ]; then
     source $HOME/.nvm/nvm.sh
@@ -79,23 +79,6 @@ alias stoe='trans -brief es:en'
 alias vifm='vifm . .'
 
 ##########################################################
-############# OSX: VOLUME FROM TERMINAL ##################
-##########################################################
-if [ "$IS_MAC" -eq 1 ]; then
-    vol(){
-        local v=${1:-none}
-        if [ "$v" == "none" ]; then
-            osascript -e 'output volume of (get volume settings)'
-        else
-            osascript -e "set volume output volume $v"
-        fi
-    }
-    alias ismute='osascript -e "output muted of (get volume settings)"'
-    alias mute='osascript -e "set volume output muted true"'
-    alias unmute='osascript -e "set volume output muted false"'
-fi
-
-##########################################################
 ########## FUZZYFINDER AND VIM INTEGRATION ###############
 ##########################################################
 if [ -x "/usr/local/bin/fzf" ]; then
@@ -121,7 +104,7 @@ playall() {
 
     while [ $# -gt 0  ]; do
         case $1 in
-            -t|-type|-f|-format) _ext=$2 ; shift ;;
+            -t|-type) _ext=$2 ; shift ;;
             -*) _params="${_params}${1}" ;;
             *) break
         esac

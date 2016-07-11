@@ -42,7 +42,6 @@ function __prompt_proxy(){
             RPS1="$RPS1 <proxy: $http_proxy>"
         fi
     else
-        #RPS1=$(echo $RPS1|sed 's/<proxy.+>//g')
         # sed for osx / gnu linux
         RSP1=$( (echo $RPS1 2>&1 | sed -E 's|<proxy.+>||g' 2>/dev/null) || (echo $RPS1 2>&1 | sed -r 's|<proxy.+>||g' 2>/dev/null)  )
     fi

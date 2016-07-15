@@ -24,6 +24,14 @@ esac
 [ -e "${HOME}/.zgen/zgen.zsh" ] && source "${HOME}/.zgen/zgen.zsh"
 
 if ! zgen saved; then
+
+    ################################################################
+    # Load my profile
+    [ -f "$LOCALPROFILE" ] && zgen load "$LOCALPROFILE" 2>/dev/null;
+    # Load work profile
+    [ -f "$WORKPROFILE" ] && zgen load "$WORKPROFILE" 2>/dev/null;
+    ################################################################
+
     zgen oh-my-zsh
 
     zgen oh-my-zsh plugins/git
@@ -39,7 +47,6 @@ if ! zgen saved; then
     zgen oh-my-zsh plugins/django
 
     zgen oh-my-zsh plugins/rvm
-    #zgen oh-my-zsh plugins/rails
 
     zgen oh-my-zsh plugins/node
     zgen oh-my-zsh plugins/npm
@@ -51,21 +58,26 @@ if ! zgen saved; then
     zgen load rimraf/k
     zgen load rupa/z
     zgen load sharat87/zsh-vim-mode
-
+    zgen load zsh-users/zsh-autosuggestions
+    zgen load zsh-users/zsh-history-substring-search
     zgen load zsh-users/zsh-syntax-highlighting
-    zgen oh-my-zsh plugins/history-substring-search
 
-    ###############################################################
-    #################### USER PERSONALIZATION  ####################
-    ###############################################################
-    # LOAD MY CUSTOM THEME
+    ################################################################
+    # Load my theme
     zgen load $HOME/.rogerthat.zsh-theme 2>/dev/null
-
-    # LOAD MY PROFILE
-    [ -f "$LOCALPROFILE" ] && zgen load "$LOCALPROFILE" 2>/dev/null;
-    # LOAD WORK PROFILE
-    [ -f "$WORKPROFILE" ] && zgen load "$WORKPROFILE" 2>/dev/null;
+    ################################################################
 
     # save all to init script
     zgen save
+fi
+
+###################################################################
+# # "zsh-history-substring-search" plugin
+# # => Key bindings (for UP and DOWN arrow keys)
+zmodload zsh/terminfo
+if [ "$IS_MAC" -eq 1 ]; then
+    #bindkey "$terminfo[cuu1]" history-substring-search-up
+    #bindkey "$terminfo[cud1]" history-substring-search-down
+    bindkey '^[[A' history-substring-search-up
+    bindkey '^[[B' history-substring-search-down
 fi

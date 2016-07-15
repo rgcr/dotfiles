@@ -8,16 +8,6 @@ setopt histignorespace
 # silent no match
 unsetopt nomatch
 
-#history
-zmodload zsh/terminfo
-if [ "$IS_MAC" -eq 1 ]; then
-    bindkey '^[[A' history-substring-search-up
-    bindkey '^[[B' history-substring-search-down
-fi
-#bindkey -M vicmd 'k' history-substring-search-up
-#bindkey -M vicmd 'j' history-substring-search-down
-
-
 ##########################################################
 #################### VARIABLES ###########################
 ##########################################################
@@ -55,14 +45,11 @@ setproxy() {
     no_proxy=$np; NO_PROXY=$np;
     http_proxy=$p; HTTP_PROXY=$p; https_proxy=$p; HTTPS_PROXY=$p; ftp_proxy=$p; FTP_PROXY=$p;
     export http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ftp_proxy FTP_PROXY no_proxy NO_PROXY;
-    __prompt_proxy
 }
 
 noproxy() {
     unset http_proxy https_proxy ftp_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY;
     echo "unset proxy!";
-    # cut proxy info ( osx / gnu linux )
-    RPS1=$( (echo $RPS1 2>&1 | sed -E 's|<proxy.+>||g' 2>/dev/null) || (echo $RPS1 2>&1 | sed -r 's|<proxy.+>||g' 2>/dev/null)  )
 }
 alias unsetproxy='noproxy'
 

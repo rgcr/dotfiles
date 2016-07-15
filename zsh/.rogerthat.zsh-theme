@@ -37,15 +37,16 @@ function __promtp_symbol(){
 }
 
 function __prompt_proxy(){
-    if [ $(env 2>&1 | grep -i https_proxy 2>&1 >/dev/null; echo $?) -eq 0 ]; then
-        if [ $( echo $RPS1 2>&1 | grep -i proxy >/dev/null; echo $?) -eq 1 ]; then
+    # if there is a proxy
+    if [ ! -z "$http_proxy" ]; then
+        # to avoid duplicate entries
+        if ! echo "${RPS1}" | grep proxy >/dev/null 2>&1; then
             RPS1="$RPS1 <proxy: $http_proxy>"
         fi
     else
         # sed for osx / gnu linux
-        RSP1=$( (echo $RPS1 2>&1 | sed -E 's|<proxy.+>||g' 2>/dev/null) || (echo $RPS1 2>&1 | sed -r 's|<proxy.+>||g' 2>/dev/null)  )
+        RPS1="$( echo $RPS1 2>&1 | sed -E 's|<proxy.+>||g' 2>/dev/null || echo $RPS1 2>&1 | sed -r 's|<proxy.+>||g' 2>/dev/null  )"
     fi
 }
 
-
-__prompt_proxy
+add-zsh-hook precmd __prompt_proxy

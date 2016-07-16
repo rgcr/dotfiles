@@ -105,10 +105,3 @@ ydl(){
     youtube-dl --extract-audio --audio-format mp3 --audio-quality 5 --ignore-errors $@
 }
 
-
-##########################################################
-################## m-cli for mac #########################
-##########################################################
-[ "$IS_MAC" -eq 1 -a -e "/usr/local/m-cli" ] && export PATH=$PATH:/usr/local/m-cli
-
-

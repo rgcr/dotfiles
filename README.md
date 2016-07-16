@@ -1,3 +1,13 @@
 # My personal configuration
 
-Just run `bash bootstrap.sh`
+## Requirements
+
+* [stow](https://www.gnu.org/software/stow/)
+`brew install stow`
+
+
+## Installation
+
+`bash bootstrap.sh`
+
+

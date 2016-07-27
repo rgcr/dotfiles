@@ -31,9 +31,6 @@ Plugin 'othree/html5.vim'                   " html syntax
 Plugin 'pangloss/vim-javascript'            " js syntax
 Plugin 'myhere/vim-nodejs-complete'         " nodejs syntax
 Plugin 'nono/jquery.vim'                    " jquery syntax
-"Plugin 'garbas/vim-snipmate'               " snippet engine
-"Plugin 'honza/vim-snippets'                " snippets
-"Plugin 'vadv/vim-chef'                     " chef snippets
 """nerd commenter
 Plugin 'scrooloose/nerdcommenter'"
 
@@ -50,6 +47,11 @@ Plugin 'suan/vim-instant-markdown'          " Preview markdown needs to run npm 
 Plugin 'benmills/vimux'                     " run commands
 Plugin 'sjl/gundo.vim'                      " undo history
 Plugin 'terryma/vim-multiple-cursors'       " multiple cursors
+
+Plugin 'SirVer/ultisnips'                   " Snippet engine
+Plugin 'honza/vim-snippets'                 " Snippets
+
+
 
 
 "Config
@@ -159,10 +161,11 @@ if executable('ag')
     let g:ctrlp_use_caching = 0
     " bind \ (backward slash) to grep shortcut
     "command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
-    nnoremap \ :ag<SPACE> -i
+    nnoremap \ :Ag<SPACE> -i
     " Setup some default ignores
+				"\ 'dir':  '\v[\/](node_modules)|(\.(swp|git|hg|svn))$',
 	let g:ctrlp_custom_ignore = {
-				\ 'dir':  '\v[\/](\.(git|hg|svn)|\_site)$',
+				\ 'dir':  '\v[\/](node_modules)|(\.(swp|git|hg|svn))$',
 				\ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg)$',
 				\}
 else
@@ -204,4 +207,11 @@ map <leader>x :VimuxPromptCommand<CR>
 
 "gundo toggle
 map <leader>u :GundoToggle<CR>
+
+"Snippet configuration
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+" If you want :UltiSnipsEdit to split your window.
+"let g:UltiSnipsEditSplit="vertical"
 

@@ -46,7 +46,10 @@ Plugin 'Ntpeters/vim-better-whitespace'     " highlight unnecessary spaces
 Plugin 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
 Plugin 'benmills/vimux'                     " run commands
 Plugin 'sjl/gundo.vim'                      " undo history
-Plugin 'terryma/vim-multiple-cursors'       " multiple cursors
+"Plugin 'terryma/vim-multiple-cursors'       " multiple cursors
+Plugin 'wesQ3/vim-windowswap'               " swap windows easily
+
+
 
 Plugin 'SirVer/ultisnips'                   " Snippet engine
 Plugin 'honza/vim-snippets'                 " Snippets

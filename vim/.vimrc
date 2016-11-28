@@ -12,7 +12,8 @@ Plugin 'bling/vim-airline'                  " statusline
 Plugin 'vim-airline/vim-airline-themes'     " theme for statusline
 Plugin 'nathanaelkane/vim-indent-guides'    " identation
 Plugin 'kshenoy/vim-signature'              " show marks
-Plugin 'tomasr/molokai'                     " molokai colorscheme
+Plugin 'flazz/vim-colorschemes'             " Colorscheme pack
+
 
 "Develop tools
 """"""""""""""""""""""""""""""""""""
@@ -98,7 +99,7 @@ syntax on
 syntax enable
 
 try
-    colorscheme molokai
+    colorscheme triplejelly
 catch /^Vim\%((\a\+)\)\=:E185/
     colorscheme elflord
 endtry
@@ -216,4 +217,16 @@ let g:UltiSnipsJumpForwardTrigger="<c-b>"
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 " If you want :UltiSnipsEdit to split your window.
 "let g:UltiSnipsEditSplit="vertical"
-"
+
+" Custom task tags
+if has("autocmd")
+  " Highlight TODO, FIXME, NOTE, etc.
+  if v:version > 701
+    "autocmd Syntax * call matchadd('Todo',  '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\)')
+    "autocmd Syntax * call matchadd('Debug', '\W\zs\(NOTE\|INFO\|IDEA\)')
+    " I prefer the Todo style for triplejelly theme
+    autocmd Syntax * call matchadd('Todo', '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
+  endif
+endif
+
+

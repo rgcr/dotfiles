@@ -30,6 +30,7 @@ Plugin 'majutsushi/tagbar'                  " tagbar
 """"""""""""""""""""""""""""""""""""
 Plugin 'othree/html5.vim'                   " html syntax
 Plugin 'pangloss/vim-javascript'            " js syntax
+Plugin 'heavenshell/vim-jsdoc'              " auto jsdoc for functions
 Plugin 'myhere/vim-nodejs-complete'         " nodejs syntax
 Plugin 'nono/jquery.vim'                    " jquery syntax
 """nerd commenter
@@ -229,4 +230,6 @@ if has("autocmd")
   endif
 endif
 
+
+let g:NERDSpaceDelims = 1
 

@@ -1,0 +1,105 @@
+############################
+# Global config
+############################
+
+config defaultToCurrentScreen true
+config windowHintsBackgroundColor 96;96;64;0.5
+config windowHintsIgnoreHiddenWindows true
+# config windowHintsShowIcons true
+# config windowHintsOrder persist
+# config windowHintsSpread true
+# config windowHintsSpreadPadding 40
+# config windowHintsSpreadSearchWidth 80
+# config windowHintsSpreadSearchHeight 80
+config undoOps move,resize
+
+
+# config windowHintsShowIcons true
+
+############################
+# Alias
+############################
+
+# alias monitors
+alias mon-1 0
+alias mon-2 1
+
+# Aloas for focus with hints
+alias showNormalHint hint AOEUIDHTNSYXFBPKGMCW
+
+# Abstract positions
+alias full          move screenOriginX;screenOriginY screenSizeX;screenSizeY
+alias lefthalf      move screenOriginX;screenOriginY screenSizeX/2;screenSizeY
+alias righthalf     move screenOriginX+screenSizeX/2;screenOriginY screenSizeX/2;screenSizeY
+alias tophalf       move screenOriginX;screenOriginY screenSizeX;screenSizeY/2
+alias bottomhalf    move screenOriginX;screenOriginY+screenSizeY/2 screenSizeX;screenSizeY/2
+alias topleft       corner top-left resize:screenSizeX/2;screenSizeY/2
+alias topright      corner top-right resize:screenSizeX/2;screenSizeY/2
+alias bottomleft    corner bottom-left resize:screenSizeX/2;screenSizeY/2
+alias bottomright   corner bottom-right resize:screenSizeX/2;screenSizeY/2
+alias center        move screenOriginX+screenSizeX/6;screenOriginY+screenSizeY/6 2*screenSizeX/3;2*screenSizeY/3
+alias bigCenter     move screenOriginX+screenSizeX/12;screenOriginY+screenSizeY/12 10*screenSizeX/12;10*screenSizeY/12
+
+# keyboard aliases
+alias alt_shift         alt;shift
+alias alt_ctrl          alt;ctrl
+alias alt_cmd           alt;cmd
+alias ctrl_cmd          ctrl;cmd
+alias alt_ctrl_shift    alt;ctrl;shift
+alias alt_ctrl_cmd      alt;ctrl;cmd
+
+############################
+# Location bindings
+############################
+
+# Reload Slate
+bind r:${alt_ctrl_cmd}  relaunch
+
+# Undo
+bind delete:${alt_ctrl} undo
+
+# Position windows
+bind left:${alt_ctrl}   ${lefthalf}
+bind m:${alt_ctrl}      ${full}
+bind right:${alt_ctrl}  ${righthalf}
+bind up:${alt_ctrl}     ${tophalf}
+bind down:${alt_ctrl}   ${bottomhalf}
+bind c:${alt_ctrl}      ${center}
+bind v:${alt_ctrl}      ${bigCenter}
+## corners
+bind down:${alt_ctrl_shift}     ${bottomleft}
+bind right:${alt_ctrl_shift}    ${bottomright}
+bind left:${alt_ctrl_shift}     ${topleft}
+bind up:${alt_ctrl_shift}       ${topright}
+
+# Focus Bindings
+## NOTE: some of these may *not* work if you have not removed the expose/spaces/mission control bindings
+bind right:${alt_cmd}  focus right
+bind left:${alt_cmd}   focus left
+bind up:${alt_cmd}     focus up
+bind down:${alt_cmd}   focus down
+bind j:${alt_cmd}      focus behind
+bind k:${alt_cmd}      focus behind
+
+# Monitor switching bindings
+bind right:${alt_ctrl_cmd}  throw next resize
+bind left:${alt_ctrl_cmd}   throw next resize
+# bind right:${alt_ctrl_cmd}    throw ${mon-2} resize
+# bind left:${alt_ctrl_cmd}     throw ${mon-1} resize
+
+# Resize Bindings
+# NOTE: some of these may *not* work if you have not removed the expose/spaces/mission control bindings
+bind right:${ctrl_cmd} resize +10% +0
+bind left:${ctrl_cmd}  resize -10% +0
+bind up:${ctrl_cmd}    resize +0   -10%
+bind down:${ctrl_cmd}  resize +0   +10%
+
+# Show focus hints
+bind esc:cmd    ${showNormalHint}
+# bind ,:${alt_ctrl} ${showNormalHint}
+
+# Grid
+bind esc:ctrl grid
+
+# bind tab:cmd switch
+

@@ -95,7 +95,7 @@ bind up:${ctrl_cmd}    resize +0   -10%
 bind down:${ctrl_cmd}  resize +0   +10%
 
 # Show focus hints
-bind esc:cmd    ${showNormalHint}
+bind .:cmd    ${showNormalHint}
 # bind ,:${alt_ctrl} ${showNormalHint}
 
 # Grid

@@ -6,6 +6,13 @@ call vundle#rc()
 "Bundle
 Plugin 'gmarik/vundle'
 
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
+"       PLUGINS
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
+
+
 "Visual
 """"""""""""""""""""""""""""""""""""
 Plugin 'bling/vim-airline'                  " statusline
@@ -14,23 +21,23 @@ Plugin 'nathanaelkane/vim-indent-guides'    " identation
 Plugin 'kshenoy/vim-signature'              " show marks
 Plugin 'flazz/vim-colorschemes'             " Colorscheme pack
 
-
 "Develop tools
 """"""""""""""""""""""""""""""""""""
 Plugin 'scrooloose/syntastic'               " syntax checker
 Plugin 'Shougo/neocomplcache.vim'           " cache autocompletion
 Plugin 'ervandew/supertab'                  " autocomplete typing tab
-Plugin 'tpope/vim-surround'                 " autoclose parentheses, brackets, tags
 Plugin 'tpope/vim-fugitive'                 " git plugin
+Plugin 'airblade/vim-gitgutter'             " git gutter plugin
 Plugin 'mattn/emmet-vim'                    " emmet, fast html development
-Plugin 'jiangmiao/auto-pairs'               " autoclose brackets
 Plugin 'majutsushi/tagbar'                  " tagbar
+Plugin 'tpope/vim-surround'                 " to easily delete, change and add such surroundings in pairs
+Plugin 'Raimondi/delimitMate'               " awesome and simple plugin to automatic close quotes, parenthesis, brackets
+Plugin 'heavenshell/vim-jsdoc'              " auto jsdoc for functions
 
 "Syntax
 """"""""""""""""""""""""""""""""""""
 Plugin 'othree/html5.vim'                   " html syntax
 Plugin 'pangloss/vim-javascript'            " js syntax
-Plugin 'heavenshell/vim-jsdoc'              " auto jsdoc for functions
 Plugin 'myhere/vim-nodejs-complete'         " nodejs syntax
 Plugin 'nono/jquery.vim'                    " jquery syntax
 """nerd commenter
@@ -38,7 +45,10 @@ Plugin 'scrooloose/nerdcommenter'"
 
 "Awesome Tools
 """"""""""""""""""""""""""""""""""""
+Plugin 'tpope/vim-repeat'                   " used for a lot of vim plugins
+Plugin 'rking/ag.vim'                       " silver searcher plugin
 Plugin 'kien/ctrlp.vim'                     " fuzzy finder like sublime (ctrl + p)
+Plugin 'tacahiroy/ctrlp-funky'              " function navigator for ctrlp.vim
 Plugin 'scrooloose/nerdtree'                " File explorer
 Plugin 'troydm/easybuffer.vim'              " list of buffers
 Plugin 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
@@ -50,16 +60,17 @@ Plugin 'benmills/vimux'                     " run commands
 Plugin 'sjl/gundo.vim'                      " undo history
 "Plugin 'terryma/vim-multiple-cursors'       " multiple cursors
 Plugin 'wesQ3/vim-windowswap'               " swap windows easily
-
-
-
 Plugin 'SirVer/ultisnips'                   " Snippet engine
 Plugin 'honza/vim-snippets'                 " Snippets
 
 
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
+"       SETS
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
 
-"Config
-""""""""""""""""""""""""""""""""""""
+
 filetype plugin indent on
 
 set ruler           " cursorline and column
@@ -104,57 +115,81 @@ try
 catch /^Vim\%((\a\+)\)\=:E185/
     colorscheme elflord
 endtry
-
-"let g:rehash256 = 1
-
-let g:airline_theme='badwolf'                       " Airline - select theme
-let g:airline#extensions#tabline#enabled = 1        " Airline - Enable the list of buffers
-let g:airline#extensions#tabline#fnamemod = ':t'    " Airline Show just the filename
-
+" let g:rehash256 = 1
 "hi CursorLine term=bold cterm=bold guibg=Grey40
 "hi CursorLine  term=bold cterm=bold ctermbg=8
 
-""""""""""""""""""""""""""""""""""""
-""""""""""""""""""""""""""""""""""""
-""
-""           GENERAL
-""
-""""""""""""""""""""""""""""""""""""
-""""""""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
+"       MAPS
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
 
 let mapleader = ","
 
-"Reload vim shortcut
-noremap <silent> <leader>V :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
+"Reload .vimrc
+noremap <silent> <leader>R :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
 
 " Toggle Paste
 set pastetoggle=<C-p>
+
 " Hidden search hl
 map <Leader>F :nohls<CR>
-"Hidden column number
+
+" Hidden column number
 map <Leader>n :set invnumber<CR>
 
-"NERD Tree
+" copy and paste {
+""" copy in visual mode
+vmap <C-c> "+yi
+""" cut in visual mode
+vmap <C-x> "+c
+""" replace in visual mode
+vmap <C-v> c<ESC>"+p
+""" paste in insert mode
+imap <C-v> <ESC>"+pa
+""" copy line to clipboard
+map <Leader>yy <ESC>"+yy
+" }
+
+" Surround
+map <Leader>{ <ESC>ysiw}
+map <Leader>( <ESC>ysiw)
+map <Leader>" <ESC>ysiw"
+map <Leader>' <ESC>ysiw'
+map <Leader>[ <ESC>ysiw]
+map <Leader>< <ESC>ysiw>
+" }
+
+" NERD Tree {
 map <Leader>e :NERDTreeToggle<CR>
 let NERDTreeIgnore = ['\.pyc$']
+" }
 
-"Resize current buffer +/-5
+"Resize current buffer +/-5 {
 map <Leader>h :vertical resize -5<cr>
 map <Leader>j :resize +5<cr>
 map <Leader>k :resize -5<cr>
 map <Leader>l :vertical resize +5<cr>
+" }
 
-" Move lines normal mode
+" Move lines normal mode {
 nnoremap <C-j> :m .+1<CR>==
 nnoremap <C-k> :m .-2<CR>==
-" Move lines insert mode
+" }
+
+" Move lines insert mode {
 inoremap <C-j> <ESC>:m .+1<CR>==gi
 inoremap <C-k> <ESC>:m .-2<CR>==gi
-" Move lines visual mode
+" }
+
+" Move lines visual mode {
 vnoremap <C-j> :m '>+1<CR>gv=gv
 vnoremap <C-k> :m '<-2<CR>gv=gv
+" }
 
-"CtrlP & Silver searcher
+"CtrlP & Silver searcher {
 let g:ctrlp_map = '<Leader>p'
 if executable('ag')
     " Use ag over grep
@@ -164,8 +199,8 @@ if executable('ag')
     " ag is fast enough that CtrlP doesn't need to cache
     let g:ctrlp_use_caching = 0
     " bind \ (backward slash) to grep shortcut
-    "command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
-    nnoremap \ :Ag<SPACE> -i
+    " command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
+    nnoremap \ :Ag<SPACE> -i<SPACE>
     " Setup some default ignores
 				"\ 'dir':  '\v[\/](node_modules)|(\.(swp|git|hg|svn))$',
 	let g:ctrlp_custom_ignore = {
@@ -175,6 +210,7 @@ if executable('ag')
 else
     map <F5> :CtrlPClearCache<CR>
 endif
+" }
 
 " bind K to grep word under cursor
 "nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
@@ -182,44 +218,77 @@ endif
 "Easybuffer
 nmap <Leader>b :EasyBuffer<CR>
 
-"Neocomplcache
-let g:neocomplcache_enable_at_startup = 1
-
-"show identation
-"<Leader>ig
-
 "Toggle syntastic mode
-nmap <Leader>sm :SyntasticToggleMode<CR>
+nmap <Leader>ss :SyntasticToggleMode<CR>
 
-"Toggle mark bar
-nmap <Leader>tm :SignatureToggle<CR>
+" Toggle mark bar
+nmap <Leader>mm :SignatureToggle<CR>
 
 "Toggle tagbar
 nmap <Leader>tt :TagbarToggle<CR>
 
-"Toggle whitespace (vim-better-whitespace)
+" Toggle whitespace (vim-better-whitespace) {
 nmap <Leader>ts :ToggleWhitespace<CR>
-
-"Strip whitespaces(vim-better-whitespace)
+""" Strip whitespaces
 nmap <Leader>ds :StripWhitespace<CR>
-
-"strip all trailing whitespace everytime
+""" strip all trailing whitespace everytime
 autocmd BufWritePre * StripWhitespace
+" }
 
 "vimux shell
 map <leader>x :VimuxPromptCommand<CR>
 
 "gundo toggle
-map <leader>u :GundoToggle<CR>
+map <leader>uu :GundoToggle<CR>
 
-"Snippet configuration
+" ctrlp-funky {
+nnoremap <Leader>fu :CtrlPFunky<Cr>
+"" narrow the list down with a word under cursor
+nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+" }
+
+" git gutter
+nnoremap <Leader>gg :GitGutterToggle<Cr>
+
+
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
+"       OPTIONS
+""""""""""""""""""""""""""
+""""""""""""""""""""""""""
+
+
+" ctrlp-funky {
+let g:ctrlp_funky_multi_buffers = 1
+let g:ctrlp_funky_matchtype = 'path'
+" let g:ctrlp_funky_syntax_highlight = 1
+" }
+
+" Neocomplcache {
+let g:neocomplcache_enable_at_startup = 1
+" }
+
+" airline {
+let g:airline_theme='badwolf'                       " Airline - select theme
+let g:airline#extensions#tabline#enabled = 1        " Airline - Enable the list of buffers
+let g:airline#extensions#tabline#fnamemod = ':t'    " Airline Show just the filename
+" }
+
+" delimitmate {
+let g:delimitMate_jump_expansion=1
+let g:delimitMate_expand_cr=2
+" let g:delimitMateSmartQuotes=1
+"}
+
+" Snippet configuration {
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<c-b>"
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 " If you want :UltiSnipsEdit to split your window.
 "let g:UltiSnipsEditSplit="vertical"
+" }
 
-" Custom task tags
+" Custom task tags {
 if has("autocmd")
   " Highlight TODO, FIXME, NOTE, etc.
   if v:version > 701
@@ -229,7 +298,8 @@ if has("autocmd")
     autocmd Syntax * call matchadd('Todo', '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
   endif
 endif
+" }
 
-
-let g:NERDSpaceDelims = 1
-
+" Nerdcommenter {
+let g:NERDSpaceDelims = 0
+" }

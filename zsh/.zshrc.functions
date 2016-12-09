@@ -1,0 +1,48 @@
+# Django {
+pmrs() { PORT=${1:-8080}; python manage.py runserver 0.0.0.0:${PORT}    }
+pmrsp() { PORT=${1:-8080}; python manage.py runserver_plus 0.0.0.0:${PORT}  }
+# }
+
+# Proxy {
+setproxy() {
+    p=${1}; np=${2:-localhost}
+    no_proxy=$np; NO_PROXY=$np;
+    http_proxy=$p; HTTP_PROXY=$p; https_proxy=$p; HTTPS_PROXY=$p; ftp_proxy=$p; FTP_PROXY=$p;
+    export http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ftp_proxy FTP_PROXY no_proxy NO_PROXY;
+}
+
+noproxy() {
+    unset http_proxy https_proxy ftp_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY;
+    echo "unset proxy!";
+}
+# }
+
+# youtube-dl {
+ydl(){
+    youtube-dl --extract-audio --audio-format mp3 --audio-quality 5 --ignore-errors $@
+}
+# }
+
+# mplayer {
+playall() {
+    # play music recursively with mplayer
+    # e.g.
+    #   playall  # play all mp3 in the current directory
+    #   playall -t mp3 .
+    #   playall -t avi /home
+    #   playall -f mp4 /tmp /home .
+    local _params=""
+    local _ext="mp3"
+
+    while [ $# -gt 0  ]; do
+        case $1 in
+            -t|-type) _ext=$2 ; shift ;;
+            -*) _params="${_params}${1}" ;;
+            *) break ;;
+        esac
+        shift
+    done
+    [ ! -z "${@}" ] && \
+        find ${@} -name "*.${_ext}" -exec mplayer ${_params} '{}' +
+}
+# }

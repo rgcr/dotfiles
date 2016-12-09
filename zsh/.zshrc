@@ -1,36 +1,49 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
-WORKPROFILE="${HOME}/.zshrc-work_profile"
-LOCALPROFILE="${HOME}"/.zshrc.local
+WORKPROFILE="${HOME}/.zshrc.work"
+MYPROFILE="${HOME}/.zshrc.local"
+ALIASES="${HOME}/.zshrc.aliases"
+FUNCTIONS="${HOME}/.zshrc.functions"
 
-# I hate which with whence function
-if [ -x "/usr/bin/which"  ]; then
-    alias which='/usr/bin/which';
-fi
+ZGEN_RESET_ON_CHANGE=(${MYPROFILE} ${ALIASES} ${FUNCTIONS})
+
+# I hate which with the whence function
+command which which>/dev/null 2>&1 && {
+    alias which="$(command which which)"
+}
+
+_has(){
+    command type "$1" > /dev/null 2>&1
+}
 
 # DETECT OS
 case $(uname) in
-    Linux)
-        IS_LINUX=1 ;;
+    {Linux})
+        IS_LINUX="true"
+        #
+        _has "pacman" && HAS_PACMAN="true"
+        ;;
     Darwin)
-        IS_MAC=1 ;;
+        IS_MAC="true"
+        _has "brew" && HAS_BREW="true";
+        ;;
     *)
         ;;
 esac
-
-[ -x "$(which brew 2>/dev/null)" ] && HAS_BREW=1;
-[ -x "$(which pacman 2>/dev/null)" ] && HAS_PACMAN=1;
 
 [ -e "${HOME}/.zgen/zgen.zsh" ] && source "${HOME}/.zgen/zgen.zsh"
 
 if ! zgen saved; then
 
-    ################################################################
-    # Load my profile
-    [ -f "$LOCALPROFILE" ] && zgen load "$LOCALPROFILE" 2>/dev/null;
-    # Load work profile
-    [ -f "$WORKPROFILE" ] && zgen load "$WORKPROFILE" 2>/dev/null;
-    ################################################################
+    # Load my zshrc files {
+    [ -f "${MYPROFILE}" ] && zgen load "${MYPROFILE}" 2>/dev/null;
+    [ -f "${ALIASES}" ] && zgen load "${ALIASES}" 2>/dev/null;
+    [ -f "${FUNCTIONS}" ] && zgen load "${FUNCTIONS}" 2>/dev/null;
+    # }
+
+    # Load work profile {
+    [ -f "${WORKPROFILE}" ] && zgen load "${WORKPROFILE}" 2>/dev/null;
+    # }
 
     zgen oh-my-zsh
 
@@ -51,10 +64,13 @@ if ! zgen saved; then
 
     zgen oh-my-zsh plugins/node
     zgen oh-my-zsh plugins/npm
+    zgen oh-my-zsh plugins/yarn
 
-    [ "$IS_MAC" -eq 1 ] && zgen oh-my-zsh plugins/osx
-    [ "$HAS_BREW" -eq 1 ] && zgen oh-my-zsh plugins/brew
-    [ "$HAS_PACMAN" -eq 1 ] && zgen oh-my-zsh plugins/archlinux
+    zgen oh-my-zsh plugins/tmuxinator
+
+    [ "${IS_MAC}" = "true" ] && zgen oh-my-zsh plugins/osx
+    [ "${HAS_BREW}" = "true" ] && zgen oh-my-zsh plugins/brew
+    [ "${HAS_PACMAN}" = "true" ] && zgen oh-my-zsh plugins/archlinux
 
     zgen load rimraf/k
     zgen load rupa/z
@@ -63,10 +79,9 @@ if ! zgen saved; then
     zgen load zsh-users/zsh-history-substring-search
     zgen load zsh-users/zsh-syntax-highlighting
 
-    ################################################################
-    # Load my theme
+    # Load my theme {
     zgen load $HOME/.rogerthat.zsh-theme 2>/dev/null
-    ################################################################
+    # }
 
     # save all to init script
     zgen save
@@ -76,7 +91,7 @@ fi
 # # "zsh-history-substring-search" plugin
 # # => Key bindings (for UP and DOWN arrow keys)
 zmodload zsh/terminfo
-if [ "$IS_MAC" -eq 1 ]; then
+if [ "${IS_MAC}" = "true" ]; then
     #bindkey "$terminfo[cuu1]" history-substring-search-up
     #bindkey "$terminfo[cud1]" history-substring-search-down
     bindkey '^[[A' history-substring-search-up

@@ -82,8 +82,8 @@ bind j:${alt_cmd}      focus behind
 bind k:${alt_cmd}      focus behind
 
 # Monitor switching bindings
-bind right:${alt_ctrl_cmd}  throw next resize
-bind left:${alt_ctrl_cmd}   throw next resize
+bind right:${alt_ctrl_cmd}  throw next # resize
+bind left:${alt_ctrl_cmd}   throw next # resize
 # bind right:${alt_ctrl_cmd}    throw ${mon-2} resize
 # bind left:${alt_ctrl_cmd}     throw ${mon-1} resize
 

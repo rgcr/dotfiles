@@ -17,10 +17,13 @@ done
 
 #install vim-plug
 printf "\nInstalling vim-plug"
+
 # vim
+mkdir -p ~/.vim/autoload
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 # neovim
+mkdir -p ~/.config/nvim/
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 

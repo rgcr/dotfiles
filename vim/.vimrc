@@ -13,56 +13,62 @@ end
 """"""""""""""""""""""""""
 """"""""""""""""""""""""""
 
-"Visual
-""""""""""""""""""""""""""""""""""""
+"Themes,colors & status lines {{{
 Plug 'bling/vim-airline'                  " statusline
 Plug 'vim-airline/vim-airline-themes'     " theme for statusline
-Plug 'nathanaelkane/vim-indent-guides'    " identation
 Plug 'kshenoy/vim-signature'              " show marks
-Plug 'flazz/vim-colorschemes'             " Colorscheme pack
+Plug 'flazz/vim-colorschemes'             " colorscheme pack
+"}}}
+"
+"Utils {{{
+Plug 'tomtom/tlib_vim'                    " library for vim plugins
+Plug 'tpope/vim-repeat'                   " library for vim plugins
+Plug 'rking/ag.vim'                       " silver searcher plugin
+Plug 'kien/ctrlp.vim'                     " fuzzy finder like sublime (ctrl + p)
+Plug 'scrooloose/nerdtree'                " File explorer
+Plug 'scrooloose/nerdcommenter'           " easy way to comment text for multiple languages
+Plug 'majutsushi/tagbar'                  " tagbar
+Plug 'nathanaelkane/vim-indent-guides'    " show identation
+Plug 'editorconfig/editorconfig-vim'      "
+Plug 'troydm/easybuffer.vim'              " list of buffers
+Plug 'netrw.vim'                          " remote files
+Plug 'benmills/vimux'                     " run commands
+Plug 'sjl/gundo.vim'                      " undo history
+Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
+Plug 'wesQ3/vim-windowswap'               " swap windows easily
+"}}}
 
-"Develop tools
-""""""""""""""""""""""""""""""""""""
+"Syntax {{{
 Plug 'scrooloose/syntastic'               " syntax checker
+Plug 'mattn/emmet-vim'                    " emmet, fast html development
+Plug 'Ntpeters/vim-better-whitespace'     " highlight unnecessary spaces
+"}}}
+
+"Completions {{{
 Plug 'Shougo/neocomplcache.vim'           " cache autocompletion
 Plug 'ervandew/supertab'                  " autocomplete typing tab
-Plug 'tpope/vim-fugitive'                 " git plugin
-Plug 'airblade/vim-gitgutter'             " git gutter plugin
-Plug 'mattn/emmet-vim'                    " emmet, fast html development
-Plug 'majutsushi/tagbar'                  " tagbar
 Plug 'tpope/vim-surround'                 " to easily delete, change and add such surroundings in pairs
 Plug 'Raimondi/delimitMate'               " awesome and simple plugin to automatic close quotes, parenthesis, brackets
-Plug 'heavenshell/vim-jsdoc'              " auto jsdoc for functions
-Plug 'editorconfig/editorconfig-vim'      "
+Plug 'tacahiroy/ctrlp-funky'              " function navigator for ctrlp.vim
+Plug 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
+Plug 'SirVer/ultisnips'                   " Snippet engine
+Plug 'honza/vim-snippets'                 " Snippets
+"}}}
 
-"Syntax
-""""""""""""""""""""""""""""""""""""
+"Git {{{
+Plug 'tpope/vim-fugitive'                 " git plugin
+Plug 'airblade/vim-gitgutter'             " git gutter plugin
+"}}}
+
+" HTML5 {{{
 Plug 'othree/html5.vim'                   " html syntax
+"}}}
+
+"JS {{{
 Plug 'pangloss/vim-javascript'            " js syntax
 Plug 'myhere/vim-nodejs-complete'         " nodejs syntax
 Plug 'nono/jquery.vim'                    " jquery syntax
-"""nerd commenter
-Plug 'scrooloose/nerdcommenter'
-
-"Awesome Tools
-""""""""""""""""""""""""""""""""""""
-Plug 'tpope/vim-repeat'                   " used for a lot of vim plugins
-Plug 'rking/ag.vim'                       " silver searcher plugin
-Plug 'kien/ctrlp.vim'                     " fuzzy finder like sublime (ctrl + p)
-Plug 'tacahiroy/ctrlp-funky'              " function navigator for ctrlp.vim
-Plug 'scrooloose/nerdtree'                " File explorer
-Plug 'troydm/easybuffer.vim'              " list of buffers
-Plug 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
-Plug 'tomtom/tlib_vim'                    " vim libs
-Plug 'netrw.vim'                          " remote files
-Plug 'Ntpeters/vim-better-whitespace'     " highlight unnecessary spaces
-Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
-Plug 'benmills/vimux'                     " run commands
-Plug 'sjl/gundo.vim'                      " undo history
-"Plug 'terryma/vim-multiple-cursors'       " multiple cursors
-Plug 'wesQ3/vim-windowswap'               " swap windows easily
-Plug 'SirVer/ultisnips'                   " Snippet engine
-Plug 'honza/vim-snippets'                 " Snippets
+"}}}
 
 " Add plugins to &runtimepath
  call plug#end()
@@ -72,7 +78,6 @@ Plug 'honza/vim-snippets'                 " Snippets
 "       SETS
 """"""""""""""""""""""""""
 """"""""""""""""""""""""""
-
 
 filetype plugin indent on
 

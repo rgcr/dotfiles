@@ -33,6 +33,7 @@ Plugin 'majutsushi/tagbar'                  " tagbar
 Plugin 'tpope/vim-surround'                 " to easily delete, change and add such surroundings in pairs
 Plugin 'Raimondi/delimitMate'               " awesome and simple plugin to automatic close quotes, parenthesis, brackets
 Plugin 'heavenshell/vim-jsdoc'              " auto jsdoc for functions
+Plugin 'editorconfig/editorconfig-vim'      "
 
 "Syntax
 """"""""""""""""""""""""""""""""""""
@@ -275,7 +276,7 @@ let g:airline#extensions#tabline#fnamemod = ':t'    " Airline Show just the file
 " }
 
 " delimitmate {
-let g:delimitMate_jump_expansion=1
+let g:delimitMate_jump_expansion=0
 let g:delimitMate_expand_cr=2
 " let g:delimitMateSmartQuotes=1
 "}
@@ -303,3 +304,15 @@ endif
 " Nerdcommenter {
 let g:NERDSpaceDelims = 0
 " }
+
+" Syntastic {
+let g:syntastic_error_symbol = '✘'
+let g:syntastic_warning_symbol = '⚠'
+let g:syntastic_style_error_symbol = '⚡'
+let g:syntastic_style_warning_symbol = '⚡'
+"}
+
+" PythonMode {
+let g:pymode_doc = 0
+" }
+

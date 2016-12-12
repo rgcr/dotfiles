@@ -9,6 +9,8 @@ alias vv='vim ~/.vimrc'
 alias vt='vim ~/.tmux.conf'
 alias vz='vim ~/.zshrc'
 alias vzl='vim ~/.zshrc.local'
+alias vza='vim ~/.zshrc.aliases'
+alias vzf='vim ~/.zshrc.functions'
 # }
 
 # source zshrc {
@@ -36,4 +38,8 @@ alias vifm='vifm . .'
 
 # vim-fzf {
 alias vo='vim $(fzf)'
+# }
+
+# search alias quickly {
+alias sal='alias 2>&1| grep '
 # }

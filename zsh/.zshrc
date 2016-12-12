@@ -37,8 +37,8 @@ if ! zgen saved; then
 
     # Load my zshrc files {
     [ -f "${MYPROFILE}" ] && zgen load "${MYPROFILE}" 2>/dev/null;
-    [ -f "${ALIASES}" ] && zgen load "${ALIASES}" 2>/dev/null;
     [ -f "${FUNCTIONS}" ] && zgen load "${FUNCTIONS}" 2>/dev/null;
+    [ -f "${ALIASES}" ] && zgen load "${ALIASES}" 2>/dev/null;
     # }
 
     # Load work profile {
@@ -97,3 +97,6 @@ if [ "${IS_MAC}" = "true" ]; then
     bindkey '^[[A' history-substring-search-up
     bindkey '^[[B' history-substring-search-down
 fi
+
+#_has "brew" && source "$(brew --prefix autoenv)/activate.sh"
+

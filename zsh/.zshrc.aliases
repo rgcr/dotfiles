@@ -1,4 +1,7 @@
 # General {
+if _has "nvim"; then
+    alias vim='nvim'
+fi
 alias ..='cd ..'
 alias ....='cd ../../'
 alias week='date +%V'

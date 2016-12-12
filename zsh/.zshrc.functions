@@ -46,3 +46,11 @@ playall() {
         find ${@} -name "*.${_ext}" -exec mplayer ${_params} '{}' +
 }
 # }
+
+mux(){
+    [ "${1}" = "show" ] && {
+        { [ ! -z "${2}" -a -e "${HOME}/.tmuxinator/${2}.yml" ] && cat "${HOME}/.tmuxinator/${2}.yml" } || echo "Project ${2} not found" 1>&2
+    } || {
+        command tmuxinator "${@}"
+    }
+}

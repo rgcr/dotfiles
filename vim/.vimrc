@@ -24,18 +24,20 @@ Plug 'flazz/vim-colorschemes'             " colorscheme pack
 Plug 'tomtom/tlib_vim'                    " library for vim plugins
 Plug 'tpope/vim-repeat'                   " library for vim plugins
 Plug 'rking/ag.vim'                       " silver searcher plugin
-Plug 'kien/ctrlp.vim'                     " fuzzy finder like sublime (ctrl + p)
+Plug 'ctrlpvim/ctrlp.vim'                 " fuzzy finder like sublime (ctrl + p)
 Plug 'scrooloose/nerdtree'                " File explorer
 Plug 'scrooloose/nerdcommenter'           " easy way to comment text for multiple languages
 Plug 'majutsushi/tagbar'                  " tagbar
 Plug 'nathanaelkane/vim-indent-guides'    " show identation
 Plug 'editorconfig/editorconfig-vim'      "
-Plug 'troydm/easybuffer.vim'              " list of buffers
+"Plug 'troydm/easybuffer.vim'              " list of buffers
+Plug 'moll/vim-bbye' 					  " delete buffers (close files) without closing your windows
 Plug 'netrw.vim'                          " remote files
 Plug 'benmills/vimux'                     " run commands
 Plug 'sjl/gundo.vim'                      " undo history
 Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
 Plug 'wesQ3/vim-windowswap'               " swap windows easily
+Plug 'junegunn/goyo.vim'                  " free distraction
 "}}}
 
 "Syntax {{{
@@ -51,8 +53,10 @@ Plug 'tpope/vim-surround'                 " to easily delete, change and add suc
 Plug 'Raimondi/delimitMate'               " awesome and simple plugin to automatic close quotes, parenthesis, brackets
 Plug 'tacahiroy/ctrlp-funky'              " function navigator for ctrlp.vim
 Plug 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
-Plug 'SirVer/ultisnips'                   " Snippet engine
-Plug 'honza/vim-snippets'                 " Snippets
+" Snippets
+if has('python')
+    Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+end
 "}}}
 
 "Git {{{
@@ -119,7 +123,7 @@ syntax on
 syntax enable
 
 try
-    colorscheme triplejelly
+    colorscheme Monokai
 catch /^Vim\%((\a\+)\)\=:E185/
     colorscheme elflord
 endtry
@@ -135,6 +139,19 @@ endtry
 """"""""""""""""""""""""""
 
 let mapleader = ","
+
+" Fast saving
+nmap <leader>w :w!<cr>
+
+" Moving around, tabs {
+" delete all buffers
+map <C-d> :bufdo bd<cr>
+" moving arround
+map <C-l> :bnext<cr>
+map <C-h> :bprevious<cr>
+"}
+
+
 
 "Reload .vimrc
 noremap <silent> <leader>R :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
@@ -224,7 +241,7 @@ endif
 "nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 "Easybuffer
-nmap <Leader>b :EasyBuffer<CR>
+"nmap <Leader>b :EasyBuffer<CR>
 
 "Toggle syntastic mode
 nmap <Leader>ss :SyntasticToggleMode<CR>
@@ -258,14 +275,6 @@ nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 " git gutter
 nnoremap <Leader>gg :GitGutterToggle<Cr>
 
-
-""""""""""""""""""""""""""
-""""""""""""""""""""""""""
-"       OPTIONS
-""""""""""""""""""""""""""
-""""""""""""""""""""""""""
-
-
 " ctrlp-funky {
 let g:ctrlp_funky_multi_buffers = 1
 let g:ctrlp_funky_matchtype = 'path'
@@ -277,9 +286,26 @@ let g:neocomplcache_enable_at_startup = 1
 " }
 
 " airline {
-let g:airline_theme='badwolf'                       " Airline - select theme
+let g:airline_theme='luna'                       " Airline - select theme
+let g:airline#extensions#tabline#buffer_nr_format = '%s: '
 let g:airline#extensions#tabline#enabled = 1        " Airline - Enable the list of buffers
-let g:airline#extensions#tabline#fnamemod = ':t'    " Airline Show just the filename
+"let g:airline#extensions#tabline#exclude_preview = 1
+"let g:airline#extensions#tabline#tab_nr_type = 2 " splits and tab number
+"let g:airline#extensions#tabline#fnamemod = ':~:.'   " Airline Show just the filename
+let g:airline#extensions#tabline#fnamemod = ':t'   " Airline Show just the filename
+let g:airline#extensions#tabline#show_tab_nr = 1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+nmap <leader>1 <Plug>AirlineSelectTab1
+nmap <leader>2 <Plug>AirlineSelectTab2
+nmap <leader>3 <Plug>AirlineSelectTab3
+nmap <leader>4 <Plug>AirlineSelectTab4
+nmap <leader>5 <Plug>AirlineSelectTab5
+nmap <leader>6 <Plug>AirlineSelectTab6
+nmap <leader>7 <Plug>AirlineSelectTab7
+nmap <leader>8 <Plug>AirlineSelectTab8
+nmap <leader>9 <Plug>AirlineSelectTab9
+nmap <leader>. <Plug>AirlineSelectPrevTab
+nmap <leader>- <Plug>AirlineSelectNextTab
 " }
 
 " delimitmate {
@@ -322,4 +348,10 @@ let g:syntastic_style_warning_symbol = '⚡'
 " PythonMode {
 let g:pymode_doc = 0
 " }
+
+" bbyte {
+nnoremap <Leader>q :Bdelete<CR>
+" }
+
+
 

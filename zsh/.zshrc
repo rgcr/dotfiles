@@ -18,7 +18,7 @@ _has(){
 
 # DETECT OS
 case $(uname) in
-    {Linux})
+    Linux)
         IS_LINUX="true"
         #
         _has "pacman" && HAS_PACMAN="true"
@@ -99,4 +99,14 @@ if [ "${IS_MAC}" = "true" ]; then
 fi
 
 #_has "brew" && source "$(brew --prefix autoenv)/activate.sh"
+
+# XXX: shell crash if we load pyenv via zgen load
+# PYENV {
+if _has "pyenv"; then
+  if [ -n "$commands[pyenv]" ] ; then
+    eval "$(pyenv init -)"
+    _has "pyenv-virtualenv-init" && eval "$(pyenv virtualenv-init -)";
+  fi
+fi
+# }
 

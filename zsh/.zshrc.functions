@@ -47,10 +47,65 @@ playall() {
 }
 # }
 
+# tmux {
 mux(){
     [ "${1}" = "show" ] && {
         { [ ! -z "${2}" -a -e "${HOME}/.tmuxinator/${2}.yml" ] && cat "${HOME}/.tmuxinator/${2}.yml" } || echo "Project ${2} not found" 1>&2
     } || {
         command tmuxinator "${@}"
     }
+}
+
+# }
+
+
+# fzf {
+ # open selected file with the default editor
+fe() {
+  local files
+  IFS=$'\n' files=($(fzf-tmux --query="$1" --multi --select-1 --exit-0))
+  [[ -n "$files" ]] && ${EDITOR:-vim} "${files[@]}"
+}
+
+ # fd - cd to selected directory
+fd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune \
+                  -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
+}
+
+ # fda - including hidden directories
+fda() {
+  local dir
+  dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
+}
+
+ # fkill - kill process
+fkill() {
+  pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+
+  if [ "x$pid" != "x" ]
+  then
+    kill -${1:-9} $pid
+  fi
+}
+
+ # fh - repeat history
+fh() {
+  eval $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
+}
+
+ # z integration
+#unalias z 2> /dev/null
+#z() {
+    #[ $# -gt 0 ] && _z "$*" && return
+    #cd "$(_z -l 2>&1 | fzf-tmux +s --tac --query "$*" | sed 's/^[0-9,.]* *//')"
+#}
+
+# }
+
+
+gi() {
+	curl -L -s https://www.gitignore.io/api/${@}
 }

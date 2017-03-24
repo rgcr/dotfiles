@@ -290,7 +290,7 @@ let g:neocomplcache_enable_at_startup = 1
 " }
 
 " airline {
-let g:airline_theme='luna'                       " Airline - select theme
+let g:airline_theme='kalisi'                       " Airline - select theme
 let g:airline#extensions#tabline#buffer_nr_format = '%s: '
 let g:airline#extensions#tabline#enabled = 1        " Airline - Enable the list of buffers
 "let g:airline#extensions#tabline#exclude_preview = 1

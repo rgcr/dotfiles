@@ -38,6 +38,8 @@ Plug 'sjl/gundo.vim'                      " undo history
 Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
 Plug 'wesQ3/vim-windowswap'               " swap windows easily
 Plug 'junegunn/goyo.vim'                  " free distraction
+Plug 'simeji/winresizer'                  " resizing splits easily
+Plug 't9md/vim-choosewin'                 " Navigate to the window you choose
 "}}}
 
 "Syntax {{{
@@ -192,11 +194,13 @@ map <Leader>e :NERDTreeToggle<CR>
 let NERDTreeIgnore = ['\.pyc$']
 " }
 
-"Resize current buffer +/-5 {
-map <Leader>h :vertical resize -5<cr>
-map <Leader>j :resize +5<cr>
-map <Leader>k :resize -5<cr>
-map <Leader>l :vertical resize +5<cr>
+" Resize current buffer +/-5 {
+" XXX: Don't need this anymore,
+" simeji/winresizer does the job
+"map <Leader>h :vertical resize -5<cr>
+"map <Leader>j :resize +5<cr>
+"map <Leader>k :resize -5<cr>
+"map <Leader>l :vertical resize +5<cr>
 " }
 
 " Move lines normal mode {
@@ -346,12 +350,17 @@ let g:syntastic_style_warning_symbol = '⚡'
 "}
 
 " PythonMode {
-let g:pymode_doc = 0
+let g:pymode_doc = 1
 " }
 
 " bbyte {
 nnoremap <Leader>q :Bdelete<CR>
 " }
 
+" choosewin {
+nmap  -  <Plug>(choosewin)
+let g:choosewin_overlay_enable = 1
+
+" }
 
 

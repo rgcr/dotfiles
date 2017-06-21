@@ -363,4 +363,7 @@ let g:choosewin_overlay_enable = 1
 
 " }
 
+" highlight for bats files {
+au BufRead,BufNewFile *.bats set filetype=sh
+" }
 

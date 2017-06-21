@@ -96,16 +96,11 @@ fh() {
   eval $( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed 's/ *[0-9]* *//')
 }
 
- # z integration
-#unalias z 2> /dev/null
-#z() {
-    #[ $# -gt 0 ] && _z "$*" && return
-    #cd "$(_z -l 2>&1 | fzf-tmux +s --tac --query "$*" | sed 's/^[0-9,.]* *//')"
-#}
-
-# }
-
-
+# create git ignore files
 gi() {
 	curl -L -s https://www.gitignore.io/api/${@}
+}
+
+lyric(){
+    curl -s --get "https://makeitpersonal.co/lyrics" --data-urlencode "artist=$1" --data-urlencode "title=$2"
 }

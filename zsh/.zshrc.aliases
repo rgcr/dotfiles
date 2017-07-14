@@ -21,6 +21,10 @@ alias sz='source ~/.zshrc'
 # }
 
 
+# python {
+lsvirtualenv='lsvirtualenv -b'
+# }
+
 # Django {
 alias pm='python manage.py'
 alias pmmm='python manage.py makemigrations'
@@ -40,7 +44,7 @@ alias vifm='vifm . .'
 # }
 
 # vim-fzf {
-#alias vo='vim $(fzf)'
+alias vo='vim $(fzf)'
 # }
 
 # search alias quickly {

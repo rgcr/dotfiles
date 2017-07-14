@@ -56,7 +56,7 @@ if ! zgen saved; then
     zgen oh-my-zsh plugins/docker-compose
     zgen oh-my-zsh plugins/tmux
 
-    zgen oh-my-zsh plugins/virtualenvwrapper
+    [ "$PIPENV_ACTIVE" != '1' ] && zgen oh-my-zsh plugins/virtualenvwrapper
     zgen oh-my-zsh plugins/pip
     zgen oh-my-zsh plugins/django
 
@@ -100,13 +100,14 @@ fi
 
 #_has "brew" && source "$(brew --prefix autoenv)/activate.sh"
 
+# NOTE: I don't want pyenv at this moment
 # XXX: shell crash if we load pyenv via zgen load
 # PYENV {
-if _has "pyenv"; then
-  if [ -n "$commands[pyenv]" ] ; then
-    eval "$(pyenv init -)"
-    _has "pyenv-virtualenv-init" && eval "$(pyenv virtualenv-init -)";
-  fi
-fi
+#if _has "pyenv"; then
+  #if [ -n "$commands[pyenv]" ] ; then
+    #eval "$(pyenv init -)"
+    #_has "pyenv-virtualenv-init" && eval "$(pyenv virtualenv-init -)";
+  #fi
+#fi
 # }
 

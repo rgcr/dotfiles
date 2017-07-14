@@ -15,7 +15,7 @@ end
 
 "Themes,colors & status lines {{{
 Plug 'bling/vim-airline'                  " statusline
-Plug 'vim-airline/vim-airline-themes'     " theme for statusline
+Plug 'vim-airline/vim-airline-themes'     " themes for statusline
 Plug 'kshenoy/vim-signature'              " show marks
 Plug 'flazz/vim-colorschemes'             " colorscheme pack
 "}}}
@@ -24,7 +24,7 @@ Plug 'flazz/vim-colorschemes'             " colorscheme pack
 Plug 'tomtom/tlib_vim'                    " library for vim plugins
 Plug 'tpope/vim-repeat'                   " library for vim plugins
 Plug 'rking/ag.vim'                       " silver searcher plugin
-Plug 'ctrlpvim/ctrlp.vim'                 " fuzzy finder like sublime (ctrl + p)
+Plug 'ctrlpvim/ctrlp.vim'                 " fuzzy finder, like sublime (ctrl + p)
 Plug 'scrooloose/nerdtree'                " File explorer
 Plug 'scrooloose/nerdcommenter'           " easy way to comment text for multiple languages
 Plug 'majutsushi/tagbar'                  " tagbar
@@ -37,7 +37,7 @@ Plug 'benmills/vimux'                     " run commands
 Plug 'sjl/gundo.vim'                      " undo history
 Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
 Plug 'wesQ3/vim-windowswap'               " swap windows easily
-Plug 'junegunn/goyo.vim'                  " free distraction
+"Plug 'junegunn/goyo.vim'                  " free distraction
 Plug 'simeji/winresizer'                  " resizing splits easily
 Plug 't9md/vim-choosewin'                 " Navigate to the window you choose
 "}}}
@@ -58,6 +58,7 @@ Plug 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
 " Snippets
 if has('python')
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+    Plug 'nvie/vim-flake8'
 end
 "}}}
 
@@ -141,6 +142,17 @@ endtry
 """"""""""""""""""""""""""
 
 let mapleader = ","
+
+" Append modeline after last line in buffer.
+" Use substitute() instead of printf() to handle '%%s' modeline in LaTeX
+" files.
+function! AppendModeline()
+  let l:modeline = printf(" vim: set ts=%d sw=%d tw=%d %set :",
+        \ &tabstop, &shiftwidth, &textwidth, &expandtab ? '' : 'no')
+  let l:modeline = substitute(&commentstring, "%s", l:modeline, "")
+  call append(line("$"), l:modeline)
+endfunction
+nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
 
 " Fast saving
 nmap <leader>w :w!<cr>

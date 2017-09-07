@@ -33,7 +33,8 @@ Plug 'editorconfig/editorconfig-vim'      "
 "Plug 'troydm/easybuffer.vim'              " list of buffers
 Plug 'moll/vim-bbye' 					  " delete buffers (close files) without closing your windows
 Plug 'netrw.vim'                          " remote files
-Plug 'benmills/vimux'                     " run commands
+Plug 'Shougo/vimproc.vim', {'do' : 'make'}
+Plug 'Shougo/vimshell.vim'
 Plug 'sjl/gundo.vim'                      " undo history
 Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
 Plug 'wesQ3/vim-windowswap'               " swap windows easily
@@ -201,7 +202,7 @@ map <Leader>[ <ESC>ysiw]
 map <Leader>< <ESC>ysiw>
 " }
 
-" NERD Tree {
+ " NERD Tree {
 map <Leader>e :NERDTreeToggle<CR>
 let NERDTreeIgnore = ['\.pyc$']
 " }
@@ -277,7 +278,7 @@ autocmd BufWritePre * StripWhitespace
 " }
 
 "vimux shell
-map <leader>x :VimuxPromptCommand<CR>
+"map <leader>x :VimuxPromptCommand<CR>
 
 "gundo toggle
 map <leader>uu :GundoToggle<CR>
@@ -374,6 +375,15 @@ nmap  -  <Plug>(choosewin)
 let g:choosewin_overlay_enable = 1
 
 " }
+
+" vimproc{
+"nnoremap <Leader>x :VimProcBang<SPACE>
+let g:vimshell_prompt = 'vimshell % '
+nnoremap <Leader>x :VimShellExecute<SPACE>
+nnoremap <Leader>$ :VimShell<CR>
+nnoremap <Leader>xq :VimShellClose<CR>
+"}
+
 
 " highlight for bats files {
 au BufRead,BufNewFile *.bats set filetype=sh

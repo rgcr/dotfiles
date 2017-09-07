@@ -142,10 +142,24 @@ setopt mark_dirs
 setopt interactive_comments
 # List completion
 setopt auto_list
+setopt menu_complete
 # Check original command in alias completion
 setopt complete_aliases
 # silent no match
 unsetopt nomatch
+
+# menu completion
+zstyle ':completion:*' menu select
+
+
+
+# Share zsh histories
+HISTFILE=$HOME/.zsh_history
+HISTSIZE=10000
+SAVEHIST=50000
+setopt inc_append_history
+setopt share_history
+
 
 # }}}
 

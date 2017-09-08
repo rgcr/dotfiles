@@ -117,36 +117,36 @@ bindkey '^R' history-incremental-search-backward
 # vi mode
 set -o vi
 # Ignore <C-d> logout
-setopt ignore_eof
+setopt IGNORE_EOF
 # Disable beeps
-setopt no_beep
+setopt NO_BEEP
 # {a-c} -> a b c
-setopt brace_ccl
-# History ignore dups
-setopt hist_ignore_dups
+setopt BRACE_CCL
+# History ignoreb dups
+setopt HIST_IGNORE_DUPS
 # History reduce spaces
-setopt hist_reduce_blanks
+setopt HIST_REDUCE_BLANKS
 # History ignore if there is a space
-setopt hist_ignore_space
+setopt HIST_IGNORE_SPACE
 # History save time stamp
-setopt extended_history
+setopt EXTENDED_HISTORY
 # Expand history
-setopt hist_expand
+setopt HIST_EXPAND
 # Better jobs
-setopt long_list_jobs
+setopt LONG_LIST_JOBS
 # Add "/" if completes directory
-setopt mark_dirs
+setopt MARK_DIRS
 # Print exit value if return code is non-zero
 #setopt print_exit_value
 # Enable comment string
-setopt interactive_comments
+setopt INTERACTIVE_COMMENTS
 # List completion
-setopt auto_list
-setopt menu_complete
+setopt AUTO_LIST
+setopt MENU_COMPLETE
 # Check original command in alias completion
-setopt complete_aliases
+setopt COMPLETE_ALIASES
 # silent no match
-unsetopt nomatch
+unsetopt NOMATCH
 
 # menu completion
 zstyle ':completion:*' menu select

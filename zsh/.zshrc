@@ -18,6 +18,7 @@ case $(uname) in
         ;;
 esac
 
+# install zplug if it does not exist
 [ ! -d ~/.zplug ] && {
 	git clone https://github.com/zplug/zplug ~/.zplug;
 	source ~/.zplug/init.zsh && zplug update --self

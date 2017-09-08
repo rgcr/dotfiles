@@ -89,6 +89,11 @@ Plug 'nono/jquery.vim'                    " jquery syntax
 
 filetype plugin indent on
 
+
+set enc=utf-8                " default encoding
+set fileformats=unix,dos,mac " unix over windows over os9 formats
+set scrolloff=5              " keep some more lines for scope
+
 set ruler           " cursorline and column
 set number          " linenumber
 
@@ -109,6 +114,7 @@ set cursorline      " highlight the screen line of the cursor
 set gcr=a:blinkon0  " disable cursor blink
 set wildmenu        " use menu for command line completion
 set wildmode=list:longest " mode for 'wildchar' command-line expansion
+set wildignore+=*.dll,*.o,*.pyc,*.bak,*.exe,*.jpg,*.jpeg,*.png,*.gif,*$py.class,*.class,*/*.dSYM/*,*.dylib
 
 set laststatus=2    " when last window has status lines
 set tabstop=4       " number of spaces that <tab> in file uses
@@ -121,6 +127,8 @@ set noswapfile      " whether to use a swapfile for a buffer
 set nocompatible    " behave vi-compatible as much as possible
 set modeline        " recognize modelines at start or end of file
 set modelines=5     " number of lines checked for modelines
+
+set backspace=indent,eol,start
 
 "turn on syntax highlighting
 syntax on
@@ -144,6 +152,9 @@ endtry
 
 let mapleader = ","
 
+"Reload .vimrc
+noremap <silent> <leader>R :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
+
 " Append modeline after last line in buffer.
 " Use substitute() instead of printf() to handle '%%s' modeline in LaTeX
 " files.
@@ -158,29 +169,22 @@ nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
 " Fast saving
 nmap <leader>w :w!<cr>
 
-" Moving around, tabs {
-" delete all buffers
+" Create new buffer
+nnoremap <C-n> :new<CR>
+
+" Delete all buffers
 map <C-d> :bufdo bd<cr>
-" moving arround
-map <C-l> :bnext<cr>
-map <C-h> :bprevious<cr>
-"}
-
-
-
-"Reload .vimrc
-noremap <silent> <leader>R :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
 
 " Toggle Paste
 set pastetoggle=<C-p>
 
-" Hidden search hl
-map <Leader>F :nohls<CR>
+" Hidde matches
+map <Leader><space> :nohls<CR>
 
-" Hidden column number
+" Toggle column numbers
 map <Leader>n :set invnumber<CR>
 
-" copy and paste {
+" copy & paste {
 """ copy in visual mode
 vmap <C-c> "+yi
 """ cut in visual mode
@@ -193,6 +197,24 @@ imap <C-v> <ESC>"+pa
 map <Leader>yy <ESC>"+yy
 " }
 
+"to create a new line cmd mode without going to insert
+nmap <leader>k O<esc>k0
+nmap <leader>j o<esc>j0
+
+nmap <leader>b i<cr><esc>k$
+
+" Move lines {
+"" Move lines normal mode
+nnoremap <C-j> :m .+1<CR>==
+nnoremap <C-k> :m .-2<CR>==
+"" Move lines insert mode
+inoremap <C-j> <ESC>:m .+1<CR>==gi
+inoremap <C-k> <ESC>:m .-2<CR>==gi
+"" Move lines visual mode
+vnoremap <C-j> :m '>+1<CR>gv=gv
+vnoremap <C-k> :m '<-2<CR>gv=gv
+" }
+
 " Surround
 map <Leader>{ <ESC>ysiw}
 map <Leader>( <ESC>ysiw)
@@ -203,32 +225,9 @@ map <Leader>< <ESC>ysiw>
 " }
 
  " NERD Tree {
-map <Leader>e :NERDTreeToggle<CR>
-let NERDTreeIgnore = ['\.pyc$']
-" }
+map <Leader>t :NERDTreeToggle<CR>
+let NERDTreeIgnore=['\~$', '\.pyc$', '\.pyo$', '\.class$', 'pip-log\.txt$', '\.o$', '\.dSYM$']
 
-" Resize current buffer +/-5 {
-" XXX: Don't need this anymore,
-" simeji/winresizer does the job
-"map <Leader>h :vertical resize -5<cr>
-"map <Leader>j :resize +5<cr>
-"map <Leader>k :resize -5<cr>
-"map <Leader>l :vertical resize +5<cr>
-" }
-
-" Move lines normal mode {
-nnoremap <C-j> :m .+1<CR>==
-nnoremap <C-k> :m .-2<CR>==
-" }
-
-" Move lines insert mode {
-inoremap <C-j> <ESC>:m .+1<CR>==gi
-inoremap <C-k> <ESC>:m .-2<CR>==gi
-" }
-
-" Move lines visual mode {
-vnoremap <C-j> :m '>+1<CR>gv=gv
-vnoremap <C-k> :m '<-2<CR>gv=gv
 " }
 
 "CtrlP & Silver searcher {
@@ -257,40 +256,39 @@ endif
 " bind K to grep word under cursor
 "nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
-"Easybuffer
-"nmap <Leader>b :EasyBuffer<CR>
+" Explore {
+let g:netrw_list_hide='^\.,.\(pyc\|pyo\|o\)$'
+map <leader>e :Explore!<CR>
+" }
 
 "Toggle syntastic mode
-nmap <Leader>ss :SyntasticToggleMode<CR>
+nmap <Leader>s :SyntasticToggleMode<CR>
 
 " Toggle mark bar
-nmap <Leader>mm :SignatureToggle<CR>
+nmap <Leader>m :SignatureToggle<CR>
 
 "Toggle tagbar
-nmap <Leader>tt :TagbarToggle<CR>
+nmap <Leader>T :TagbarToggle<CR>
 
 " Toggle whitespace (vim-better-whitespace) {
 nmap <Leader>ts :ToggleWhitespace<CR>
-""" Strip whitespaces
+""" Delete whitespaces
 nmap <Leader>ds :StripWhitespace<CR>
 """ strip all trailing whitespace everytime
 autocmd BufWritePre * StripWhitespace
 " }
 
-"vimux shell
-"map <leader>x :VimuxPromptCommand<CR>
-
 "gundo toggle
-map <leader>uu :GundoToggle<CR>
+map <leader>u :GundoToggle<CR>
+
+" git gutter
+nnoremap <Leader>g :GitGutterToggle<Cr>
 
 " ctrlp-funky {
 nnoremap <Leader>fu :CtrlPFunky<Cr>
 "" narrow the list down with a word under cursor
 nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 " }
-
-" git gutter
-nnoremap <Leader>gg :GitGutterToggle<Cr>
 
 " ctrlp-funky {
 let g:ctrlp_funky_multi_buffers = 1
@@ -303,13 +301,13 @@ let g:neocomplcache_enable_at_startup = 1
 " }
 
 " airline {
-let g:airline_theme='kalisi'                       " Airline - select theme
+let g:airline_theme='kalisi'                                        " Airline - select theme
 let g:airline#extensions#tabline#buffer_nr_format = '%s: '
-let g:airline#extensions#tabline#enabled = 1        " Airline - Enable the list of buffers
+let g:airline#extensions#tabline#enabled = 1                        " Airline - Enable the list of buffers
 "let g:airline#extensions#tabline#exclude_preview = 1
-"let g:airline#extensions#tabline#tab_nr_type = 2 " splits and tab number
-"let g:airline#extensions#tabline#fnamemod = ':~:.'   " Airline Show just the filename
-let g:airline#extensions#tabline#fnamemod = ':t'   " Airline Show just the filename
+"let g:airline#extensions#tabline#tab_nr_type = 2                   " splits and tab number
+"let g:airline#extensions#tabline#fnamemod = ':~:.'                 " Airline Show just the filename
+let g:airline#extensions#tabline#fnamemod = ':t'                    " Airline Show just the filename
 let g:airline#extensions#tabline#show_tab_nr = 1
 let g:airline#extensions#tabline#buffer_idx_mode = 1
 nmap <leader>1 <Plug>AirlineSelectTab1
@@ -373,7 +371,6 @@ nnoremap <Leader>q :Bdelete<CR>
 " choosewin {
 nmap  -  <Plug>(choosewin)
 let g:choosewin_overlay_enable = 1
-
 " }
 
 " vimproc{

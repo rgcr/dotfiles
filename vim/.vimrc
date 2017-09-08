@@ -58,6 +58,7 @@ Plug 'tacahiroy/ctrlp-funky'              " function navigator for ctrlp.vim
 Plug 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
 " Snippets
 if has('python')
+    Plug 'Valloric/YouCompleteMe'
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
     Plug 'nvie/vim-flake8'
 end
@@ -170,13 +171,14 @@ nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
 nmap <leader>w :w!<cr>
 
 " Create new buffer
-nnoremap <C-n> :new<CR>
+"nnoremap <C-n> :new<CR>
 
 " Delete all buffers
 map <C-d> :bufdo bd<cr>
 
 " Toggle Paste
-set pastetoggle=<C-p>
+nmap <leader>sp :set invpaste paste?<CR>
+
 
 " Hidde matches
 map <Leader><space> :nohls<CR>
@@ -205,14 +207,14 @@ nmap <leader>b i<cr><esc>k$
 
 " Move lines {
 "" Move lines normal mode
-nnoremap <C-j> :m .+1<CR>==
-nnoremap <C-k> :m .-2<CR>==
+"nnoremap <C-j> :m .+1<CR>==
+"nnoremap <C-k> :m .-2<CR>==
 "" Move lines insert mode
-inoremap <C-j> <ESC>:m .+1<CR>==gi
-inoremap <C-k> <ESC>:m .-2<CR>==gi
+"inoremap <C-j> <ESC>:m .+1<CR>==gi
+"inoremap <C-k> <ESC>:m .-2<CR>==gi
 "" Move lines visual mode
-vnoremap <C-j> :m '>+1<CR>gv=gv
-vnoremap <C-k> :m '<-2<CR>gv=gv
+"vnoremap <C-j> :m '>+1<CR>gv=gv
+"vnoremap <C-k> :m '<-2<CR>gv=gv
 " }
 
 " Surround
@@ -329,14 +331,6 @@ let g:delimitMate_expand_cr=2
 " let g:delimitMateSmartQuotes=1
 "}
 
-" Snippet configuration {
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
-" If you want :UltiSnipsEdit to split your window.
-"let g:UltiSnipsEditSplit="vertical"
-" }
-
 " Custom task tags {
 if has("autocmd")
   " Highlight TODO, FIXME, NOTE, etc.
@@ -385,4 +379,18 @@ nnoremap <Leader>xq :VimShellClose<CR>
 " highlight for bats files {
 au BufRead,BufNewFile *.bats set filetype=sh
 " }
+"
 
+" snippets {
+" make YCM compatible with UltiSnips (using supertab)
+let g:SuperTabDefaultCompletionType     = '<C-n>'
+let g:SuperTabCrMapping                 = 0
+let g:ycm_key_list_select_completion    = ['<C-n>', '<Down>']
+let g:ycm_key_list_previous_completion  = ['<C-p>', '<Up>']
+
+" better key bindings for UltiSnipsExpandTrigger
+let g:UltiSnipsExpandTrigger        = "<tab>"
+let g:UltiSnipsJumpForwardTrigger   = "<tab>"
+let g:UltiSnipsJumpBackwardTrigger  = "<s-tab>"
+let g:UltiSnipsListSnippets         = "<c-e>"
+" }

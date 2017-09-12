@@ -78,8 +78,8 @@ zplug "zsh-users/zsh-history-substring-search"
 zplug "zsh-users/zsh-syntax-highlighting"
 
 # my theme
-zplug "rgcr/dotfiles", use:"zsh/.rogerthat.zsh-theme", as:theme
-#zplug "${HOME}/dotfiles/zsh", from:local, use:".rogerthat.zsh-theme", as:theme
+#zplug "rgcr/dotfiles", use:"zsh/.rogerthat.zsh-theme", as:theme
+zplug "${HOME}/.zsh/", from:local, use:".rogerthat.zsh-theme", as:theme
 
 # Install packages that have not been installed yet
 if ! zplug check --verbose; then

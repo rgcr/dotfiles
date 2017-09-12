@@ -36,17 +36,19 @@ function __promtp_symbol(){
     fi
 }
 
-function __prompt_proxy(){
-    # if there is a proxy
-    if [ ! -z "$http_proxy" ]; then
-        # to avoid duplicate entries
-        if ! echo "${RPS1}" | grep proxy >/dev/null 2>&1; then
-            RPS1="$RPS1 <proxy: $http_proxy>"
-        fi
-    else
-        # sed for osx / gnu linux
-        RPS1="$( echo $RPS1 2>&1 | sed -E 's|<proxy.+>||g' 2>/dev/null || echo $RPS1 2>&1 | sed -r 's|<proxy.+>||g' 2>/dev/null  )"
-    fi
-}
+#function __prompt_proxy(){
+#    # if there is a proxy
+#    if [ ! -z "$http_proxy" ]; then
+#        # to avoid duplicate entries
+#        if ! echo "${RPS1}" | grep proxy >/dev/null 2>&1; then
+#            RPS1="$RPS1 <proxy: $http_proxy>"
+#        fi
+#    else
+#        # sed for osx / gnu linux
+#        RPS1="$( echo $RPS1 2>&1 | sed -E 's|<proxy.+>||g' 2>/dev/null || echo $RPS1 2>&1 | sed -r 's|<proxy.+>||g' 2>/dev/null  )"
+#    fi
+#}
 
-add-zsh-hook precmd __prompt_proxy
+# NOTE: I added this into the tmux status bar
+# add-zsh-hook precmd __prompt_proxy
+

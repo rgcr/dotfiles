@@ -32,7 +32,7 @@ Plug 'Yggdroot/indentLine'                " show identation
 Plug 'editorconfig/editorconfig-vim'      " .
 Plug 'moll/vim-bbye'                      " delete buffers (close files) without closing the window
 Plug 'scrooloose/nerdtree'
-Plug 'netrw.vim'                          " remote files
+"Plug 'netrw.vim'                          " remote files
 Plug 'Shougo/vimproc.vim', {'do' : 'make'}
 Plug 'Shougo/vimshell.vim'                " shell in vim
 Plug 'sjl/gundo.vim'                      " undo history
@@ -173,9 +173,6 @@ let mapleader = ","
 inoremap jj <Esc>
 inoremap jk <Esc>
 inoremap <leader><leader> <Esc>
-inoremap <Up><Up> <Esc><Up>
-inoremap <Down><Down> <Esc><Down>
-"inoremap <Down> <Esc>k
 
 "Reload .vimrc
 noremap <silent> <leader>r :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
@@ -397,12 +394,13 @@ let g:syntastic_warning_symbol = '⚠'
 let g:syntastic_style_error_symbol = '⚡'
 let g:syntastic_style_warning_symbol = '⚡'
 let g:syntastic_ignore_files = ['\.xml$']
-let g:syntastic_mode_map = { "mode": "pasive", "active_filetypes": [], "passive_filetypes": [] }
+"let g:syntastic_mode_map = { "mode": "pasive", "active_filetypes": [], "passive_filetypes": [] }
+let g:syntastic_mode_map = { 'mode': 'passive' }
+
 " }}}
 
-
 " PythonMode
-let g:pymode_doc = 1
+"let g:pymode_doc = 1
 
 " bbyte
 nnoremap <Leader>q :Bdelete<CR>
@@ -473,14 +471,4 @@ nmap <leader>7 <Plug>BufTabLine.Go(7)
 nmap <leader>8 <Plug>BufTabLine.Go(8)
 nmap <leader>9 <Plug>BufTabLine.Go(9)
 nmap <leader>0 <Plug>BufTabLine.Go(10)
-
-
-"let g:tagbar_type_ps1 = {
-    "\ 'ctagstype' : 'powershell',
-    "\ 'kinds'     : [
-        "\ 'f:function',
-        "\ 'i:filter',
-        "\ 'a:alias'
-    "\ ]
-"\ }
 

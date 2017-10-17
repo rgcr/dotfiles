@@ -1,7 +1,4 @@
-############################
-# Global config
-############################
-
+# Configs
 config defaultToCurrentScreen true
 config windowHintsBackgroundColor 96;96;64;0.5
 config windowHintsIgnoreHiddenWindows true
@@ -14,18 +11,30 @@ config windowHintsIgnoreHiddenWindows true
 config undoOps move,resize
 
 
-# config windowHintsShowIcons true
-
-############################
-# Alias
-############################
-
 # alias monitors
 alias mon-1 0
 alias mon-2 1
 
-# Aloas for focus with hints
+# keyboard aliases
+alias alt               alt
+alias alt_shift         alt;shift
+alias alt_ctrl          alt;ctrl
+alias alt_cmd           alt;cmd
+alias alt_ctrl_shift    alt;ctrl;shift
+alias ctrl_cmd          ctrl;cmd
+
+alias hyper             ctrl;shift;alt;cmd
+alias super             ctrl;alt;cmd
+
+# Alias for focus with hints
 alias showNormalHint hint AOEUIDHTNSYXFBPKGMCW
+
+# Show focus hints
+bind .:cmd    ${showNormalHint}
+
+# Grid
+bind g:cmd    grid padding:5 0:6,4 1:8,4
+
 
 # Abstract positions
 alias full          move screenOriginX;screenOriginY screenSizeX;screenSizeY
@@ -40,52 +49,44 @@ alias bottomright   corner bottom-right resize:screenSizeX/2;screenSizeY/2
 alias center        move screenOriginX+screenSizeX/6;screenOriginY+screenSizeY/6 2*screenSizeX/3;2*screenSizeY/3
 alias bigCenter     move screenOriginX+screenSizeX/12;screenOriginY+screenSizeY/12 10*screenSizeX/12;10*screenSizeY/12
 
-# keyboard aliases
-alias alt_shift         alt;shift
-alias alt_ctrl          alt;ctrl
-alias alt_cmd           alt;cmd
-alias ctrl_cmd          ctrl;cmd
-alias alt_ctrl_shift    alt;ctrl;shift
-alias alt_ctrl_cmd      alt;ctrl;cmd
-
-############################
-# Location bindings
-############################
 
 # Reload Slate
-bind r:${alt_ctrl_cmd}  relaunch
+bind r:${super}  relaunch
 
 # Undo
-bind delete:${alt_ctrl} undo
+bind z:${super}  undo
 
-# Position windows
-bind left:${alt_ctrl}   ${lefthalf}
+# Location bindings
 bind m:${alt_ctrl}      ${full}
+bind left:${alt_ctrl}   ${lefthalf}
 bind right:${alt_ctrl}  ${righthalf}
 bind up:${alt_ctrl}     ${tophalf}
 bind down:${alt_ctrl}   ${bottomhalf}
 bind c:${alt_ctrl}      ${center}
 bind v:${alt_ctrl}      ${bigCenter}
-## corners
-bind down:${alt_ctrl_shift}     ${bottomleft}
-bind right:${alt_ctrl_shift}    ${bottomright}
-bind left:${alt_ctrl_shift}     ${topleft}
-bind up:${alt_ctrl_shift}       ${topright}
+
+bind 1:${alt_cmd} ${bottomleft}
+bind 2:${alt_cmd} push bottom bar-resize:screenSizeY/2
+bind 3:${alt_cmd} ${bottomright}
+bind 4:${alt_cmd} ${lefthalf}
+bind 5:${alt_cmd} ${full}
+bind 6:${alt_cmd} ${righthalf}
+bind 7:${alt_cmd} ${topleft}
+bind 8:${alt_cmd} push top bar-resize:screenSizeY/2
+bind 9:${alt_cmd} ${topright}
 
 # Focus Bindings
 ## NOTE: some of these may *not* work if you have not removed the expose/spaces/mission control bindings
-bind right:${alt_cmd}  focus right
-bind left:${alt_cmd}   focus left
-bind up:${alt_cmd}     focus up
-bind down:${alt_cmd}   focus down
-bind j:${alt_cmd}      focus behind
-bind k:${alt_cmd}      focus behind
+bind l:${alt}  focus right
+bind h:${alt}   focus left
+bind k:${alt}     focus up
+bind j:${alt}   focus down
+#bind j:${alt_cmd}      focus behind
+#bind k:${alt_cmd}      focus behind
 
 # Monitor switching bindings
-bind right:${alt_ctrl_cmd}  throw next # resize
-bind left:${alt_ctrl_cmd}   throw next # resize
-# bind right:${alt_ctrl_cmd}    throw ${mon-2} resize
-# bind left:${alt_ctrl_cmd}     throw ${mon-1} resize
+bind right:${super}  throw next # resize
+bind left:${super}   throw next # resize
 
 # Resize Bindings
 # NOTE: some of these may *not* work if you have not removed the expose/spaces/mission control bindings
@@ -94,12 +95,13 @@ bind left:${ctrl_cmd}  resize -10% +0
 bind up:${ctrl_cmd}    resize +0   -10%
 bind down:${ctrl_cmd}  resize +0   +10%
 
-# Show focus hints
-bind .:cmd    ${showNormalHint}
-# bind ,:${alt_ctrl} ${showNormalHint}
-
-# Grid
-bind esc:ctrl grid
-
 # bind tab:cmd switch
+bind c:${super} focus 'Google Chrome'
+bind i:${super} focus 'iTerm2'
+bind l:${super} focus 'Microsoft Lync'
+bind o:${super} focus 'Microsoft Outlook'
+bind s:${super} focus 'Spotify'
+
+
+
 

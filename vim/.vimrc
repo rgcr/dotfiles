@@ -12,9 +12,7 @@ end
 """"""""""""""""""""""""""""""""""""""""""""""
 
 " Themes,colors & status lines
-"Plug 'bling/vim-airline'                  " statusline
-"Plug 'vim-airline/vim-airline-themes'     " themes for statusline
-Plug 'itchyny/lightline.vim'
+"Plug 'itchyny/lightline.vim'
 Plug 'kshenoy/vim-signature'              " show marks
 Plug 'flazz/vim-colorschemes'             " colorscheme pack
 "}}}
@@ -40,6 +38,7 @@ Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g
 Plug 'wesQ3/vim-windowswap'               " swap windows easily
 Plug 'simeji/winresizer'                  " resizing splits easily
 Plug 't9md/vim-choosewin'                 " Navigate to the window you choose
+Plug 'tpope/vim-obsession'
 
 " Syntax
 Plug 'scrooloose/syntastic'               " syntax checker
@@ -137,6 +136,7 @@ catch /^Vim\%((\a\+)\)\=:E185/
 endtry
 " hls color
 hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
+
 
 
 if has("autocmd")
@@ -314,7 +314,7 @@ endif
 
 
 " Toggle mark bar
-nnoremap <Leader>m :SignatureToggle<CR>
+nnoremap <Leader>m :SignatureToggleSigns<CR>
 
 "Toggle tagbar
 nnoremap <Leader>T :TagbarToggle<CR>
@@ -424,7 +424,7 @@ let g:neocomplete#enable_at_startup = 1
 let g:neocomplete#sources#syntax#min_keyword_length = 3
 
 " snippets {{{
-"let g:ycm_auto_trigger = 0
+let g:ycm_auto_trigger = 0
 " make YCM compatible with UltiSnips (using supertab)
 let g:SuperTabDefaultCompletionType     = '<C-n>'
 let g:SuperTabCrMapping                 = 0
@@ -440,7 +440,8 @@ let g:UltiSnipsListSnippets         = "<c-e>"
 
 " Statusline
 let g:lightline = {
-  \ 'colorscheme': 'wombat',
+  \ 'colorscheme': 'PaperColor',
+  \ 'background': 'ligth',
   \ 'active': {
   \   'left': [ [ 'mode', 'paste', 'gitbranch' ],
   \             [ 'readonly', 'filename', 'modified' ] ]
@@ -471,4 +472,77 @@ nmap <leader>7 <Plug>BufTabLine.Go(7)
 nmap <leader>8 <Plug>BufTabLine.Go(8)
 nmap <leader>9 <Plug>BufTabLine.Go(9)
 nmap <leader>0 <Plug>BufTabLine.Go(10)
+
+
+
+hi VertSplit ctermbg=White ctermfg=White
+
+" now set it up to change the status line based on mode
+"if version >= 700
+"  au InsertEnter * hi StatusLine term=reverse ctermbg=5 gui=undercurl guisp=Magenta
+"  au InsertLeave * hi StatusLine term=reverse ctermfg=0 ctermbg=2 gui=bold,reverse
+"endif
+
+function! GitBranch()
+  return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
+endfunction
+
+function! StatuslineGit()
+  let l:branchname = GitBranch()
+  return strlen(l:branchname) > 0?'| '.l:branchname.' ':''
+endfunction
+
+"function! StatuslinePasteMode()
+
+
+function! StatuslineMode()
+    let l:mode_map = {
+    \ "n": 'NORMAL',
+    \ "i": 'INSERT',
+    \ 'R': 'REPLACE',
+    \ 'v': 'VISUAL',
+    \ 'V': 'V-LINE',
+    \ "\<C-v>": 'V-BLOCK',
+    \ 'c': 'COMMAND',
+    \ 's': 'SELECT',
+    \ 'S': 'S-LINE',
+    \ "\<C-s>": 'S-BLOCK',
+    \ 't': 'TERMINAL'
+    \ }
+    return get(l:mode_map, mode(), '')
+endfunction
+
+
+hi User1 term=bold cterm=None ctermbg=202 ctermfg=255
+hi User2 term=bold cterm=None ctermbg=249 ctermfg=233
+hi User3 term=bold cterm=None ctermbg=253 ctermfg=0
+hi User4 term=bold cterm=None ctermbg=109 ctermfg=0
+
+
+set statusline=
+set statusline+=%1*
+set statusline+=%{&paste?\"\ \ PASTE\ \":\"\"}
+set statusline+=%#PmenuSel#
+"set statusline+=%2*
+set statusline+=\ %{StatuslineMode()}
+set statusline+=\ %.90{StatuslineGit()}
+set statusline+=\ %3*
+set statusline+=\ %f
+set statusline+=\ %m
+"set statusline+=%#LineNr#
+set statusline+=\ %4*
+set statusline+=\ %=
+"set statusline+=%#CursorColumn#
+set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \|
+set statusline+=\ %{&fileformat}
+set statusline+=\ %y
+set statusline+=\ %3*
+set statusline+=\ %p%%\  " .
+set statusline+=%#PmenuSel#
+set statusline+=\ %l:%c\  " .
+"set statusline+=%2*
+set statusline+=%0*  " end of statusline
+
+syntax clear StatusLineNC
+hi! StatusLineNC term=None cterm=None ctermbg=white ctermfg=white
 

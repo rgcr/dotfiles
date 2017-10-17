@@ -1,4 +1,6 @@
 
+source <(antibody init)
+
 _has(){
     command type "$1" > /dev/null 2>&1
 }
@@ -18,81 +20,75 @@ case $(uname) in
         ;;
 esac
 
-# install zplug if it does not exist
-[ ! -d ~/.zplug ] && {
-	git clone https://github.com/zplug/zplug ~/.zplug;
-	source ~/.zplug/init.zsh && zplug update --self
-}
 
-# Essential
-source ~/.zplug/init.zsh
+
 
 #############################################
 # Plugins
 #############################################
 
-zplug "plugins/git",            from:oh-my-zsh
-zplug "plugins/gitfast",        from:oh-my-zsh
-zplug "plugins/vi-mode",        from:oh-my-zsh
-zplug "plugins/heroku",         from:oh-my-zsh, lazy:1
-zplug "plugins/vagrant",        from:oh-my-zsh, lazy:1
-zplug "plugins/docker",         from:oh-my-zsh, lazy:1
-zplug "plugins/docker-compose", from:oh-my-zsh
-zplug "plugins/tmux",           from:oh-my-zsh
-zplug "plugins/tmuxinator",     from:oh-my-zsh
-zplug "sharat87/zsh-vim-mode"
-zplug "rimraf/k"
-zplug "rupa/z",                 use:z.sh
+#zplug "plugins/git",            from:oh-my-zsh
+#zplug "plugins/gitfast",        from:oh-my-zsh
+#zplug "plugins/vi-mode",        from:oh-my-zsh
+#zplug "plugins/heroku",         from:oh-my-zsh, lazy:1
+#zplug "plugins/vagrant",        from:oh-my-zsh, lazy:1
+#zplug "plugins/docker",         from:oh-my-zsh, lazy:1
+#zplug "plugins/docker-compose", from:oh-my-zsh
+#zplug "plugins/tmux",           from:oh-my-zsh
+#zplug "plugins/tmuxinator",     from:oh-my-zsh
+#zplug "sharat87/zsh-vim-mode"
+#zplug "rimraf/k"
+#zplug "rupa/z",                 use:z.sh
 
-# mac
-zplug "plugins/osx",            from:oh-my-zsh,  if:"[[ $OSTYPE == *darwin* ]]"
-zplug "plugins/brew",           from:oh-my-zsh,  if:"[[ $OSTYPE == *darwin* ]]"
-# arch linux
-[ "${HAS_PACMAN}" = "true" ] && {
-    zplug "plugins/archlinux", from:oh-my-zsh
-}
+#z mac
+#zplug "plugins/osx",            from:oh-my-zsh,  if:"[[ $OSTYPE == *darwin* ]]"
+#zplug "plugins/brew",           from:oh-my-zsh,  if:"[[ $OSTYPE == *darwin* ]]"
+## arch linux
+#[ "${HAS_PACMAN}" = "true" ] && {
+#    zplug "plugins/archlinux", from:oh-my-zsh
+#}
 
-# ruby
-zplug "plugins/rvm",            from:oh-my-zsh, lazy:1
+## ruby
+#zplug "plugins/rvm",            from:oh-my-zsh, lazy:1
 
-# python
-zplug "plugins/pip",            from:oh-my-zsh
-zplug "plugins/django",         from:oh-my-zsh
+## python
+#zplug "plugins/pip",            from:oh-my-zsh
+#zplug "plugins/django",         from:oh-my-zsh
 
-[ -z "${PIPENV_ACTIVE}" ] && {
-    zplug "plugins/virtualenvwrapper", from:oh-my-zsh
-}
+#[ -z "${PIPENV_ACTIVE}" ] && {
+#    zplug "plugins/virtualenvwrapper", from:oh-my-zsh
+#}
 
-# nodejs
-## lazy loading is around 70x faster
-export NVM_LAZY_LOAD=true
-zplug "lukechilds/zsh-nvm",     lazy:1
+## nodejs
+### lazy loading is around 70x faster
+#export NVM_LAZY_LOAD=true
+#zplug "lukechilds/zsh-nvm",     lazy:1
 
-zplug "plugins/node",           from:oh-my-zsh
-zplug "plugins/npm",            from:oh-my-zsh
-zplug "plugins/yarn",           from:oh-my-zsh
+#zplug "plugins/node",           from:oh-my-zsh
+#zplug "plugins/npm",            from:oh-my-zsh
+#zplug "plugins/yarn",           from:oh-my-zsh
 
 
-zplug "zsh-users/zsh-autosuggestions"
-zplug "zsh-users/zsh-history-substring-search"
-zplug "zsh-users/zsh-syntax-highlighting"
+#zplug "zsh-users/zsh-autosuggestions"
+#zplug "zsh-users/zsh-history-substring-search"
+#zplug "zsh-users/zsh-syntax-highlighting"
 
-# my theme
-#zplug "rgcr/dotfiles", use:"zsh/.rogerthat.zsh-theme", as:theme
-zplug "${HOME}/.zsh/", from:local, use:".rogerthat.zsh-theme", as:theme
+## my theme
+##zplug "rgcr/dotfiles", use:"zsh/.rogerthat.zsh-theme", as:theme
+#zplug "${HOME}/.zsh/", from:local, use:".rogerthat.zsh-theme", as:theme
 
-# Install packages that have not been installed yet
-if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    else
-        echo
-    fi
-fi
+## Install packages that have not been installed yet
+#if ! zplug check --verbose; then
+#    printf "Install? [y/N]: "
+#    if read -q; then
+#        echo; zplug install
+#    else
+#        echo
+#    fi
+#fi
 
-# Then, source plugins and add commands to $PATH
-zplug load
+## Then, source plugins and add commands to $PATH
+#zplug load
 
 #############################################
 # 				Key bindings
@@ -103,8 +99,8 @@ zmodload zsh/terminfo
 if [ "${IS_MAC}" = "true" ]; then
     #bindkey "$terminfo[cuu1]" history-substring-search-up
     #bindkey "$terminfo[cud1]" history-substring-search-down
-    bindkey '^[[A' history-substring-search-up
-    bindkey '^[[B' history-substring-search-down
+    #bindkey '^[[A' history-substring-search-up
+    #bindkey '^[[B' history-substring-search-down
 fi
 
 # search on history with ctrl+r

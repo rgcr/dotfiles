@@ -1,4 +1,7 @@
-# Configs
+##############################
+#  General configurations
+##############################
+
 config defaultToCurrentScreen true
 config windowHintsBackgroundColor 96;96;64;0.5
 config windowHintsIgnoreHiddenWindows true
@@ -11,11 +14,16 @@ config windowHintsIgnoreHiddenWindows true
 config undoOps move,resize
 
 
-# alias monitors
+##############################
+#        Aliases
+##############################
+
+# monitor aliases {{{
 alias mon-1 0
 alias mon-2 1
+# }}}
 
-# keyboard aliases
+# keyboard aliases {{{
 alias alt               alt
 alias alt_shift         alt;shift
 alias alt_ctrl          alt;ctrl
@@ -23,20 +31,14 @@ alias alt_cmd           alt;cmd
 alias alt_ctrl_shift    alt;ctrl;shift
 alias ctrl_cmd          ctrl;cmd
 
-alias hyper             ctrl;shift;alt;cmd
 alias super             ctrl;alt;cmd
+alias hyper             ctrl;shift;alt;cmd
+# }}}
 
 # Alias for focus with hints
 alias showNormalHint hint AOEUIDHTNSYXFBPKGMCW
 
-# Show focus hints
-bind .:cmd    ${showNormalHint}
-
-# Grid
-bind g:cmd    grid padding:5 0:6,4 1:8,4
-
-
-# Abstract positions
+# Abstract positions {{{
 alias full          move screenOriginX;screenOriginY screenSizeX;screenSizeY
 alias lefthalf      move screenOriginX;screenOriginY screenSizeX/2;screenSizeY
 alias righthalf     move screenOriginX+screenSizeX/2;screenOriginY screenSizeX/2;screenSizeY
@@ -48,7 +50,12 @@ alias bottomleft    corner bottom-left resize:screenSizeX/2;screenSizeY/2
 alias bottomright   corner bottom-right resize:screenSizeX/2;screenSizeY/2
 alias center        move screenOriginX+screenSizeX/6;screenOriginY+screenSizeY/6 2*screenSizeX/3;2*screenSizeY/3
 alias bigCenter     move screenOriginX+screenSizeX/12;screenOriginY+screenSizeY/12 10*screenSizeX/12;10*screenSizeY/12
+# }}}
 
+
+##############################
+#       bindings
+##############################
 
 # Reload Slate
 bind r:${super}  relaunch
@@ -56,7 +63,13 @@ bind r:${super}  relaunch
 # Undo
 bind z:${super}  undo
 
-# Location bindings
+# Show focus hints
+bind .:cmd    ${showNormalHint}
+
+# Show a positioning grid for each monitor
+bind g:cmd    grid padding:5 0:6,4 1:8,4
+
+# Location bindings {{{
 bind m:${alt_ctrl}      ${full}
 bind left:${alt_ctrl}   ${lefthalf}
 bind right:${alt_ctrl}  ${righthalf}
@@ -64,7 +77,7 @@ bind up:${alt_ctrl}     ${tophalf}
 bind down:${alt_ctrl}   ${bottomhalf}
 bind c:${alt_ctrl}      ${center}
 bind v:${alt_ctrl}      ${bigCenter}
-
+#
 bind 1:${alt_cmd} ${bottomleft}
 bind 2:${alt_cmd} push bottom bar-resize:screenSizeY/2
 bind 3:${alt_cmd} ${bottomright}
@@ -74,34 +87,40 @@ bind 6:${alt_cmd} ${righthalf}
 bind 7:${alt_cmd} ${topleft}
 bind 8:${alt_cmd} push top bar-resize:screenSizeY/2
 bind 9:${alt_cmd} ${topright}
+# }}}
 
-# Focus Bindings
-## NOTE: some of these may *not* work if you have not removed the expose/spaces/mission control bindings
+# Focus Bindings {{{
+## NOTE: some of these may *not* work
+## if you have not removed the expose/spaces/mission control bindings
 bind l:${alt}  focus right
 bind h:${alt}   focus left
 bind k:${alt}     focus up
 bind j:${alt}   focus down
 #bind j:${alt_cmd}      focus behind
 #bind k:${alt_cmd}      focus behind
+# }}}
 
-# Monitor switching bindings
+# Monitor switching bindings {{{
 bind right:${super}  throw next # resize
 bind left:${super}   throw next # resize
+# }}}
 
-# Resize Bindings
-# NOTE: some of these may *not* work if you have not removed the expose/spaces/mission control bindings
+# Resize Bindings {{{
+## NOTE: some of these may *not* work
+## if you have not removed the expose/spaces/mission control bindings
 bind right:${ctrl_cmd} resize +10% +0
 bind left:${ctrl_cmd}  resize -10% +0
 bind up:${ctrl_cmd}    resize +0   -10%
 bind down:${ctrl_cmd}  resize +0   +10%
+# }}}
 
-# bind tab:cmd switch
+# focus apps {{{
 bind c:${super} focus 'Google Chrome'
 bind i:${super} focus 'iTerm2'
 bind l:${super} focus 'Microsoft Lync'
 bind o:${super} focus 'Microsoft Outlook'
 bind s:${super} focus 'Spotify'
-
+# }}}
 
 
 

@@ -1,5 +1,7 @@
-"set nocompatible
+" turn filetype detection off and, even if it's not strictly
 filetype off
+
+"set nocompatible
 
 if has("nvim")
     call plug#begin('~/.local/share/nvim/plugged')
@@ -7,51 +9,54 @@ else
     call plug#begin('~/.vim/plugged')
 end
 
-""""""""""""""""""""""""""""""""""""""""""""""
-"               PLUGINS
-""""""""""""""""""""""""""""""""""""""""""""""
+"#################################
+"           PLUGINS
+"#################################
 
-" Themes,colors & status lines
-"Plug 'itchyny/lightline.vim'
-Plug 'kshenoy/vim-signature'              " show marks
-Plug 'flazz/vim-colorschemes'             " colorscheme pack
-"}}}
+" libraries for vim plugins {{{
+Plug 'tomtom/tlib_vim'
+Plug 'tpope/vim-repeat'
+" "}}}
 "
-" Utils
-Plug 'tomtom/tlib_vim'                    " library for vim plugins
-Plug 'tpope/vim-repeat'                   " library for vim plugins
-Plug 'ap/vim-buftabline'
-Plug 'rking/ag.vim'                       " silver searcher plugin
-Plug 'ctrlpvim/ctrlp.vim'                 " fuzzy finder, like sublime (ctrl + p)
-Plug 'tacahiroy/ctrlp-funky'              " function navigator for ctrlp.vim
-Plug 'scrooloose/nerdcommenter'           " easy way to comment text for multiple languages
-Plug 'majutsushi/tagbar'                  " tagbar
-Plug 'Yggdroot/indentLine'                " show identation
-Plug 'editorconfig/editorconfig-vim'      " .
-Plug 'moll/vim-bbye'                      " delete buffers (close files) without closing the window
+Plug 'flazz/vim-colorschemes'
 Plug 'scrooloose/nerdtree'
-"Plug 'netrw.vim'                          " remote files
-Plug 'Shougo/vimproc.vim', {'do' : 'make'}
-Plug 'Shougo/vimshell.vim'                " shell in vim
-Plug 'sjl/gundo.vim'                      " undo history
-Plug 'suan/vim-instant-markdown'          " Preview markdown needs to run npm -g install instant-markdown-d
-Plug 'wesQ3/vim-windowswap'               " swap windows easily
-Plug 'simeji/winresizer'                  " resizing splits easily
-Plug 't9md/vim-choosewin'                 " Navigate to the window you choose
+" plugin to show marks
+Plug 'kshenoy/vim-signature'
+Plug 'ap/vim-buftabline'
+Plug 'rking/ag.vim'
+Plug 'ctrlpvim/ctrlp.vim'
+" function navigator for ctrlp.vim
+Plug 'tacahiroy/ctrlp-funky'
+Plug 'scrooloose/nerdcommenter'
+Plug 'majutsushi/tagbar'
+" show identation
+Plug 'Yggdroot/indentLine'
+Plug 'editorconfig/editorconfig-vim'      " .
+" delete buffers (close files) without closing the window
+Plug 'moll/vim-bbye'
+" undo history
+Plug 'sjl/gundo.vim'
+" Preview markdown. Needs to run npm -g install instant-markdown-d
+Plug 'suan/vim-instant-markdown'
+" swap windows easily
+Plug 'wesQ3/vim-windowswap'
+" resizing splits easily
+Plug 'simeji/winresizer'
+" Navigate to the window you choose
+Plug 't9md/vim-choosewin'
 Plug 'tpope/vim-obsession'
-
-" Syntax
-Plug 'scrooloose/syntastic'               " syntax checker
-Plug 'mattn/emmet-vim'                    " emmet, fast html development
-Plug 'Ntpeters/vim-better-whitespace'     " highlight unnecessary spaces
-
-" Completions
-Plug 'Shougo/neocomplete.vim'             " cache autocompletion
-Plug 'ervandew/supertab'                  " autocomplete typing tab
-Plug 'tpope/vim-surround'                 " to easily delete, change and add such surroundings in pairs
-Plug 'Raimondi/delimitMate'               " awesome and simple plugin to automatic close quotes, parenthesis, brackets
-Plug 'MarcWeber/vim-addon-mw-utils'       " cache file to autocomplete
-
+" syntax checker
+Plug 'scrooloose/syntastic'
+Plug 'mattn/emmet-vim'
+" highlight unnecessary spaces
+Plug 'Ntpeters/vim-better-whitespace'
+"" cache autocompletion
+Plug 'Shougo/neocomplete.vim'
+Plug 'ervandew/supertab'
+Plug 'tpope/vim-surround'
+Plug 'Raimondi/delimitMate'
+" cache file to autocomplete
+Plug 'MarcWeber/vim-addon-mw-utils'
 " Snippets
 if has('python')
     Plug 'Valloric/YouCompleteMe'
@@ -62,28 +67,26 @@ end
 " Powershell
 Plug 'PProvost/vim-ps1'
 
-" Git
-Plug 'tpope/vim-fugitive'                 " git plugin
-Plug 'airblade/vim-gitgutter'             " git gutter plugin
+" Git {{{
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
 "}}}
 
 " HTML5
-Plug 'othree/html5.vim'                   " html syntax
+Plug 'othree/html5.vim'
 
-" JS
-Plug 'pangloss/vim-javascript'            " js syntax
-Plug 'myhere/vim-nodejs-complete'         " nodejs syntax
-Plug 'nono/jquery.vim'                    " jquery syntax
+" JS {{{
+Plug 'pangloss/vim-javascript'
+Plug 'myhere/vim-nodejs-complete'
+Plug 'nono/jquery.vim'
+"" }}}
 
 " Add plugins to &runtimepath
 call plug#end()
 
-
-
-""""""""""""""""""""""""""""""""""""""""""""""
-"               SETS
-""""""""""""""""""""""""""""""""""""""""""""""
-
+"#################################
+"           Config
+"#################################
 
 filetype plugin indent on
 
@@ -125,9 +128,14 @@ set modeline        " recognize modelines at start or end of file
 set modelines=5     " number of lines checked for modelines
 
 set backspace=indent,eol,start
-"turn on syntax highlighting
+
 syntax on
 syntax enable
+
+
+"#################################
+"           Theme
+"#################################
 
 try
     colorscheme Monokai
@@ -138,49 +146,44 @@ endtry
 hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
 
 
+"#################################
+"#################################
 
-if has("autocmd")
-    " remember line position
-    au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
-
-    " Custom task tags, highlight TODO, FIXME, NOTE, etc.
-    if v:version > 701
-        "autocmd Syntax * call matchadd('Todo',  '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\)')
-        "autocmd Syntax * call matchadd('Debug', '\W\zs\(NOTE\|INFO\|IDEA\)')
-        autocmd Syntax * call matchadd('Todo', '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
-    endif
-
-    " yaml files
-    autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
-
-    " highlight for bats files
-    au BufRead,BufNewFile *.bats set filetype=sh
-
-    " close vim if the only window is a NERDTree
-    autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-
-endif
-
-
-
-""""""""""""""""""""""""""""""""""""""""""""""
-"               MAPS
-""""""""""""""""""""""""""""""""""""""""""""""
-
+" leader
 let mapleader = ","
 
-" Switch to command mode
-inoremap jj <Esc>
+" Switch to command mode {{{
 inoremap jk <Esc>
 inoremap <leader><leader> <Esc>
+" }}}
 
 "Reload .vimrc
 noremap <silent> <leader>r :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
 
+" remember line position
+au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+
+" Custom task tags, highlight TODO, FIXME, NOTE, etc. {{{
+if v:version > 701
+    "autocmd Syntax * call matchadd('Todo',  '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\)')
+    "autocmd Syntax * call matchadd('Debug', '\W\zs\(NOTE\|INFO\|IDEA\)')
+    autocmd Syntax * call matchadd('Todo', '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
+endif
+" }}}
+
+" yaml files
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+
+" highlight for bats files
+au BufRead,BufNewFile *.bats set filetype=sh
+
+" close vim if the only window is a NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
 
 " Append modeline after last line in buffer.
 " Use substitute() instead of printf() to handle '%%s' modeline in LaTeX
-" files.
+" files. {{{
 function! AppendModeline()
   let l:modeline = printf(" vim: set ts=%d sw=%d tw=%d %set :",
         \ &tabstop, &shiftwidth, &textwidth, &expandtab ? '' : 'no')
@@ -188,7 +191,7 @@ function! AppendModeline()
   call append(line("$"), l:modeline)
 endfunction
 nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
-
+" }}}
 
 " Fast saving
 nmap <leader>w :w!<cr>
@@ -203,6 +206,7 @@ nmap <leader>pp :set invpaste paste?<CR>
 map <Leader>n :set invnumber<CR>
 
 
+" {{{
 """ copy in visual mode
 vmap <C-c> "+yi
 """ cut in visual mode
@@ -213,11 +217,13 @@ vmap <C-v> c<ESC>"+p
 imap <C-v> <ESC>"+pa
 """ copy line to clipboard
 map <Leader>yy <ESC>"+yy
+" }}}
 
 
-"to create a new line cmd mode without going to insert
+" crates aa new line without going to insert mode {{{
 nmap <leader>k O<esc>k0
 nmap <leader>j o<esc>j0
+" }}}
 
 " break line
 nmap <leader>b i<cr><esc>k$
@@ -226,66 +232,30 @@ nmap <leader>b i<cr><esc>k$
 map <Leader><CR> :nohls<CR>
 
 
-" Surround
+" Surround {{{
 map <Leader>{ <ESC>ysiw}
 map <Leader>( <ESC>ysiw)
 map <Leader>" <ESC>ysiw"
 map <Leader>' <ESC>ysiw'
 map <Leader>[ <ESC>ysiw]
 map <Leader>< <ESC>ysiw>
+" }}}
 
 
-"" netrw {{{
-"" Toggle :Vexplore with <leader>t
-"function! ToggleVExplorer()
-"  if exists("t:expl_buf_num")
-"      let expl_win_num = bufwinnr(t:expl_buf_num)
-"      if expl_win_num != -1
-"          let cur_win_nr = winnr()
-"          exec expl_win_num . 'wincmd w'
-"          close
-"          exec cur_win_nr . 'wincmd w'
-"          unlet t:expl_buf_num
-"      else
-"          unlet t:expl_buf_num
-"      endif
-"  else
-"      exec '1wincmd w'
-"      Vexplore
-"      let t:expl_buf_num = bufnr("%")
-"  endif
-"endfunction
-"" keep the browsing directory the same as the current directory
-"let g:netrw_keepdir= 0
-""
-"set autochdir
-"" tree view
-"let g:netrw_liststyle = 3
-"" open in previous window
-"let g:netrw_browse_split = 4
-"let g:netrw_altv = 1
-"" percentage size
-"let g:netrw_winsize = 45
-"" ignore files in netrw
-"let g:netrw_list_hide='^\.,.\(pyc\|pyo\|o\)$'
-"map <silent> <leader>t :call ToggleVExplorer()<CR>
-"map <leader>e :Explore!<CR>
-"" }}}
-
-
-"NERDTree
+"NERDTree {{{
 map <leader>t :NERDTreeToggle<CR>
-" let NERDTreeShowHidden=1
-" automatically close NerdTree when you open a file
+"" automatically close NerdTree when you open a file
 let NERDTreeQuitOnOpen = 1
 let NERDTreeIgnore = ['\.pyc$', '\.swp$']
-"let NERDTreeMinimalUI = 1
 let NERDTreeDirArrows = 1
 let g:NERDTreeWinSize=40
-" custom directory color
+"" custom directory color
 hi Directory guifg=#ffee00 ctermfg=yellow
 let g:NERDTreeDirArrowExpandable = '+'
 let g:NERDTreeDirArrowCollapsible = '~'
+" let NERDTreeMinimalUI = 1
+" let NERDTreeShowHidden=1
+" }}}
 
 
 
@@ -320,14 +290,14 @@ nnoremap <Leader>m :SignatureToggleSigns<CR>
 nnoremap <Leader>T :TagbarToggle<CR>
 
 
-" vim-better-whitespace
+" vim-better-whitespace {{{
 " Toggle whitespace
 nnoremap <Leader>S :ToggleWhitespace<CR>
 """ Delete whitespaces
 nnoremap <Leader>ds :StripWhitespace<CR>
 """ strip all trailing whitespace everytime
 autocmd BufWritePre * StripWhitespace
-
+" }}}
 
 " Toggle gundo
 noremap <leader>u :GundoToggle<CR>
@@ -336,54 +306,31 @@ noremap <leader>u :GundoToggle<CR>
 nnoremap <Leader>g :GitGutterToggle<Cr>
 
 
-" Fugitive
+" Fugitive {{{
 map <leader>gs :Gstatus<CR><C-w>20+
 map <leader>gc :Gcommit<CR>
 "map <leader>gw :Gwrite<CR>
+" }}}
 
-
-" ctrlp-funky
+" ctrlp-funky {{{
 nnoremap <Leader>fu :CtrlPFunky<Cr>
 "" narrow the list down with a word under cursor
 nnoremap <Leader>fU :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 let g:ctrlp_funky_multi_buffers = 1
 let g:ctrlp_funky_matchtype = 'path'
+" }}}
 
 
 " Neocomplcache
 let g:neocomplcache_enable_at_startup = 1
 
-
-" airline {{{
-"let g:airline_theme='kalisi'
-"let g:airline#extensions#tabline#buffer_nr_format = '%s: '
-"let g:airline#extensions#tabline#enabled          = 1       " Airline - Enable the list of buffers
-"let g:airline#extensions#tabline#fnamemod         = ':t'    " Airline Show just the filename
-"let g:airline#extensions#tabline#show_tab_nr      = 1
-"let g:airline#extensions#tabline#buffer_idx_mode  = 1
-" Quick switch between tabs
-"nmap <leader>1 <Plug>AirlineSelectTab1
-"nmap <leader>2 <Plug>AirlineSelectTab2
-"nmap <leader>3 <Plug>AirlineSelectTab3
-"nmap <leader>4 <Plug>AirlineSelectTab4
-"nmap <leader>5 <Plug>AirlineSelectTab5
-"nmap <leader>6 <Plug>AirlineSelectTab6
-"nmap <leader>7 <Plug>AirlineSelectTab7
-"nmap <leader>8 <Plug>AirlineSelectTab8
-"nmap <leader>9 <Plug>AirlineSelectTab9
-"nmap <leader>. <Plug>AirlineSelectPrevTab
-"nmap <leader>- <Plug>AirlineSelectNextTab
-" }}}
-
-
-" delimitmate
+" delimitmate {{{
 let g:delimitMate_jump_expansion=0
 let g:delimitMate_expand_cr=2
-
+" }}}
 
 " Nerdcommenter
 let g:NERDSpaceDelims = 0
-
 
 " Syntastic {{{
 "" Toggle syntastic mode
@@ -394,9 +341,8 @@ let g:syntastic_warning_symbol = '⚠'
 let g:syntastic_style_error_symbol = '⚡'
 let g:syntastic_style_warning_symbol = '⚡'
 let g:syntastic_ignore_files = ['\.xml$']
-"let g:syntastic_mode_map = { "mode": "pasive", "active_filetypes": [], "passive_filetypes": [] }
+"" let g:syntastic_mode_map = { "mode": "pasive", "active_filetypes": [], "passive_filetypes": [] }
 let g:syntastic_mode_map = { 'mode': 'passive' }
-
 " }}}
 
 " PythonMode
@@ -405,23 +351,16 @@ let g:syntastic_mode_map = { 'mode': 'passive' }
 " bbyte
 nnoremap <Leader>q :Bdelete<CR>
 
-
-" choosewin
+" choosewin {{{
 nmap <leader>-  <Plug>(choosewin)
 let g:choosewin_overlay_enable = 1
+" }}}
 
-
-" vimproc
-let g:vimshell_prompt = 'vimshell % '
-nnoremap <Leader>x :VimShellExecute<SPACE>
-nnoremap <Leader>$ :VimShell<CR>
-nnoremap <Leader>xq :VimShellClose<CR>
-
-
-" Use neocomplete.
+" Use neocomplete {{{
 let g:neocomplete#enable_at_startup = 1
 " Set minimum syntax keyword length.
 let g:neocomplete#sources#syntax#min_keyword_length = 3
+" }}}
 
 " snippets {{{
 let g:ycm_auto_trigger = 0
@@ -438,27 +377,14 @@ let g:UltiSnipsListSnippets         = "<c-e>"
 " }}}
 
 
-" Statusline
-let g:lightline = {
-  \ 'colorscheme': 'PaperColor',
-  \ 'background': 'ligth',
-  \ 'active': {
-  \   'left': [ [ 'mode', 'paste', 'gitbranch' ],
-  \             [ 'readonly', 'filename', 'modified' ] ]
-  \ },
-  \ 'component_function': {
-  \   'gitbranch': 'fugitive#head'
-  \ },
-\ }
-
-
-" indent-guides
+" indent-guides {{{
 map <leader>i :IndentLinesToggle<CR>
 let g:indentLine_enabled = 0
+" }}}
 
 
 
-" Buftabline
+" Buftabline {{{
 let g:buftabline_numbers=2
 let g:buftabline_indicators=1
 " quick switch between buffers
@@ -472,17 +398,13 @@ nmap <leader>7 <Plug>BufTabLine.Go(7)
 nmap <leader>8 <Plug>BufTabLine.Go(8)
 nmap <leader>9 <Plug>BufTabLine.Go(9)
 nmap <leader>0 <Plug>BufTabLine.Go(10)
+" }}}
 
 
-
+" vertical split color
 hi VertSplit ctermbg=White ctermfg=White
 
-" now set it up to change the status line based on mode
-"if version >= 700
-"  au InsertEnter * hi StatusLine term=reverse ctermbg=5 gui=undercurl guisp=Magenta
-"  au InsertLeave * hi StatusLine term=reverse ctermfg=0 ctermbg=2 gui=bold,reverse
-"endif
-
+" STATUSLINE {{{{
 function! GitBranch()
   return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
 endfunction
@@ -491,9 +413,6 @@ function! StatuslineGit()
   let l:branchname = GitBranch()
   return strlen(l:branchname) > 0?'| '.l:branchname.' ':''
 endfunction
-
-"function! StatuslinePasteMode()
-
 
 function! StatuslineMode()
     let l:mode_map = {
@@ -512,12 +431,10 @@ function! StatuslineMode()
     return get(l:mode_map, mode(), '')
 endfunction
 
-
 hi User1 term=bold cterm=None ctermbg=202 ctermfg=255
 hi User2 term=bold cterm=None ctermbg=249 ctermfg=233
 hi User3 term=bold cterm=None ctermbg=253 ctermfg=0
 hi User4 term=bold cterm=None ctermbg=109 ctermfg=0
-
 
 set statusline=
 set statusline+=%1*
@@ -545,4 +462,4 @@ set statusline+=%0*  " end of statusline
 
 syntax clear StatusLineNC
 hi! StatusLineNC term=None cterm=None ctermbg=white ctermfg=white
-
+" }}}

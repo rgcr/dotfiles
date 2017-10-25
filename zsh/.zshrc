@@ -252,7 +252,7 @@ fi
 
 # function to edit config files
 e(){
-    [ -z "${1}" ] && { 2>&1 echo "usage: conf <configfile>"; return 1}
+    [ -z "${1}" ] && { 2>&1 echo "usage: e <configfile>"; return 1}
     case "${1}" in
         vim)   "${EDITOR}" ~/.vimrc      ;;
         zsh)   "${EDITOR}" ~/.zshrc      ;;
@@ -271,7 +271,7 @@ function take() { mkdir -p $1; cd $1 }
 # cli calculator
 calc() { echo "${@}" | bc -l }
 
-# manpages with colors
+# man with colors
 man() {
     env \
         LESS_TERMCAP_mb=$(printf "\e[1;31m") \

@@ -22,15 +22,15 @@ _deploy(){
     # deploy dotfiles with stow
     printf "\nRestow dotfiles\n"
     for d in $(find . -mindepth 1 -maxdepth 1 ! -path ./.git -type d -printf "%f\n"); do
-        stow -R ${d}
+        stow -v -R ${d} -d . -t ~
     done
 }
 
 _caveat(){
     cat <<_EOL_
 
-- Install all plugins automatically:
-    vim +PlugInstall +qall
+- Install antibody
+    curl -sL git.io/antibody | sh -s
 
 - Install vim-plug on vim
     mkdir -p ~/.vim/autoload;
@@ -41,6 +41,10 @@ _caveat(){
     mkdir -p ~/.config/nvim/;
     curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+- Install all plugins automatically:
+    vim +PlugInstall +qall
+
 
 _EOL_
 }

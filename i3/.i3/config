@@ -15,7 +15,7 @@ floating_modifier $mod
 bindsym $mod+Return exec lxterminal #urxvt #i3-sensible-terminal
 
 # kill focused window
-bindsym $mod+Shift+C kill
+bindsym $mod+Shift+Q kill
 
 # start dmenu
 bindsym $mod+p exec dmenu_run

@@ -13,7 +13,7 @@ Requirements
 
 Contains dotfiles for
 ------------
-* `zsh`: I use [zplug](https://github.com/zplug/zplug) as plugin manager
+* `zsh`: I use [antibody](https://github.com/getantibody/antibody) as plugin manager
 * `vim`: I use [vim-plug](https://github.com/junegunn/vim-plug) as plugin manager
 * `tmux`
 * `i3`

@@ -21,6 +21,12 @@ Plug 'tomtom/tlib_vim'
 Plug 'tpope/vim-repeat'
 " }}}
 
+Plug 'pearofducks/ansible-vim' "{{{
+au BufRead,BufNewFile */playbooks/*.yml set filetype=yaml.ansible
+" }}}
+
+" Plug 'terryma/vim-multiple-cursors'
+
 Plug 'flazz/vim-colorschemes'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle'  } " {{{
   " close vim if the only window is a NERDTree
@@ -246,7 +252,7 @@ call plug#end()
 
 "###########################################################
 "###########################################################
-"
+
 
 filetype plugin indent on
 
@@ -299,16 +305,24 @@ set noswapfile      " whether to use a swapfile for a buffer
 set nocompatible    " behave vi-compatible as much as possible
 set modeline        " recognize modelines at start or end of file
 set modelines=5     " number of lines checked for modelines
-
 set backspace=indent,eol,start
-
 set completeopt-=preview    " disable docs functions
 
-syntax on
 syntax enable
+syntax on
 
 set t_ut=
 set t_Co=256
+
+if !has("gui_running") && !has('nvim')
+    set term=xterm
+    set t_Co=256
+    let &t_AB="\e[48;5;%dm"
+    let &t_AF="\e[38;5;%dm"
+    " " colorscheme zenburn
+    inoremap <Char-0x07F> <BS>
+    nnoremap <Char-0x07F> <BS>
+endif
 
 try
     colorscheme Monokai
@@ -333,7 +347,7 @@ hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
 
 
 " Switch to command mode {{{
-  inoremap jk <Esc>
+inoremap jk <Esc>
 " }}}
 
 "Reload .vimrc
@@ -345,7 +359,7 @@ au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g
 " Custom task tags, highlight TODO, FIXME, NOTE, etc. {{{
 if v:version > 701
     "autocmd Syntax * call matchadd('Todo',  '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\)')
-    "autocmd Syntax * call matchadd('Debug', '\W\zs\(NOTE\|INFO\|IDEA\)')
+    " autocmd Syntax * call matchadd('Debug', '\W\zs\(NOTE\|INFO\|IDEA\)')
     autocmd Syntax * call matchadd('Todo', '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
 endif
 " }}}
@@ -360,7 +374,7 @@ autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
 au BufRead,BufNewFile *.bats set filetype=sh
 
 " remove all trailing whitespaces
-autocmd FileType c,cpp,perl,python autocmd BufWritePre <buffer> %s/\s\+$//e
+autocmd FileType c,cpp,perl,python,yml autocmd BufWritePre <buffer> %s/\s\+$//e
 
 " Append modeline after last line in buffer.
 " Use substitute() instead of printf() to handle '%%s' modeline in LaTeX
@@ -372,6 +386,23 @@ function! AppendModeline()
   call append(line("$"), l:modeline)
 endfunction
 nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
+" }}}
+
+" Zoom / Restore window. {{{
+function! s:ZoomToggle() abort
+    if exists('t:zoomed') && t:zoomed
+        execute t:zoom_winrestcmd
+        let t:zoomed = 0
+    else
+        let t:zoom_winrestcmd = winrestcmd()
+        resize
+        vertical resize
+        let t:zoomed = 1
+    endif
+endfunction
+command! ZoomToggle call s:ZoomToggle()
+" NOTE: we can use: c-w-| (vsplits), c-w-_ (hsplits), -w-= (restore)
+nnoremap <silent> <Leader>z :ZoomToggle<CR>
 " }}}
 
 " Fast saving

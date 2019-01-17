@@ -11,7 +11,7 @@ compdef mux=tmuxinator 2>/dev/null
 
 # tmux {{{
 # stolen from completion function _tmux
-function __tmux-sessions() {
+__tmux-sessions() {
     local expl
     local -a sessions
     sessions=( ${${(f)"$(command tmux list-sessions)"}/:[ $'\t']##/:} )

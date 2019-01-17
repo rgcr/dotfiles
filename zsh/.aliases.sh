@@ -7,9 +7,9 @@ alias reload='source ~/.zshrc'
 
 # General {{{
 # I hate the 'whence' function
-command which which>/dev/null 2>&1 && {
-    alias which="$(command which which)"
-}
+# command which which>/dev/null 2>&1 && {
+    # alias which="$(command which which)"
+# }
 
 alias ls='ls --color=always'
 alias :q='exit'
@@ -23,6 +23,7 @@ alias week='date +%V'
 # git {{{
 alias g='git'
 alias gst='git status'
+alias gb='git branch -v'
 # }}}
 
 # tmux {{{

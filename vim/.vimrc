@@ -401,9 +401,13 @@ function! s:ZoomToggle() abort
     endif
 endfunction
 command! ZoomToggle call s:ZoomToggle()
+nnoremap <silent> <Leader>zz :ZoomToggle<CR>
 " NOTE: we can use: c-w-| (vsplits), c-w-_ (hsplits), -w-= (restore)
-nnoremap <silent> <Leader>z :ZoomToggle<CR>
+" noremap <silent> zz <c-w>_ \| <c-w>\|
+" noremap <silent> zo <c-w>=
 " }}}
+"
+"
 
 " Fast saving
 nmap <leader>w :w!<cr>

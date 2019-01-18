@@ -33,6 +33,7 @@ bindkey '^R' history-incremental-search-backward
 #############################################
 
 # {{{
+setopt HIST_IGNORE_SPACE
 # Ignore <C-d> logout
 setopt IGNORE_EOF
 # Disable beeps

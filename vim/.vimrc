@@ -15,6 +15,7 @@ endif
 "###########################################################
 "###########################################################
 
+Plug 'flazz/vim-colorschemes'
 
 " libraries for vim plugins {{{
 Plug 'tomtom/tlib_vim'
@@ -22,10 +23,9 @@ Plug 'tpope/vim-repeat'
 " }}}
 
 Plug 'pearofducks/ansible-vim' "{{{
-au BufRead,BufNewFile */playbooks/*.yml set filetype=yaml.ansible
+  au BufRead,BufNewFile */playbooks/*.yml set filetype=yaml.ansible
 " }}}
 
-Plug 'flazz/vim-colorschemes'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle'  } " {{{
   " close vim if the only window is a NERDTree
   autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
@@ -154,15 +154,12 @@ Plug 'w0rp/ale' " {{{
   nnoremap <Leader>al :ALELint<CR>
 " }}}
 
-Plug 'mattn/emmet-vim'
-
 Plug 'maralla/completor.vim' " {{{
   inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
   inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
   inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
   let g:completor_complete_options = 'menuone,noselect,preview'
 " }}}
-
 
 Plug 'jiangmiao/auto-pairs' " {{{
   let g:AutoPairs =  {'(':')', '[':']', '{':'}'}
@@ -172,6 +169,13 @@ if has("nvim")
     Plug 'numirias/semshi'
 endif
 
+Plug 'mattn/emmet-vim'
+
+Plug 'airblade/vim-gitgutter' " {{{
+  nnoremap <Leader>g :GitGutterToggle<Cr>
+  let g:gitgutter_override_sign_column_highlight = 0
+" }}}
+
 if has('python') || has('python3')
     " Plug 'Valloric/YouCompleteMe', { 'do': './install.py'  } " {{{
     " let g:ycm_auto_trigger = 0
@@ -179,9 +183,11 @@ if has('python') || has('python3')
     " let g:ycm_key_list_previous_completion  = ['<C-p>', '<Up>']
     " }}}
     Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets' " {{{
-    "   " better key bindings for UltiSnipsExpandTrigger
-    let g:UltiSnipsJumpForwardTrigger="<c-j>"
-    let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+      let g:UltiSnipsExpandTrigger="<tab>"
+      let g:UltiSnipsJumpForwardTrigger="<c-j>"
+      let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+      let g:ultisnips_python_style = "google"
+      " let g:UltiSnipsSnippetDirectories = ['~/.vim/UltiSnips', 'UltiSnips']
     " }}}
 end
 "
@@ -196,17 +202,12 @@ Plug 'vim-python/python-syntax', {'for': 'python'} " {{{
 " }}}
 
 
-Plug 'airblade/vim-gitgutter' " {{{
-  nnoremap <Leader>g :GitGutterToggle<Cr>
-  let g:gitgutter_override_sign_column_highlight = 0
-" }}}
-
 " HTML5
 Plug 'othree/html5.vim'
 
 " JS {{{
-Plug 'pangloss/vim-javascript'
-Plug 'myhere/vim-nodejs-complete'
+Plug 'pangloss/vim-javascript', {'for': 'javscript'}
+Plug 'myhere/vim-nodejs-complete', {'for': 'javscript'}
 "" }}}
 
 " Add plugins to &runtimepath
@@ -215,7 +216,6 @@ call plug#end()
 
 "###########################################################
 "###########################################################
-
 
 filetype plugin indent on
 
@@ -294,8 +294,10 @@ catch /^Vim\%((\a\+)\)\=:E185/
     colorscheme elflord
 endtry
 
-" hls color
-hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
+
+"###########################################################
+"###########################################################
+
 
 " highlight python and self function
 " autocmd BufEnter * syntax match Type /\v\.[a-zA-Z0-9_]+\ze(\[|\s|$|,|\]|\)|\.|:)/hs=s+1
@@ -303,18 +305,6 @@ hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
 " hi def link pythonFunction Function
 " autocmd BufEnter * syn match Self "\(\W\|^\)\@<=self\(\.\)\@="
 " highlight self ctermfg=yellow
-
-
-"###########################################################
-"###########################################################
-
-
-" Switch to command mode {{{
-inoremap jk <Esc>
-" }}}
-
-"Reload .vimrc
-noremap <silent> <leader>rr :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
 
 " remember line position
 au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
@@ -339,56 +329,9 @@ au BufRead,BufNewFile *.bats set filetype=sh
 " remove all trailing whitespaces
 autocmd FileType c,cpp,perl,python,yml autocmd BufWritePre <buffer> %s/\s\+$//e
 
-" Append modeline after last line in buffer.
-" Use substitute() instead of printf() to handle '%%s' modeline in LaTeX
-" files. {{{
-function! AppendModeline()
-  let l:modeline = printf(" vim: set ts=%d sw=%d tw=%d %set :",
-        \ &tabstop, &shiftwidth, &textwidth, &expandtab ? '' : 'no')
-  let l:modeline = substitute(&commentstring, "%s", l:modeline, "")
-  call append(line("$"), l:modeline)
-endfunction
-nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
-" }}}
 
-" Zoom / Restore window. {{{
-function! s:ZoomToggle() abort
-    if exists('t:zoomed') && t:zoomed
-        execute t:zoom_winrestcmd
-        let t:zoomed = 0
-    else
-        let t:zoom_winrestcmd = winrestcmd()
-        resize
-        vertical resize
-        let t:zoomed = 1
-    endif
-endfunction
-command! ZoomToggle call s:ZoomToggle()
-nnoremap <silent> <Leader>zz :ZoomToggle<CR>
-" NOTE: we can use: c-w-| (vsplits), c-w-_ (hsplits), -w-= (restore)
-" noremap <silent> zz <c-w>_ \| <c-w>\|
-" noremap <silent> zo <c-w>=
-" }}}
-"
-"
-
-" Fast saving
-nmap <leader>w :w!<cr>
-
-" Delete all buffers
-map <leader>qa :bufdo bd<cr>
-
-" Toggle paste mode
-nmap <leader>pp :set invpaste paste?<CR>
-
-" Toggle column numbers
-map <Leader>n :set invnumber<CR>
-
-" select last paste
-nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
-" find current word
-nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
-
+"###########################################################
+"###########################################################
 
 " clipboard, copy & paste {{{
 if executable("clip.exe")
@@ -417,6 +360,62 @@ else
 endif
 " }}}
 
+" Switch to command mode {{{
+inoremap jk <Esc>
+" }}}
+
+"Reload .vimrc
+noremap <silent> <leader>rr :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
+
+" Append modeline after last line in buffer.
+" Use substitute() instead of printf() to handle '%%s' modeline in LaTeX
+" files. {{{
+function! AppendModeline()
+  let l:modeline = printf(" vim: set ts=%d sw=%d tw=%d %set :",
+        \ &tabstop, &shiftwidth, &textwidth, &expandtab ? '' : 'no')
+  let l:modeline = substitute(&commentstring, "%s", l:modeline, "")
+  call append(line("$"), l:modeline)
+endfunction
+
+nnoremap <silent> <Leader>ml :call AppendModeline()<CR>
+" }}}
+
+" Zoom / Restore window. {{{
+function! s:ZoomToggle() abort
+    if exists('t:zoomed') && t:zoomed
+        execute t:zoom_winrestcmd
+        let t:zoomed = 0
+    else
+        let t:zoom_winrestcmd = winrestcmd()
+        resize
+        vertical resize
+        let t:zoomed = 1
+    endif
+endfunction
+
+command! ZoomToggle call s:ZoomToggle()
+nnoremap <silent> <Leader>zz :ZoomToggle<CR>
+" NOTE: we can use: c-w-| (vsplits), c-w-_ (hsplits), -w-= (restore)
+" noremap <silent> zz <c-w>_ \| <c-w>\|
+" noremap <silent> zo <c-w>=
+" }}}
+
+" Fast saving
+nmap <leader>w :w!<cr>
+
+" Delete all buffers
+map <leader>qa :bufdo bd<cr>
+
+" Toggle paste mode
+nmap <leader>pp :set invpaste paste?<CR>
+
+" Toggle column numbers
+map <Leader>n :set invnumber<CR>
+
+" select last paste
+nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
+" find current word
+nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
 
 " crates a new line without going to insert mode {{{
 nmap <leader>k O<esc>k0
@@ -432,73 +431,76 @@ map <Leader><CR> :nohls<CR>
 " Switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
+" command Json :%!python -m json.tool
 noremap <leader>json :%!python -m json.tool
 
 "###########################################################
 "###########################################################
-"
+
+" hls color
+hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
 " vertical split color
 hi VertSplit ctermbg=White ctermfg=White
 
-if !exists('g:gui_oni')
-    " STATUSLINE {{{{
-    function! GitBranch()
-      return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
-    endfunction
+" STATUSLINE {{{{
+  if !exists('g:gui_oni')
+      function! GitBranch()
+        return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
+      endfunction
 
-    function! StatuslineGit()
-      let l:branchname = GitBranch()
-      return strlen(l:branchname) > 0?'| '.l:branchname.' ':''
-    endfunction
+      function! StatuslineGit()
+        let l:branchname = GitBranch()
+        return strlen(l:branchname) > 0?'| '.l:branchname.' ':''
+      endfunction
 
-    function! StatuslineMode()
-        let l:mode_map = {
-        \ "n": 'NORMAL',
-        \ "i": 'INSERT',
-        \ 'R': 'REPLACE',
-        \ 'v': 'VISUAL',
-        \ 'V': 'V-LINE',
-        \ "\<C-v>": 'V-BLOCK',
-        \ 'c': 'COMMAND',
-        \ 's': 'SELECT',
-        \ 'S': 'S-LINE',
-        \ "\<C-s>": 'S-BLOCK',
-        \ 't': 'TERMINAL'
-        \ }
-        return get(l:mode_map, mode(), '')
-    endfunction
+      function! StatuslineMode()
+          let l:mode_map = {
+          \ "n": 'NORMAL',
+          \ "i": 'INSERT',
+          \ 'R': 'REPLACE',
+          \ 'v': 'VISUAL',
+          \ 'V': 'V-LINE',
+          \ "\<C-v>": 'V-BLOCK',
+          \ 'c': 'COMMAND',
+          \ 's': 'SELECT',
+          \ 'S': 'S-LINE',
+          \ "\<C-s>": 'S-BLOCK',
+          \ 't': 'TERMINAL'
+          \ }
+          return get(l:mode_map, mode(), '')
+      endfunction
 
-    hi User1 term=bold cterm=None ctermbg=202 ctermfg=255
-    hi User2 term=bold cterm=None ctermbg=249 ctermfg=233
-    hi User3 term=bold cterm=None ctermbg=253 ctermfg=0
-    hi User4 term=bold cterm=None ctermbg=109 ctermfg=0
+      hi User1 term=bold cterm=None ctermbg=202 ctermfg=255
+      hi User2 term=bold cterm=None ctermbg=249 ctermfg=233
+      hi User3 term=bold cterm=None ctermbg=253 ctermfg=0
+      hi User4 term=bold cterm=None ctermbg=109 ctermfg=0
 
-    set statusline=
-    set statusline+=%1*
-    set statusline+=%{&paste?\"\ \ PASTE\ \":\"\"}
-    set statusline+=%#PmenuSel#
-    "set statusline+=%2*
-    set statusline+=\ %{StatuslineMode()}
-    " XXX: too slow
-    "set statusline+=\ %.90{StatuslineGit()}
-    set statusline+=\ %3*
-    set statusline+=\ %f
-    set statusline+=\ %m
-    "set statusline+=%#LineNr#
-    set statusline+=\ %4*
-    set statusline+=\ %=
-    "set statusline+=%#CursorColumn#
-    set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \|
-    set statusline+=\ %{&fileformat}
-    set statusline+=\ %y
-    set statusline+=\ %3*
-    set statusline+=\ %p%%\  " .
-    set statusline+=%#PmenuSel#
-    set statusline+=\ %l:%c\  " .
-    "set statusline+=%2*
-    set statusline+=%0*  " end of statusline
+      set statusline=
+      set statusline+=%1*
+      set statusline+=%{&paste?\"\ \ PASTE\ \":\"\"}
+      set statusline+=%#PmenuSel#
+      "set statusline+=%2*
+      set statusline+=\ %{StatuslineMode()}
+      " XXX: too slow
+      "set statusline+=\ %.90{StatuslineGit()}
+      set statusline+=\ %3*
+      set statusline+=\ %f
+      set statusline+=\ %m
+      "set statusline+=%#LineNr#
+      set statusline+=\ %4*
+      set statusline+=\ %=
+      "set statusline+=%#CursorColumn#
+      set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \|
+      set statusline+=\ %{&fileformat}
+      set statusline+=\ %y
+      set statusline+=\ %3*
+      set statusline+=\ %p%%\  " .
+      set statusline+=%#PmenuSel#
+      set statusline+=\ %l:%c\  " .
+      "set statusline+=%2*
+      set statusline+=%0*  " end of statusline
 
-    syntax clear StatusLineNC
-    hi! StatusLineNC term=None cterm=None ctermbg=white ctermfg=white
-    " }}}
-endif
+      syntax clear StatusLineNC
+      hi! StatusLineNC term=None cterm=None ctermbg=white ctermfg=white
+  endif
+" }}}

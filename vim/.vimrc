@@ -5,7 +5,7 @@ filetype off
 let mapleader = ","
 
 "set nocompatible
-if has("nvim") 
+if has("nvim")
     call plug#begin('~/.local/share/nvim/plugged')
 else
     call plug#begin('~/.vim/plugged')
@@ -25,8 +25,6 @@ Plug 'pearofducks/ansible-vim' "{{{
 au BufRead,BufNewFile */playbooks/*.yml set filetype=yaml.ansible
 " }}}
 
-" Plug 'terryma/vim-multiple-cursors'
-
 Plug 'flazz/vim-colorschemes'
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle'  } " {{{
   " close vim if the only window is a NERDTree
@@ -43,7 +41,7 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle'  } " {{{
   let g:NERDTreeDirArrowCollapsible = '='
   " let NERDTreeMinimalUI = 1
   " let NERDTreeShowHidden=1
-" }}} 
+" }}}
 
 " plugin to show marks
 Plug 'kshenoy/vim-signature' " {{{
@@ -67,9 +65,9 @@ Plug 'ap/vim-buftabline' " {{{
   nmap <leader>0 <Plug>BufTabLine.Go(10)
 " }}}
 
-Plug 'rking/ag.vim' 
+Plug 'rking/ag.vim'
 Plug 'ctrlpvim/ctrlp.vim' " {{{
-  " CtrlP & Silver searcher 
+  " CtrlP & Silver searcher
   let g:ctrlp_map = '<Leader>p'
   if executable('ag')
       " Use ag over grep
@@ -102,7 +100,7 @@ Plug 'tacahiroy/ctrlp-funky' " {{{
 " }}}
 
 Plug 'scrooloose/nerdcommenter' " {{{
-  " Add spaces after comment delimiters by default 
+  " Add spaces after comment delimiters by default
   let g:NERDSpaceDelims = 1
   " Enable trimming of trailing whitespace when uncommenting
   let g:NERDTrimTrailingWhitespace = 1
@@ -145,67 +143,47 @@ Plug 't9md/vim-choosewin' " {{{
 " Asynchronous Lint Engine
 Plug 'w0rp/ale' " {{{
   " if you don't want linters to run on opening a file
+  let g:ale_fix_on_save = 0
   let g:ale_lint_on_enter = 0
-  " let g:ale_lint_on_text_changed = 'never'
+  let g:ale_lint_on_text_changed = 'never'
   let g:ale_fixers = {
     \   '*': ['remove_trailing_lines', 'trim_whitespace', 'yapf']
   \}
-  nnoremap <Leader>= :ALEFix<CR>
+  nnoremap <Leader>af :ALEFix<CR>
   " let g:ale_python_flake8_options = '--ignore=E129,E501,E302,E265,E241,E305,E402,W503'
-  nnoremap <Leader>s :ALELint<CR>
+  nnoremap <Leader>al :ALELint<CR>
 " }}}
 
 Plug 'mattn/emmet-vim'
 
-Plug 'ervandew/supertab' " {{{
-  " let g:SuperTabDefaultCompletionType     = '<C-n>'
-  " let g:SuperTabCrMapping                 = 0
+Plug 'maralla/completor.vim' " {{{
+  inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+  inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+  inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<cr>"
+  let g:completor_complete_options = 'menuone,noselect,preview'
 " }}}
+
 
 Plug 'jiangmiao/auto-pairs' " {{{
   let g:AutoPairs =  {'(':')', '[':']', '{':'}'}
 " }}}
 
-" cache file to autocomplete
-" Plug 'MarcWeber/vim-addon-mw-utils'
-"
 if has("nvim")
-"     Plug 'roxma/nvim-yarp'
-"     Plug 'ncm2/ncm2'
-"     Plug 'ncm2/ncm2-jedi'
-"     " Words in buffer completion
-"     Plug 'ncm2/ncm2-bufword'
-"     " Filepath completion
-"     Plug 'ncm2/ncm2-path' "{{{
-"       " ncm2 settings
-"       autocmd BufEnter * call ncm2#enable_for_buffer()
-"       set completeopt=menuone,noselect,noinsert
-"       set shortmess+=c
-"       inoremap <c-c> <ESC>
-"       " make it fast
-"       let ncm2#popup_delay = 5
-"       let ncm2#complete_length = [[1, 1]]
-"       " Use new fuzzy based matches
-"       let g:ncm2#matcher = 'substrfuzzy'
-"     " }}}
-"
     Plug 'numirias/semshi'
 endif
 
-" if has('python') || has('python3')
+if has('python') || has('python3')
     " Plug 'Valloric/YouCompleteMe', { 'do': './install.py'  } " {{{
     " let g:ycm_auto_trigger = 0
     " let g:ycm_key_list_select_completion    = ['<C-n>', '<Down>']
     " let g:ycm_key_list_previous_completion  = ['<C-p>', '<Up>']
     " }}}
-    " Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets' " {{{
+    Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets' " {{{
     "   " better key bindings for UltiSnipsExpandTrigger
-    "   let g:UltiSnipsExpandTrigger        = "<tab>"
-    "   let g:UltiSnipsJumpForwardTrigger   = "<tab>"
-    "   let g:UltiSnipsJumpBackwardTrigger  = "<s-tab>"
-    "   let g:UltiSnipsListSnippets         = "<c-e>"
+    let g:UltiSnipsJumpForwardTrigger="<c-j>"
+    let g:UltiSnipsJumpBackwardTrigger="<c-k>"
     " }}}
-" end
+end
 "
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' } " {{{
   " let g:pymode_doc = 1
@@ -216,21 +194,6 @@ Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' } " {{{
 Plug 'vim-python/python-syntax', {'for': 'python'} " {{{
   let g:python_highlight_all = 1
 " }}}
-
-
-" Plug 'davidhalter/jedi-vim', {'for': 'python'} "{{{
-	" Disable Jedi-vim autocompletion and enable call-signatures options
-  " let g:jedi#auto_initialization = 0
-  " let g:jedi#completions_enabled = 1
-  " let g:jedi#auto_vim_configuration = 0
-  " let g:jedi#smart_auto_mappings = 0
-  " let g:jedi#popup_on_dot = 0
-  " let g:jedi#completions_command = ""
-  " let g:jedi#show_call_signatures = "1"
-  " set completeopt=menuone,noselect,noinsert
-  " set shortmess+=c
-  " inoremap <c-c> <ESC>
-"}}}
 
 
 Plug 'airblade/vim-gitgutter' " {{{
@@ -306,7 +269,7 @@ set nocompatible    " behave vi-compatible as much as possible
 set modeline        " recognize modelines at start or end of file
 set modelines=5     " number of lines checked for modelines
 set backspace=indent,eol,start
-set completeopt-=preview    " disable docs functions
+" set completeopt-=preview    " disable docs functions
 
 syntax enable
 syntax on
@@ -421,18 +384,37 @@ nmap <leader>pp :set invpaste paste?<CR>
 " Toggle column numbers
 map <Leader>n :set invnumber<CR>
 
+" select last paste
+nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
+" find current word
+nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
 
-" {{{
-""" copy in visual mode
-vmap <C-c> "+yi
-""" cut in visual mode
-vmap <C-x> "+c
-""" replace in visual mode
-vmap <C-v> c<ESC>"+p
-""" paste in insert mode
-imap <C-v> <ESC>"+pa
-""" copy line to clipboard
-map <Leader>yy <ESC>"+yy
+
+" clipboard, copy & paste {{{
+if executable("clip.exe")
+	" Windows
+	func! SelectedText()
+		normal gv"xy
+		let result = getreg("x")
+		return result
+	endfunc
+	""" copy visual selection to clipboard
+	vnoremap <C-c> :call system('clip.exe', SelectedText())<CR>
+	""" cut
+    noremap <C-x> :call system('clip.exe', SelectedText())<CR>gvx
+else
+    " Linux
+    """ copy in visual mode
+    vmap <C-c> "+yi
+    """ cut in visual mode
+    vmap <C-x> "+c
+    """ replace in visual mode
+    vmap <C-v> c<ESC>"+p
+    """ paste in insert mode
+    imap <C-v> <ESC>"+pa
+    """ copy line to clipboard
+    map <Leader>y <ESC>"+yy
+endif
 " }}}
 
 
@@ -450,7 +432,7 @@ map <Leader><CR> :nohls<CR>
 " Switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
-
+noremap <leader>json :%!python -m json.tool
 
 "###########################################################
 "###########################################################

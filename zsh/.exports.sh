@@ -1,8 +1,6 @@
 #############################################
 #               Envs
 #############################################
-# vi mode
-set -o vi
 
 # HISTORY {{{
 HISTFILE=$HOME/.sh_history
@@ -11,8 +9,7 @@ SAVEHIST=50000
 # }}}
 
 [ "${ZSH_UNAME}" = "Darwin" ] && {
-    export LC_ALL=en_US.UTF-8
-    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 }
 
 export EDITOR=vim
@@ -26,8 +23,8 @@ export WORKON_HOME=$HOME/.venvs
 export NVM_DIR=~/.nvm
 
 # FZF {{{
-if which "fzf" >/dev/null 2>&1; then
-    export FZF_DEFAULT_COMMAND='ag -g ""'
-fi
+# if which "fzf" >/dev/null 2>&1; then
+export FZF_DEFAULT_COMMAND='ag -g ""'
+# fi
 # }}}
 

@@ -37,8 +37,7 @@ bindsym $mod+Return exec lxterminal
 bindsym $mod+Shift+q kill
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec dmenu_run
-bindsym $mod+space exec j4-dmenu-desktop
+bindsym $mod+d exec --no-startup-id dmenu_run
 
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
@@ -164,13 +163,6 @@ mode "resize" {
         bindsym $mod+r mode "default"
 }
 
-# multimedia keys {{{
-bindsym XF86AudioRaiseVolume exec amixer set Master 4%+
-bindsym XF86AudioLowerVolume exec amixer set Master 3%-
-bindsym XF86AudioMute exec amixer set Master toggle
-#bindsym XF86MonBrightnessUp exec xbacklight -inc 10
-#bindsym XF86MonBrightnessDown exec xbacklight -dec 6
-
 bindsym $mod+r mode "resize"
 
 # Start i3bar to display a workspace bar (plus the system information i3status
@@ -178,3 +170,49 @@ bindsym $mod+r mode "resize"
 bar {
         status_command i3status
 }
+
+# multimedia keys {{{
+bindsym XF86AudioRaiseVolume exec --no-startup-id amixer set Master 4%+ # && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)"
+bindsym XF86AudioLowerVolume exec --no-startup-id amixer set Master 3%- # && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)"
+bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "(on|off)" | tail -1)" --icon=audio-volume-medium
+# bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 15
+# bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 7
+# }}}
+# sleep
+bindsym XF86Sleep exec --no-startup-id systemctl suspend
+
+# {{{
+# Screenshots based on the "Print" key. Requires the "scrot" tool.
+# With $mod:  Interactively select window or rectangle.
+# With Shift: JPEG instead of PNG.
+# With Ctrl:  Sleep 5 seconds before doing the screenshot.
+bindsym           Print                    exec --no-startup-id            scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot taken"
+bindsym           Shift+Print              exec --no-startup-id            scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot taken"
+bindsym --release $mod+Print               exec --no-startup-id            scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot of window taken"
+bindsym --release $mod+Shift+Print         exec --no-startup-id            scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot of window taken"
+bindsym           Control+Print            exec --no-startup-id sleep 5 && scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot in 5s"
+bindsym           Control+Shift+Print      exec --no-startup-id sleep 5 && scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot in 5s"
+bindsym --release $mod+Control+Print       exec --no-startup-id sleep 5 && scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot of window in 5s"
+bindsym --release $mod+Control+Shift+Print exec --no-startup-id sleep 5 && scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot of window in 5s"
+# }}}
+
+# spotify {{
+bindsym XF86AudioNext exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
+bindsym XF86AudioPrev exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+bindsym XF86AudioStop exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop"
+bindsym XF86AudioPlay exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
+# }}}
+
+# lock
+bindsym $mod+Escape exec dm-tool lock
+
+# j4 dmenu
+# bindsym $mod+space exec j4-dmenu-desktop
+
+# rofi
+bindsym $mod+space exec --no-startup-id "rofi -show combi -combi-modi window,drun -show-icons"
+
+
+# startup
+exec --no-startup-id feh --randomize --bg-fill /usr/share/backgrounds/gnome/*
+exec --no-startup-id compton

@@ -1,3 +1,8 @@
+# vi mode
+set -o vi
+
+# ZSH_UNAME=$(uname)
+
 autoload -Uz compinit 
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24)  ]]
 then
@@ -20,7 +25,8 @@ if [ "${ZSH_UNAME}" = "Darwin" ]; then
 fi
 # search on history with ctrl+r
 bindkey '^R' history-incremental-search-backward
-
+# vi-mode, search on hisotry with '?'
+bindkey -M vicmd '?' history-incremental-search-backward
 
 # source ~/.zsh/thzshrcemes/rho.zsh-theme
 
@@ -34,6 +40,7 @@ bindkey '^R' history-incremental-search-backward
 
 # {{{
 setopt HIST_IGNORE_SPACE
+setopt PROMPT_SUBST
 # Ignore <C-d> logout
 setopt IGNORE_EOF
 # Disable beeps

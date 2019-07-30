@@ -116,7 +116,7 @@ Plug 'Yggdroot/indentLine' " {{{
   let g:indentLine_enabled = 0
 " }}}
 
-"Plug 'editorconfig/editorconfig-vim'      " .
+Plug 'editorconfig/editorconfig-vim'      " .
 
 " delete buffers (close files) without closing the window
 Plug 'moll/vim-bbye' " {{{

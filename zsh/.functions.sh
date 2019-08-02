@@ -13,7 +13,7 @@ zsh_setprompt() {
 
 	setopt prompt_subst
 
-	if [[ -n "$SSH_CLIENT"  ||  -n "$SSH2_CLIENT" ]]; then 
+	if [[ -n "$SSH_CLIENT"  ||  -n "$SSH2_CLIENT" ]]; then
 		p_host='%F{yellow}%M%f'
 	else
 		p_host='%F{cyan}%M%f'
@@ -44,9 +44,9 @@ e(){
 
 
 # better history
-function history-all { history -E 1 }
+history-all() { history -E 1 }
 
-function take() { mkdir -p $1; cd $1 }
+take() { mkdir -p $1; cd $1 }
 
 # cli calculator
 calc() { echo "${@}" | bc -l }
@@ -186,3 +186,14 @@ lyric(){
     { [ -z "{$1}" ] || [ -z "${2}" ] } && { 2>&1 echo 'usage lyric <artist> <title>'; return 1 }
     curl -s --get "https://makeitpersonal.co/lyrics" --data-urlencode "artist=$1" --data-urlencode "title=$2"
 }
+
+flake8-mkconfig(){
+    cat <<__EOF__ > .flake8
+[flake8]
+ignore = E116
+# E116: unexpected indentation (comment)
+# E402:  Module level import not at top of file
+__EOF__
+    echo ".flake8 was created"
+}
+

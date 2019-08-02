@@ -135,10 +135,10 @@ endif
                     \   '*': ['remove_trailing_lines', 'trim_whitespace'],
                     \   'python': ['isort', 'black', 'yapf', 'autopep8']
                     \ }
+        nnoremap <Leader>al :ALELint<CR>
         nnoremap <Leader>af :ALEFix<CR>
         nnoremap <Leader>= :ALEFix<CR>
         " let g:ale_python_flake8_options = '--ignore=E129,E501,E302,E265,E241,E305,E402,W503'
-        nnoremap <Leader>al :ALELint<CR>
     "}}}
 
     Plug 'maralla/completor.vim' " {{{

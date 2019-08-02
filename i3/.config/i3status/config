@@ -1,0 +1,87 @@
+# i3status configuration file
+# see "man i3status" for documentation.
+
+# It is important that this file is edited as UTF-8.
+# If the above line is not correctly displayed, fix your editor first!
+
+general {
+	colors = true
+    color_good      = '#88b090'
+    color_degraded  = '#ccdc90'
+    color_bad       = '#e89393'
+	interval = 5
+}
+
+order += "volume master"
+# order += "cpu_usage"
+# order += "disk /"
+# order += "disk /home"
+order += "wireless wlp2s0"
+order += "ethernet eth0"
+order += "battery 0"
+# order += "load"
+order += "cpu_usage"
+order += "tztime local"
+
+volume master {
+    format = "%volume ♪ "
+    format_muted = " "
+    device = "default"
+    mixer = "Master"
+    mixer_idx = 0
+}
+
+wireless wlp2s0 {
+    format_up = "%quality  %essid %ip"
+    format_down = ""
+}
+
+ethernet eth0 {
+    format_up =  " Ω: %ip  "
+    format_down = " ∅ eth0  "
+	# termsyn font
+}
+
+battery 0 {
+    format = "%status %percentage %remaining"
+    format_down = ""
+    last_full_capacity = true
+    integer_battery_capacity = true
+    low_threshold = 15
+    threshold_type = percentage
+    hide_seconds = true
+    status_chr = " "
+    status_bat = " "
+    status_unk = " "
+    status_full = " "
+}
+
+# load {
+    # format = " Δ: %1min "
+# }
+
+cpu_usage {
+    format = " %usage"
+}
+
+tztime local {
+    # format = " %h-%d %H:%M ☰ "
+    format = " %A %e.%B.%Y   %H:%M:%S"
+	# termsyn font
+}
+
+# disk "/" {
+	# format = " %avail"
+	# prefix_type	= custom
+	# low_threshold = 20
+	# threshold_type = percentage_avail
+# }
+
+# run_watch DHCP {
+	# pidfile = "/var/run/dhclient*.pid"
+# }
+
+# run_watch VPN {
+	# pidfile = "/var/run/vpnc/pid"
+# }
+

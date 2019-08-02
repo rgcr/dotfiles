@@ -39,6 +39,7 @@ bindkey -M vicmd '?' history-incremental-search-backward
 #############################################
 
 # {{{
+setopt HIST_IGNORE_SPACE
 setopt PROMPT_SUBST
 # Ignore <C-d> logout
 setopt IGNORE_EOF

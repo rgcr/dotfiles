@@ -25,8 +25,9 @@ zsh_setprompt() {
 	RPROMPT=$'${vcs_info_msg_0_}'
 }
 
-zsh_init_plugins(){
-    antibody bundle < $1 > ~/.zsh_plugins.sh
+antibody_init(){
+    _bundles=${1:-${HOME}/.zsh/bundles.txt}
+    antibody bundle < ${_bundles} > ~/.zsh_plugins.sh
     chmod 755 ~/.zsh_plugins.sh
 }
 

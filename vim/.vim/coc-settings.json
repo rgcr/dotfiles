@@ -1,0 +1,21 @@
+{
+  "diagnostic.displayByAle": false,
+  "coc.preferences.formatOnType": true,
+  "coc.preferences.formatOnSaveFiletypes": [
+    "javascript",
+    "typescript",
+    "typescriptreact",
+    "json",
+    "javascriptreact"
+  ],
+  "tslint.run": "onSave",
+  "tslint.autoFixOnSave": false,
+  "eslint.enable": true,
+  "eslint.run": "onSave",
+  "eslint.autoFixOnSave": false,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "python.formatting.provider": "yapf",
+  "python.formatting.yapfArgs": ["--style", "{based_on_style: facebook}"]
+}

@@ -198,3 +198,7 @@ __EOF__
     echo ".flake8 was created"
 }
 
+py-devpackages(){
+    pipenv install --dev jedi flake8 ipython yapf
+    # pipenv install --dev --pre black
+}

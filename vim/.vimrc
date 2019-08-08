@@ -1,3 +1,13 @@
+"------------------------------------------------------------------------------
+" Enable only one of the below variables
+
+" variable to enable/disable coc.nvim plugins, settings and shorcuts easily
+let g:vimrc_use_coc_nvim = 1
+" variable to enable/disable YouCompleteMe plugins, settings and shortcuts easily
+let g:vimrc_use_ycm = 0
+"------------------------------------------------------------------------------
+
+
 filetype off                 
 
 if has("nvim")
@@ -5,6 +15,7 @@ if has("nvim")
 else
   call plug#begin('~/.vim/plugged')
 endif
+
 
 " Plugins
 "------------------------------------------------------------------------------
@@ -35,18 +46,16 @@ Plug 'mattn/emmet-vim'                          " for html
 Plug 'tacahiroy/ctrlp-funky'                    " ctrlp for functions
 Plug 'majutsushi/tagbar'                        " show tags
 Plug 'Yggdroot/indentLine'                      " show indentation
+" Plug 'plytophogy/vim-virtualenv'
 
 "" Git
-Plug 'airblade/vim-gitgutter'                   " shows git diff in the sign column
+" Plug 'airblade/vim-gitgutter'                   " shows git diff in the sign column
 
 "" Snippets
 Plug 'SirVer/ultisnips'                         
 Plug 'honza/vim-snippets'                       
 
-"" Lint
-" Plug 'w0rp/ale'                                 " asynchronous lint engine
-"
-"
+
 " collection of language packs
 " Plug 'sheerun/vim-polyglot'
 "
@@ -62,22 +71,28 @@ Plug 'myhere/vim-nodejs-complete', {'for': 'javscript'}
 "" VueJS
 Plug 'posva/vim-vue'
 
+if g:vimrc_use_ycm
+  "" Python
+  if has('python') || has('python3')
+    Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all'  }
+  endif
+endif
 
-
-"" Python
-" Plug 'vim-python/python-syntax', {'for': 'python'}
-" if has('python') || has('python3')
-"   if executable('black')
-"     Plug 'psf/black', {'for': 'python'}
-"   elseif executable('yapf')
-"     Plug 'mindriot101/vim-yapf', {'for': 'python'}
-"   endif
-"   Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all'  }
-" endif
-" Plug 'python-mode/python-mode', { 'branch': 'develop' }
-
-"" Completion 
-Plug 'neoclide/coc.nvim', {'do': { -> coc#util#install() }}
+if g:vimrc_use_coc_nvim
+  "" Intellisense engine for Vim8/Neovim
+  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+else
+  "" Asynchronous lint engine
+  Plug 'w0rp/ale'
+  "" Python
+  Plug 'vim-python/python-syntax', {'for': 'python'}
+  Plug 'python-mode/python-mode', { 'branch': 'develop' }
+  if executable('black')
+    Plug 'psf/black', {'for': 'python'}
+  elseif executable('yapf')
+    Plug 'mindriot101/vim-yapf', {'for': 'python'}
+  endif
+endif
 
 " Add plugins to &runtimepath
 call plug#end()
@@ -243,8 +258,11 @@ endfunction
 "------------------------------------------------------------------------------
 " json format
 command! JSONFormat %!python -m json.tool
-" coc.nvim
-command! -nargs=0 Format :call CocAction('format')
+
+if g:vimrc_use_coc_nvim
+  " coc.nvim
+  command! -nargs=0 Format :call CocAction('format')
+endif
 
 "------------------------------------------------------------------------------
 
@@ -254,7 +272,7 @@ command! -nargs=0 Format :call CocAction('format')
 let mapleader = ","
 
 " Put : command on ; for easer access
-nnoremap ; :
+" nnoremap ; :
 
 "Reload .vimrc
 noremap <silent> <leader>rr :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
@@ -277,6 +295,8 @@ if executable("clip.exe")
     noremap <C-x> :call system('clip.exe', SelectedText())<CR>gvx
 " Linux
 else
+    """ copy line to clipboard
+    map <C-c> <ESC>"+yy
     """ copy in visual mode
     vmap <C-c> "+yi
     """ cut in visual mode
@@ -285,8 +305,6 @@ else
     vmap <C-v> c<ESC>"+p
     """ paste in insert mode
     imap <C-v> <ESC>"+pa
-    """ copy line to clipboard
-    map <Leader>y <ESC>"+yy
 endif
 "}}}
 
@@ -328,34 +346,46 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
 
 
 "coc.nvim {{{
-nnoremap <silent> cc :CocConfig<CR>
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+if g:vimrc_use_coc_nvim
+  nnoremap <silent> cc :CocConfig<CR>
 
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-autocmd CursorHold * silent call CocActionAsync('highlight')
+  " Use `:Format` to format current buffer
+  noremap <silent> <leader>= :call CocAction('format')<CR>
 
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
+  nnoremap <silent> K :call <SID>show_documentation()<CR>
 
-" Use `:Format` to format current buffer
-noremap <silent> <leader>= :call CocAction('format')<CR>
+  " Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
+  " xmap <leader>a  <Plug>(coc-codeaction-selected)
+  " nmap <leader>a  <Plug>(coc-codeaction-selected)
 
-" Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
-" xmap <leader>a  <Plug>(coc-codeaction-selected)
-" nmap <leader>a  <Plug>(coc-codeaction-selected)
+  " Use tab for trigger completion with characters ahead and navigate.
+  " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+  inoremap <silent><expr> <TAB>
+        \ pumvisible() ? "\<C-n>" :
+        \ <SID>check_back_space() ? "\<TAB>" :
+        \ coc#refresh()
+  inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
-" Remap for format selected region
-" xmap <leader>f  <Plug>(coc-format)
-" nmap <leader>f  <Plug>(coc-format)
-" inoremap <silent><expr> <c-space> coc#refresh()
+  nmap <silent> gd <Plug>(coc-definition)
+  nmap <silent> gy <Plug>(coc-type-definition)
+  nmap <silent> gi <Plug>(coc-implementation)
+  nmap <silent> gr <Plug>(coc-references)
+
+  "coc-snippets {{{
+  " inoremap <silent><expr> <TAB>
+  " \ pumvisible() ? coc#_select_confirm() :
+  " \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+  " \ <SID>check_back_space() ? "\<TAB>" :
+  " \ coc#refresh()
+  "let g:coc_snippet_next = '<tab>'
+  "}}}
+
+  " coc-yank {{{
+  " nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
+  nnoremap <silent> <leader>p :CocList yank<cr>
+  "}}}
+  
+endif
 "}}}
 
 "------------------------------------------------------------------------------
@@ -401,7 +431,7 @@ noremap <silent> <leader>= :call CocAction('format')<CR>
 "}}}
 
 "ctrlp.vim {{{
-  let g:ctrlp_map = '<Leader>p'
+  let g:ctrlp_map = '<C-p>'
   let g:ctrlp_custom_ignore = {
         \ 'dir':  '\v[\/](node_modules)|(\.(swp|git|hg|svn))$',
         \ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg|pyc)$'
@@ -483,67 +513,70 @@ noremap <silent> <leader>= :call CocAction('format')<CR>
   " " let g:UltiSnipsSnippetDirectories = ['~/.vim/UltiSnips', 'UltiSnips']
 "}}}
 
-"ale {{{ 
-"   let g:ale_fix_on_save = 0
-"   let g:ale_lint_on_enter = 0
-"   let g:ale_lint_on_text_changed = 'never'
-"   let g:ale_fixers = {
-"         \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-"         \   'python': ['isort', 'black', 'yapf', 'autopep8']
-"         \ }
-"   nnoremap <Leader>al :ALELint<CR>
-"   nnoremap <Leader>af :ALEFix<CR>
-"   nnoremap <Leader>= :ALEFix<CR>
-"   " let g:ale_python_flake8_options = '--ignore=E129,E501,E302,E265,E241,E305,E402,W503'
-" "}}}
-
-"python-syntax {{{
+if !g:vimrc_use_coc_nvim 
+  "ale {{{ 
+  let g:ale_fix_on_save = 0
+  let g:ale_lint_on_enter = 0
+  let g:ale_lint_on_text_changed = 'never'
+  let g:ale_fixers = {
+        \   '*': ['remove_trailing_lines', 'trim_whitespace'],
+        \   'python': ['isort', 'black', 'yapf', 'autopep8']
+        \ }
+  nnoremap <Leader>al :ALELint<CR>
+  nnoremap <Leader>af :ALEFix<CR>
+  nnoremap <Leader>= :ALEFix<CR>
+  " " let g:ale_python_flake8_options = '--ignore=E129,E501,E302,E265,E241,E305,E402,W503'
+  "}}}
+  
+  ""python-syntax {{{
   let g:python_highlight_all = 1
-"}}}
+  "}}}
 
-"black {{{
   if has('python3') && executable('black')
+    "black settings here:
     let g:black_linelength = 80 
-  endif
-"}}}
-
-"yapf {{{
-  if has('python') && executable('yapf')
+  elseif has('python') && executable('yapf')
+    "yapf settings here:
     let g:yapf_style = "facebook"     
     nnoremap <C-Y> :call Yapf()<cr>
   endif
+endif
+
+
+"YouCompleteMe {{{
+if g:vimrc_use_ycm
+  " let g:ycm_auto_trigger = 0
+  let g:ycm_autoclose_preview_window_after_insertion = 1
+  let g:ycm_key_list_previous_completion  = ['<C-p>', '<Up>']
+  let g:ycm_key_list_select_completion    = ['<C-n>', '<Down>']
+  " let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
+
+  nnoremap <leader>jd :YcmCompleter GoTo<CR>
+  nnoremap <leader>jh :YcmCompleter GetDoc<CR>
+
+  " Point YCM to the Pipenv created virtualenv
+  function! PipenvVenv()
+    let l:pipenv_venv_path = system('pipenv --venv')
+    if shell_error == 0
+      let l:venv_path = substitute(pipenv_venv_path, '\n', '', '')
+      let g:ycm_python_binary_path = l:venv_path . '/bin/python'
+      " else
+      " let g:ycm_python_binary_path = 'python'
+    endif
+  endfunction
+  command! PipenvVenv call PipenvVenv()
+  " nnoremap <silent> <Leader>ve :PipenvVenv<CR>
+endif
 "}}}
-
-" "YouCompleteMe {{{
-"   " let g:ycm_auto_trigger = 0
-"   let g:ycm_autoclose_preview_window_after_insertion = 1
-"   let g:ycm_key_list_previous_completion  = ['<C-p>', '<Up>']
-"   let g:ycm_key_list_select_completion    = ['<C-n>', '<Down>']
-"   " let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
-
-"   nnoremap <leader>jd :YcmCompleter GoTo<CR>
-"   nnoremap <leader>jh :YcmCompleter GetDoc<CR>
-
-"   " Point YCM to the Pipenv created virtualenv
-"   function! PipenvVenv()
-"     let l:pipenv_venv_path = system('pipenv --venv')
-"     if shell_error == 0
-"       let l:venv_path = substitute(pipenv_venv_path, '\n', '', '')
-"       let g:ycm_python_binary_path = l:venv_path . '/bin/python'
-"       " else
-"       " let g:ycm_python_binary_path = 'python'
-"     endif
-"   endfunction
-"   command! PipenvVenv call PipenvVenv()
-"   " nnoremap <silent> <Leader>ve :PipenvVenv<CR>
-" "}}}
-
+  
 "coc.nvim {{{
-let g:coc_global_extensions = [
-      \ 'coc-eslint', 'coc-prettier',
-      \ 'coc-tsserver', 'coc-tslint', 'coc-tslint-plugin',
-      \ 'coc-css', 'coc-json', 'coc-yaml', 'coc-python'
-      \ ]
+if g:vimrc_use_coc_nvim
+  let g:coc_global_extensions = [
+        \ 'coc-eslint', 'coc-prettier',
+        \ 'coc-tsserver', 'coc-tslint', 'coc-tslint-plugin',
+        \ 'coc-css', 'coc-json', 'coc-yaml', 'coc-python'
+        \ ]
+endif
 "}}}
 
 "------------------------------------------------------------------------------
@@ -604,11 +637,16 @@ if !exists('g:gui_oni')
   set statusline+=\ %4*
   set statusline+=\ %=
   
-  " coc statusline
-  " set statusline+=\ %3*
-  " set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}
+  " coc.nvim {{{
+  " if g:vimrc_use_coc_nvim
+    " set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}\ \|
+    " set statusline+=\ %{get(b:,'coc_current_function','')}\ \|
+    " set statusline+=\ %{coc#status()}
+  " endif
+  "" }}}
+  " set statusline+=\ %{virtualenv#statusline()}\ \|
   
-  set statusline+=\ %4*
+  set statusline+=%4*
   "set statusline+=%#CursorColumn#
   set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \|
   set statusline+=\ %{&fileformat}

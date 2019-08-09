@@ -8,7 +8,7 @@ let g:vimrc_use_ycm = 0
 "------------------------------------------------------------------------------
 
 
-filetype off                 
+filetype off
 
 if has("nvim")
   call plug#begin('~/.local/share/nvim/plugged')
@@ -19,11 +19,11 @@ endif
 
 " Plugins
 "------------------------------------------------------------------------------
-" Libraries for vim plugins 
+" Libraries for vim plugins
 Plug 'tomtom/tlib_vim'
 Plug 'tpope/vim-repeat'
 
-" UI 
+" UI
 Plug 'flazz/vim-colorschemes'
 
 "Utilities
@@ -33,7 +33,7 @@ Plug 'kshenoy/vim-signature'                              " show marks
 Plug 'ctrlpvim/ctrlp.vim'                                 " ctrlp, rg / silver searcher
 Plug 'wesQ3/vim-windowswap'                               " swap windows easily
 Plug 'simeji/winresizer'                                  " resize windows
-Plug 't9md/vim-choosewin'                                 " switch between windows 
+Plug 't9md/vim-choosewin'                                 " switch between windows
 
 "" Edit
 Plug 'editorconfig/editorconfig-vim'
@@ -41,7 +41,7 @@ Plug 'scrooloose/nerdcommenter'                 " comment code
 Plug 'jiangmiao/auto-pairs'                     " for brackets, parens, quoutes
 Plug 'mattn/emmet-vim'                          " for html
 
-"" Dev utilities 
+"" Dev utilities
 " Plug 'maralla/completor.vim'                    " completion
 Plug 'tacahiroy/ctrlp-funky'                    " ctrlp for functions
 Plug 'majutsushi/tagbar'                        " show tags
@@ -52,8 +52,8 @@ Plug 'Yggdroot/indentLine'                      " show indentation
 " Plug 'airblade/vim-gitgutter'                   " shows git diff in the sign column
 
 "" Snippets
-Plug 'SirVer/ultisnips'                         
-Plug 'honza/vim-snippets'                       
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 
 
 " collection of language packs
@@ -62,7 +62,7 @@ Plug 'honza/vim-snippets'
 "" Toml
 Plug 'cespare/vim-toml', {'for': 'toml'}
 "" Ansible
-Plug 'pearofducks/ansible-vim' 
+Plug 'pearofducks/ansible-vim'
 "" HTML5
 Plug 'othree/html5.vim'
 "" JS
@@ -206,7 +206,7 @@ autocmd FileType c,cpp,perl,python,sh,yml autocmd BufWritePre <buffer> %s/\s\+$/
 autocmd FileType vue setlocal ts=2 sts=2 sw=2 expandtab
 " yaml
 autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
-" bats 
+" bats
 au BufRead,BufNewFile *.bats set filetype=sh
 "------------------------------------------------------------------------------
 
@@ -221,7 +221,7 @@ function! AppendModeline()
   call append(line("$"), l:modeline)
 endfunction
 
-" Zoom / Restore window 
+" Zoom / Restore window
 function! s:ZoomToggle() abort
     if exists('t:zoomed') && t:zoomed
         execute t:zoom_winrestcmd
@@ -278,8 +278,8 @@ let mapleader = ","
 noremap <silent> <leader>rr :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
 
 " delete buffers (close files) without closing the window
-" like vim-bbye 
-nnoremap <Leader>q :bp\|bd #<CR>    
+" like vim-bbye
+nnoremap <Leader>q :bp\|bd #<CR>
 
 " clipboard, copy & paste {{{
 " Windows
@@ -350,7 +350,10 @@ if g:vimrc_use_coc_nvim
   nnoremap <silent> cc :CocConfig<CR>
 
   " Use `:Format` to format current buffer
-  noremap <silent> <leader>= :call CocAction('format')<CR>
+  noremap <silent> <leader>== :call CocAction('format')<CR>
+  nmap <leader>= <Plug>(coc-fix-current)
+
+
 
   nnoremap <silent> K :call <SID>show_documentation()<CR>
 
@@ -366,6 +369,8 @@ if g:vimrc_use_coc_nvim
         \ coc#refresh()
   inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
+  " Use `[c` and `]c` to navigate diagnostics
+
   nmap <silent> gd <Plug>(coc-definition)
   nmap <silent> gy <Plug>(coc-type-definition)
   nmap <silent> gi <Plug>(coc-implementation)
@@ -379,12 +384,29 @@ if g:vimrc_use_coc_nvim
   " \ coc#refresh()
   "let g:coc_snippet_next = '<tab>'
   "}}}
+  "
+  " Show all diagnostics
+  nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
+  " Manage extensions
+  nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+  " Show commands
+  nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
+  " Find symbol of current document
+  nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+  " Search workspace symbols
+  nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
 
-  " coc-yank {{{
-  " nnoremap <silent> <space>y  :<C-u>CocList -A --normal yank<cr>
-  nnoremap <silent> <leader>p :CocList yank<cr>
-  "}}}
-  
+  " Jump to next or prev diagnostic
+  nmap <silent> <space>j <Plug>(coc-diagnostic-next)
+  nmap <silent> <space>k <Plug>(coc-diagnostic-prev)
+
+  " Do default action for next or prev item.
+  " nnoremap <silent> <space>j  :<C-u>CocNext<CR>
+  " nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
+
+  " Show yank history
+  nnoremap <silent> <space>p  :<C-u>CocList yank<CR>
+
 endif
 "}}}
 
@@ -513,8 +535,8 @@ endif
   " " let g:UltiSnipsSnippetDirectories = ['~/.vim/UltiSnips', 'UltiSnips']
 "}}}
 
-if !g:vimrc_use_coc_nvim 
-  "ale {{{ 
+if !g:vimrc_use_coc_nvim
+  "ale {{{
   let g:ale_fix_on_save = 0
   let g:ale_lint_on_enter = 0
   let g:ale_lint_on_text_changed = 'never'
@@ -527,17 +549,17 @@ if !g:vimrc_use_coc_nvim
   nnoremap <Leader>= :ALEFix<CR>
   " " let g:ale_python_flake8_options = '--ignore=E129,E501,E302,E265,E241,E305,E402,W503'
   "}}}
-  
+
   ""python-syntax {{{
   let g:python_highlight_all = 1
   "}}}
 
   if has('python3') && executable('black')
     "black settings here:
-    let g:black_linelength = 80 
+    let g:black_linelength = 80
   elseif has('python') && executable('yapf')
     "yapf settings here:
-    let g:yapf_style = "facebook"     
+    let g:yapf_style = "facebook"
     nnoremap <C-Y> :call Yapf()<cr>
   endif
 endif
@@ -568,7 +590,7 @@ if g:vimrc_use_ycm
   " nnoremap <silent> <Leader>ve :PipenvVenv<CR>
 endif
 "}}}
-  
+
 "coc.nvim {{{
 if g:vimrc_use_coc_nvim
   let g:coc_global_extensions = [
@@ -636,7 +658,7 @@ if !exists('g:gui_oni')
   "set statusline+=%#LineNr#
   set statusline+=\ %4*
   set statusline+=\ %=
-  
+
   " coc.nvim {{{
   " if g:vimrc_use_coc_nvim
     " set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}\ \|
@@ -645,7 +667,7 @@ if !exists('g:gui_oni')
   " endif
   "" }}}
   " set statusline+=\ %{virtualenv#statusline()}\ \|
-  
+
   set statusline+=%4*
   "set statusline+=%#CursorColumn#
   set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \|

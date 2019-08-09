@@ -34,6 +34,7 @@ Plug 'ctrlpvim/ctrlp.vim'                                 " ctrlp, rg / silver s
 Plug 'wesQ3/vim-windowswap'                               " swap windows easily
 Plug 'simeji/winresizer'                                  " resize windows
 Plug 't9md/vim-choosewin'                                 " switch between windows
+Plug 'mbbill/undotree'                                    " undo history visualizer
 
 "" Edit
 Plug 'editorconfig/editorconfig-vim'
@@ -155,6 +156,9 @@ set nocompatible            " behave vi-compatible as much as possible
 set modeline                " recognize modelines at start or end of file
 set modelines=5             " number of lines checked for modelines
 set backspace=indent,eol,start
+
+set undodir=~/.vim/undodir
+set undofile
 
 " set completeopt-=preview  " disable docs functions
 set splitbelow              " preview windows at bottom
@@ -484,6 +488,10 @@ endif
   nmap -  <Plug>(choosewin)
   let g:choosewin_overlay_enable = 1
 "}}}
+
+" undotree {{{
+  nmap <silent> <leader>u :UndotreeToggle<CR>
+" }}}
 
 "nerdcommenter {{{
   " Add spaces after comment delimiters by default

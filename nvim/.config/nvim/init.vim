@@ -6,6 +6,22 @@ let maplocalleader = "\<space>"
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Plugin management with vim-plug
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Auto-install vim-plug
+function! VimPlugInstall()
+  if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
+    silent !mkdir ~/.config/nvim/ > /dev/null 2>&1
+    silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    " autocmd VimEnter * PlugInstall
+  endif
+endfunction
+
+" Custom command to install vim-plug => :VimPlugInstall
+command! VimPlugInstall :call VimPlugInstall()<bar>PlugInstall<CR>
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Global flags 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " enable only one of the below variables
@@ -13,19 +29,17 @@ let maplocalleader = "\<space>"
 let g:nvim_use_lsp = 1
 let g:nvim_use_ycm = 0
 
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Plugins
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Required to install plugins
 filetype off
 
-if has("nvim")
-  call plug#begin('~/.local/share/nvim/plugged')
-else
-  call plug#begin('~/.vim/plugged')
-endif
+" Load Vim-Plug
+call plug#begin('~/.local/share/nvim/plugged')
 
-" Libraries for vim plugins
+" Libraries for some vim plugins
 ".......................................
 Plug 'tomtom/tlib_vim'
 Plug 'tpope/vim-repeat'
@@ -123,29 +137,30 @@ Plug 'myhere/vim-nodejs-complete', {'for': 'javscript'}
 "" vuejs
 Plug 'posva/vim-vue'
 
-
 if g:nvim_use_ycm && ( has('python') || has('python3') )
-  " Python
+  " python
   Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all'  }
 endif
 
-if g:vim_use_lsp
-  " LSP - Intellisense engine for Vim8/Neovim
+if g:nvim_use_lsp
+  " LSP - intellisense engine for vim8/neovim
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
 else
-  "" Asynchronous lint engine
+  " asynchronous lint engine
   Plug 'w0rp/ale'
-  "" Python
+  "" python
   Plug 'vim-python/python-syntax', {'for': 'python'}
   Plug 'python-mode/python-mode', { 'branch': 'develop' }
   if executable('black')
+    " python formatter
     Plug 'psf/black', {'for': 'python'}
   elseif executable('yapf')
+    " python formatter
     Plug 'mindriot101/vim-yapf', {'for': 'python'}
   endif
 endif
 
-" Add plugins to &runtimepath
+" add plugins to &runtimepath
 call plug#end()
 filetype plugin indent on
 
@@ -244,10 +259,10 @@ if has("termguicolors")
 endif
 
 set t_ut=
-set t_Co=256
+set t_co=256
 
 try
-    colorscheme Monokai
+    colorscheme deep-space
     " highlight linenr
           " \ term=bold cterm=none ctermfg=darkgrey ctermbg=none
           " \ gui=none guifg=darkgrey guibg=none
@@ -255,24 +270,14 @@ catch
     colorscheme elflord
 endtry
 
-" if !has("gui_running") && !has('nvim')
-    " set term=xterm
-    " set t_Co=256
-    " let &t_AB="\e[48;5;%dm"
-    " let &t_AF="\e[38;5;%dm"
-    " inoremap <Char-0x07F> <BS>
-    " nnoremap <Char-0x07F> <BS>
-" endif
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => FileType-specific configurations
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 augroup vimrc
   autocmd!
 
-  " Custom task tags
+  " custom task tags
   if v:version > 701
     autocmd syntax * call matchadd('Todo', 
           \ '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
@@ -287,24 +292,27 @@ augroup vimrc
         " \ autocmd bufwritepre <buffer> %s/\s\+$//e
 
   " http://vim.wikia.com/wiki/Highlight_unwanted_spaces
-  autocmd BufNewFile,BufRead,InsertLeave * silent! match ExtraWhitespace /\s\+$/
-  autocmd InsertEnter * silent! match ExtraWhitespace /\s\+\%#\@<!$/
+  " autocmd BufNewFile,BufRead,InsertLeave * silent! match ExtraWhitespace /\s\+$/
+  " autocmd InsertEnter * silent! match ExtraWhitespace /\s\+\%#\@<!$/
 
   " warn for lines that exceed 80 column line
   autocmd BufWinEnter * let w:m1=matchadd('search', '\%<82v.\%>81v', -1)
   autocmd BufWinEnter * let w:m2=matchadd('errormsg', '\%>81v.\+', -1)
 
-  " Unset paste on InsertLeave 
+  " unset paste mode on InsertLeave
   autocmd InsertLeave * silent! set nopaste
 
+  " Disable automatic comment insertion after a comment line
+  autocmd FileType * set formatoptions-=r formatoptions-=c formatoptions-=o
+
   " hide cursor line in inactive windows
-  augroup cursorline
-    autocmd!
-    autocmd VimEnter * setlocal cursorline
-    autocmd WinEnter * setlocal cursorline
-    autocmd BufWinEnter * setlocal cursorline
-    autocmd winleave * setlocal nocursorline
-  augroup end
+  " augroup cursorline
+    " autocmd!
+    " autocmd VimEnter * setlocal cursorline
+    " autocmd WinEnter * setlocal cursorline
+    " autocmd BufWinEnter * setlocal cursorline
+    " autocmd winleave * setlocal nocursorline
+  " augroup end
 
   " automatic rename of tmux window
   if exists('$TMUX') && !exists('$NORENAME')
@@ -326,7 +334,7 @@ augroup end
 
 augroup bats
   autocmd!
-  autocmd BufRead,BufNewFile *.bats set filetype=sh
+  autocmd bufread,bufnewfile *.bats set filetype=sh
 augroup end
 
 
@@ -334,8 +342,8 @@ augroup end
 " => Functions
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" Append modeline after last line in buffer
-function! ModelineAppend()
+" append modeline after last line in buffer
+function! ModeLineAppend()
   let l:modeline = printf(" vim: ts=%d sw=%d tw=%d %set :",
         \ &tabstop, &shiftwidth, &textwidth, &expandtab ? '' : 'no')
   let l:modeline = substitute(&commentstring, "%s", l:modeline, "")
@@ -374,6 +382,7 @@ endfunction
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Commands and Mappings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" go to previous window
 nnoremap <silent> <leader><leader> <ESC><C-W><C-W>
 
 " modeline command {{{
@@ -421,17 +430,20 @@ nnoremap <leader>cd :<C-U>BufferGoToPath<CR>
 nmap <leader>b :<C-U>BufferSplitLine<CR>
 "}}}
 
-" json format
-command! JSONFormat %!python -m json.tool
+" " format json
+command! JSONformat %!python -m json.tool
 
-" Put : command on ; for easer access
+" " put : command on ; for easer access
 " nnoremap ; :
 
-" qq to record, Q to replay
-nnoremap Q @q
+" " redo
+" nnoremap <C-R> r
+
+" " qq to record macro, q to replay
+nnoremap q @q
 
 " clipboard, copy & paste {{{
-" Windows
+" windows
 if executable("clip.exe")
     func! SelectedText()
         normal gv"xy
@@ -439,10 +451,10 @@ if executable("clip.exe")
         return result
     endfunc
     """ copy visual selection to clipboard
-    vnoremap <C-c> :call system('clip.exe', SelectedText())<CR>
+    vnoremap <c-c> :call system('clip.exe', SelectedText())<CR>
     """ cut
-    noremap <C-x> :call system('clip.exe', SelectedText())<CR>gvx
-" Linux
+    noremap <c-x> :call system('clip.exe', SelectedText())<CR>gvx
+" linux
 else
     """ copy line to clipboard
     map <C-c> <ESC>"+yy
@@ -457,20 +469,20 @@ else
 endif
 "}}}
 
-" Toggle paste mode
-nmap <leader>pp :set invpaste paste?<CR>
+" toggle paste mode
+nnoremap <leader>pp :set invpaste paste?<CR>
 
-" Toggle column numbers
-map  <Leader>n :set invnumber<CR>
+" toggle column numbers
+nnoremap  <leader>n :set invnumber<CR>
 
 " hidde matches
 command! HideMatches :nohls
 map <leader><CR> :<C-U>HideMatches<CR>
 
 " select last paste
-nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
+nnoremap <expr> lp '`[' . strpart(getregtype(), 0, 1) . '`]'
 " find current word
-nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
+nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -787,18 +799,15 @@ if g:nvim_use_lsp
 endif
 "}}}
 
-
 "------------------------------------------------------------------------------
-" Colors & Statusline
+" colors & statusline
 "------------------------------------------------------------------------------
 " highlight search
-hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
+hi search cterm=none ctermfg=white ctermbg=darkyellow
 " vertical split color
-hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
+hi vertsplit guibg=white guifg=white ctermbg=white ctermfg=white
 
- " XXX: lightline supports truecolors
-
- " STATUSLINE {{{{
+ " statusline {{{{
  if !exists('g:gui_oni')
 
    function! GitBranch()
@@ -806,17 +815,15 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
        return fugitive#head()
      endif
      return ''
-     " XXX: too slow
-     " return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
    endfunction
 
 
-   function! StatuslineGit()
+   function! StatusLineGit()
      let l:branchname = GitBranch()
      return strlen(l:branchname) > 0?' '.l:branchname.' ':''
    endfunction
 
-   function! StatuslineMode()
+   function! StatusLineMode()
      let l:mode_map = {
            \ "n": 'NORMAL',
            \ "i": 'INSERT',
@@ -832,6 +839,7 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
            \ }
      return get(l:mode_map, mode(), '')
    endfunction
+
 
    hi StMode 
          \ term=bold cterm=none ctermbg=7 ctermfg=255 

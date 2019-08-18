@@ -23,10 +23,8 @@ export WORKON_HOME=$HOME/.venvs
 export NVM_DIR=~/.nvm
 
 # FZF {{{
-# if which "fzf" >/dev/null 2>&1; then
 # export FZF_DEFAULT_COMMAND='ag -g ""'
-export FZF_DEFAULT_COMMAND='rg --files --hidden'
-# fi
+export FZF_DEFAULT_COMMAND='rg --files --ignore-vcs'
 # }}}
 
 export PYTHONDONTWRITEBYTECODE=1

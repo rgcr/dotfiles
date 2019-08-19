@@ -644,6 +644,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
 " " }}}
 
 "ultisnips | vim-snippets {{{
+  set rtp+=$HOME/.snippets/
   let g:UltiSnipsExpandTrigger="<TAB>"
   let g:UltiSnipsJumpForwardTrigger="<c-j>"
   let g:UltiSnipsJumpBackwardTrigger="<c-k>"

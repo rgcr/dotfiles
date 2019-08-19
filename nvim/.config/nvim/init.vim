@@ -120,7 +120,7 @@ Plug 'honza/vim-snippets'
 
 "" git
 Plug 'tpope/vim-fugitive'
-Plug 'mhinz/vim-signify'
+Plug 'mhinz/vim-signify', { 'on': 'SignifyToggle'  }
 
 " html
 Plug 'mattn/emmet-vim'
@@ -296,8 +296,8 @@ augroup vimrc
   " autocmd InsertEnter * silent! match ExtraWhitespace /\s\+\%#\@<!$/
 
   " warn for lines that exceed 80 column line
-  autocmd BufWinEnter * let w:m1=matchadd('search', '\%<82v.\%>81v', -1)
-  autocmd BufWinEnter * let w:m2=matchadd('errormsg', '\%>81v.\+', -1)
+  " autocmd BufWinEnter * let w:m1=matchadd('search', '\%<82v.\%>81v', -1)
+  " autocmd BufWinEnter * let w:m2=matchadd('errormsg', '\%>81v.\+', -1)
 
   " unset paste mode on InsertLeave
   autocmd InsertLeave * silent! set nopaste
@@ -315,11 +315,11 @@ augroup vimrc
   " augroup end
 
   " automatic rename of tmux window
-  if exists('$TMUX') && !exists('$NORENAME')
-    autocmd BufEnter * if empty(&buftype)
-          \ | call system('tmux rename-window '.expand('%:t:s')) | endif
-    autocmd VimLeave * call system('tmux set-window automatic-rename on')
-  endif
+  " if exists('$TMUX') && !exists('$NORENAME')
+    " autocmd BufEnter * if empty(&buftype)
+          " \ | call system('tmux rename-window '.expand('%:t:s')) | endif
+    " autocmd VimLeave * call system('tmux set-window automatic-rename on')
+  " endif
 augroup end
 
 augroup vuejs
@@ -656,12 +656,18 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
 " " }}}
 
 "ultisnips | vim-snippets {{{
+  set rtp+=$HOME/.snippets/
   let g:UltiSnipsExpandTrigger="<TAB>"
   let g:UltiSnipsJumpForwardTrigger="<c-j>"
   let g:UltiSnipsJumpBackwardTrigger="<c-k>"
   let g:UltiSnipsListSnippets = "<c-l>"
   let g:ultisnips_python_style = "google"
-  " " let g:UltiSnipssnippetdirectories = ['~/.vim/ultisnips', 'ultisnips']
+  " let g:UltiSnipssnippetdirectories = ['~/.vim/ultisnips', 'ultisnips']
+"}}}
+
+"vim-signify {{{
+  let g:signify_disable_by_default = 0
+  nnoremap <leader>g :<C-U>SignifyToggle<CR>
 "}}}
 
 "completor.vim {{{

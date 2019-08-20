@@ -377,8 +377,9 @@
       ;; doom-neotree-file-icons t)
       )
   (load-theme 'doom-Iosvkem t)
-  :config
-  (doom-themes-neotree-config))
+  ;; :config
+  ;; (doom-themes-neotree-config)
+  )
 
 ;; (use-package monokai-theme
 ;;   :defer t
@@ -601,7 +602,7 @@
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme all-the-icons-dired add-node-modules-path)))
+    (dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
  '(weechat-color-list

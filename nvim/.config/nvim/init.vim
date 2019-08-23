@@ -49,6 +49,7 @@ Plug 'tpope/vim-repeat'
 " UI
 ".......................................
 Plug 'flazz/vim-colorschemes'
+Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'guns/xterm-color-table.vim'
 ".......................................
 
@@ -137,6 +138,9 @@ Plug 'myhere/vim-nodejs-complete', {'for': 'javscript'}
 "" vuejs
 Plug 'posva/vim-vue'
 
+"" python
+Plug 'vim-python/python-syntax', {'for': 'python'}
+
 if g:nvim_use_ycm && ( has('python') || has('python3') )
   " python
   Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all'  }
@@ -148,8 +152,6 @@ if g:nvim_use_lsp
 else
   " asynchronous lint engine
   Plug 'w0rp/ale'
-  "" python
-  Plug 'vim-python/python-syntax', {'for': 'python'}
   Plug 'python-mode/python-mode', { 'branch': 'develop' }
   if executable('black')
     " python formatter
@@ -670,6 +672,10 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
   nnoremap <leader>g :<C-U>SignifyToggle<CR>
 "}}}
 
+"python-syntax {{{
+  let g:python_highlight_all = 1
+"}}}
+
 "completor.vim {{{
   " tab to trigger completion
   " let g:completor_auto_trigger = 0
@@ -692,10 +698,6 @@ if !g:nvim_use_lsp
   nnoremap <leader>= :ALEFix<CR>
   " let g:ale_python_flake8_options =
         " \ '--ignore=e129,e501,e302,e265,e241,e305,e402,w503'
-  "}}}
-
-  ""python-syntax {{{
-  let g:python_highlight_all = 1
   "}}}
 
   if has('python3') && executable('black')

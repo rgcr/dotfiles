@@ -1,3 +1,4 @@
+--exclude=.vscode
 --exclude=.git
 --exclude=.svn
 --exclude=.hg
@@ -25,3 +26,9 @@
 --exclude=tags
 --exclude=cscope.\*
 --exclude=\*.tar.\*
+--exclude=webpack\*
+--exclude=package.json
+--exclude=package-lock.json
+--exclude=composer.json
+--exclude=composer.lock
+--exclude=artisan

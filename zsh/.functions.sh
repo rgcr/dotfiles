@@ -2,28 +2,28 @@
 #             Functions
 #############################################
 
-zsh_setprompt() {
-	autoload -U colors zsh/terminfo
-	colors
-
-	autoload -Uz vcs_info
-	zstyle ':vcs_info:*' enable git hg
-	zstyle ':vcs_info:*' check-for-changes true
-	zstyle ':vcs_info:git*' formats "%{${fg[cyan]}%}[%{${fg[green]}%}%s%{${fg[cyan]}%}][%{${fg[blue]}%}%r/%S%%{${fg[cyan]}%}][%{${fg[blue]}%}%b%{${fg[yellow]}%}%m%u%c%{${fg[cyan]}%}]%{$reset_color%}"
-
-	setopt prompt_subst
-
-	if [[ -n "$SSH_CLIENT"  ||  -n "$SSH2_CLIENT" ]]; then
-		p_host='%F{yellow}%M%f'
-	else
-		p_host='%F{cyan}%M%f'
-	fi
-
-	PS1=${(j::Q)${(Z:Cn:):-$' %F{cyan}[%f %(!.%F{red}%n%f.%F{cyan}%n%f) %F{cyan}@%f ${p_host} %F{cyan}][%f %F{blue}%~%f %F{cyan}]%f %(!.%F{cyan}%#%f.%F{cyan}%#%f) " " '}}
-
-	PS2=$'%_>'
-	RPROMPT=$'${vcs_info_msg_0_}'
-}
+# zsh_setprompt() {
+#     autoload -U colors zsh/terminfo
+#     colors
+#
+#     autoload -Uz vcs_info
+#     zstyle ':vcs_info:*' enable git hg
+#     zstyle ':vcs_info:*' check-for-changes true
+#     zstyle ':vcs_info:git*' formats "%{${fg[cyan]}%}[%{${fg[green]}%}%s%{${fg[cyan]}%}][%{${fg[blue]}%}%r/%S%%{${fg[cyan]}%}][%{${fg[blue]}%}%b%{${fg[yellow]}%}%m%u%c%{${fg[cyan]}%}]%{$reset_color%}"
+#
+#     setopt prompt_subst
+#
+#     if [[ -n "$SSH_CLIENT"  ||  -n "$SSH2_CLIENT" ]]; then
+#         p_host='%F{yellow}%M%f'
+#     else
+#         p_host='%F{cyan}%M%f'
+#     fi
+#
+#     PS1=${(j::Q)${(Z:Cn:):-$' %F{cyan}[%f %(!.%F{red}%n%f.%F{cyan}%n%f) %F{cyan}@%f ${p_host} %F{cyan}][%f %F{blue}%~%f %F{cyan}]%f %(!.%F{cyan}%#%f.%F{cyan}%#%f) " " '}}
+#
+#     PS2=$'%_>'
+#     RPROMPT=$'${vcs_info_msg_0_}'
+# }
 
 antibody_init(){
     _bundles=${1:-${HOME}/.zsh/bundles.txt}
@@ -70,7 +70,10 @@ t() {
   if [ -z "$1" ]; then
       tmux list-sessions
   else
-      tmux has -t $1 && tmux attach -t $1 || tmux new -s $1
+      local _session="${1}"; shift
+      # tmux has -t $1 && tmux attach -t $1 2>/dev/null || echo "Creating new session..." && tmux new -s $1
+      tmux attach -t "${_session}" "${@}" 2>/dev/null || \
+          echo "Starting new session..." && tmux new -s "${_session}"
   fi
 }
 
@@ -85,7 +88,7 @@ setproxy() {
     p=${1}; np=${2:-localhost}
     no_proxy=$np; NO_PROXY=$np;
     http_proxy=$p; HTTP_PROXY=$p; https_proxy=$p;
-        HTTPS_PROXY=$p; ftp_proxy=$p; FTP_PROXY=$p;
+    HTTPS_PROXY=$p; ftp_proxy=$p; FTP_PROXY=$p;
     export http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ftp_proxy FTP_PROXY no_proxy NO_PROXY;
 }
 
@@ -199,6 +202,6 @@ __EOF__
 }
 
 py-devpackages(){
-    pipenv install --dev jedi flake8 ipython yapf
-    # pipenv install --dev --pre black
+    pipenv install --dev jedi flake8 ipython # yapf
+    pipenv install --dev --pre black
 }

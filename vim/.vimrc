@@ -10,8 +10,8 @@ let maplocalleader = "\<space>"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " enable only one of the below variables
 " to use LSP (coc.nvim) or YCM
-let g:nvim_use_lsp = 1
-let g:nvim_use_ycm = 0
+let g:vim_use_lsp = 1
+let g:vim_use_ycm = 0
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Plugins
@@ -124,7 +124,7 @@ Plug 'myhere/vim-nodejs-complete', {'for': 'javscript'}
 Plug 'posva/vim-vue'
 
 
-if g:nvim_use_ycm && ( has('python') || has('python3') )
+if g:vim_use_ycm && ( has('python') || has('python3') )
   " Python
   Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all'  }
 endif
@@ -228,7 +228,7 @@ set wildignore+=*.dylib
 
 set tags+=.tags,./.git/tags
 
-set undodir=~/.config/nvim//undodir
+set undodir=~/.config/undodir.vim
 set undofile
 
 
@@ -589,8 +589,12 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   " by default timeoutlen is 1000 ms
   set timeoutlen=500
   " register dictionaries
-  call which_key#register(',', "g:which_key_map_leader")
-  call which_key#register('<space>', "g:which_key_map_localleader")
+  try
+    call which_key#register(',', "g:which_key_map_leader")
+    call which_key#register('<space>', "g:which_key_map_localleader")
+  catch
+    let g:Dummy = 1
+  endtry
   " maps
   nnoremap <silent> <leader> :WhichKey ','<CR>
   noremap <silent> <localleader> :WhichKey '<space>'<CR>
@@ -644,7 +648,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
 " " }}}
 
 "ultisnips | vim-snippets {{{
-  set rtp+=$HOME/.snippets/
+  set rtp+=$HOME/.config/.snippets.vim/
   let g:UltiSnipsExpandTrigger="<TAB>"
   let g:UltiSnipsJumpForwardTrigger="<c-j>"
   let g:UltiSnipsJumpBackwardTrigger="<c-k>"
@@ -661,7 +665,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   " let g:completor_complete_options = 'menuone,noselect,preview'
 " }}}
 
-if !g:nvim_use_lsp
+if !g:vim_use_lsp
   "ale {{{
   let g:ale_fix_on_save = 0
   let g:ale_lint_on_enter = 0
@@ -694,7 +698,7 @@ if !g:nvim_use_lsp
 endif
 
 "YouCompleteme (ycm) {{{
-if g:nvim_use_ycm
+if g:vim_use_ycm
   " let g:ycm_auto_trigger = 0
   let g:ycm_autoclose_preview_window_after_insertion = 1
   let g:ycm_key_list_previous_completion  = ['<C-p>', '<Up>']
@@ -720,7 +724,7 @@ endif
 "}}}
 
 "coc.nvim (LSP) {{{
-if g:nvim_use_lsp
+if g:vim_use_lsp
   " extensions to install when they aren't installed
   let g:coc_global_extensions = [
         \ 'coc-eslint', 'coc-prettier',
@@ -812,12 +816,12 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
    endfunction
 
 
-   function! StatuslineGit()
+   function! StatusLineGit()
      let l:branchname = GitBranch()
      return strlen(l:branchname) > 0?' '.l:branchname.' ':''
    endfunction
 
-   function! StatuslineMode()
+   function! StatusLineMode()
      let l:mode_map = {
            \ "n": 'NORMAL',
            \ "i": 'INSERT',
@@ -861,7 +865,7 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
    " vim mode
    " set statusline+=%#pmenusel#
    set statusline+=%#StMode#
-   set statusline+=\ %{StatusLineMode()}\ 
+   set statusline+=\ %{StatusLineMode()}\  " .
    " git
    set statusline+=%#StBranch#
    set statusline+=%.90{StatusLineGit()}
@@ -873,7 +877,7 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
    set statusline+=\ %=
 
    " " coc.nvim {{{
-   " if g:nvim_use_lsp
+   " if g:vim_use_lsp
    "   set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}
    "   set statusline+=\ %{get(b:,'coc_current_function','')}\ \|
    "   set statusline+=\ %{coc#status()}
@@ -881,13 +885,13 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
    " " }}}
 
    " file encoding and file format
-   set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \|
+   set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \| " .
    set statusline+=\ %{&fileformat}
    " FileType
    set statusline+=\ %y
    " set statusline+=%#position#
    " percentage
-   set statusline+=\ \[%p%%\]
+   set statusline+=\ \[%p%%\]  " .
    " set statusline+=%#pmenusel#
    " line and column
    set statusline+=\ %l:%c\  " .

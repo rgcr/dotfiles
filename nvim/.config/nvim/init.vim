@@ -245,7 +245,7 @@ set wildignore+=*.dylib
 
 set tags+=.tags,./.git/tags
 
-set undodir=~/.config/nvim//undodir
+set undodir=~/.config/undodir.nvim
 set undofile
 
 
@@ -658,7 +658,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
 " " }}}
 
 "ultisnips | vim-snippets {{{
-  set rtp+=$HOME/.snippets/
+  set rtp+=$HOME/.config/.snippets.vim/
   let g:UltiSnipsExpandTrigger="<TAB>"
   let g:UltiSnipsJumpForwardTrigger="<c-j>"
   let g:UltiSnipsJumpBackwardTrigger="<c-k>"

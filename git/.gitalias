@@ -1,0 +1,6 @@
+[alias]
+    rank = shortlog -sn --no-merges
+    lh = log --color --graph --pretty=format:'%C(red)%h%C(reset) %C(green)(%ai)%C(reset) %C(yellow)|%C(reset) %s %C(bold blue)[%an] %C(red)%d' --abbrev-commit
+    lol = log --color --graph --pretty=format:'%C(red)%h%C(reset) %C(green)(%ar)%C(reset) %C(yellow)|%C(reset) %s %C(bold blue)[%an] %C(red)%d' --abbrev-commit
+
+# vim: ft=gitconfig

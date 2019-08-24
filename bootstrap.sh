@@ -57,7 +57,7 @@ fi
 
 rm -fv ${HOME}/.zcompdump*
 
-_backup
+# _backup
 _deploy
 _caveat
 

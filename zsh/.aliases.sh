@@ -12,7 +12,7 @@ alias reload='source ~/.zshrc'
 # }
 
 alias ls='ls --color=always'
-alias :q='exit'
+# alias :q='exit'
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ll='ls -l'
@@ -20,10 +20,28 @@ alias lla='ls -la'
 alias week='date +%V'
 # }}}
 
+# systemctl {{{
+alias s='sudo systemctl'
+# }}}
+
+# vim / neovim {{{
+alias v='vim'
+alias n='nvim'
+alias vo='vim $(fzf)'
+# }}}
+
 # git {{{
 alias g='git'
 alias gst='git status'
 alias gb='git branch -v'
+alias gd='git diff'
+alias gp='git pull'
+alias gpom='git pull origin master'
+# }}}
+
+# docker {{{
+alias d='docker'
+alias dps='docker ps -a'
 # }}}
 
 # tmux {{{
@@ -51,9 +69,6 @@ alias stoe='trans -brief es:en'
 
 # vifm
 alias vifm='vifm . .'
-
-# vim-fzf
-alias vo='vim $(fzf)'
 
 # search alias quickly
 alias agrep='alias 2>&1| grep '

@@ -92,14 +92,15 @@ mdb(){
     DBUSER="${DBUSER:-root}"
     DBPASSWORD="${DBPASSWORD}"
     
+    local _login=""
     if [ -n "${DBPASSWORD}" ]; then
-        DBPASSWORD="-p${DBPASSWORD}"
+        _login="-p${DBPASSWORD}"
     fi
         
     if [ "${DBUSER}" = "root" ]; then
-        sudo mysql -h "${DBHOST}" -u "${DBUSER}" "${DBPASSWORD}" "${@}"
+        sudo mysql -h "${DBHOST}" -u "${DBUSER}" "${_login}" "${@}"
     else
-        mysql -h "${DBHOST}" -u "${DBUSER}" "${DBPASSWORD}" "${@}"
+        mysql -h "${DBHOST}" -u "${DBUSER}" "${_login}" "${@}"
     fi
 }
 
@@ -237,7 +238,7 @@ e(){
         zsh)   "${EDITOR}" ~/.zshrc                ;;
         tmux)  "${EDITOR}" ~/.tmux.conf            ;;
         slate) "${EDITOR}" ~/.slate                ;;
-        i3)    "${EDITOR}" ~/.i3/config            ;;
+        i3)    "${EDITOR}" ~/.config/i3/config            ;;
     esac
 }
 

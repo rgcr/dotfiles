@@ -65,8 +65,8 @@ cpu_usage {
 }
 
 tztime local {
-    # format = " %h-%d %H:%M ☰ "
-    format = " %A %e.%B.%Y   %H:%M:%S"
+    format = "%A %d/%h | %H:%M ☰ "
+    # format = " %A %e.%B.%Y    %H:%M:%S"
 	# termsyn font
 }
 

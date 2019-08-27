@@ -2,10 +2,10 @@
   "diagnostic.displayByAle": false,
   "coc.preferences.formatOnType": true,
   "coc.preferences.formatOnSaveFiletypes": [
-    "javascript",
+    // "json",
+    // "javascript",
     "typescript",
     "typescriptreact",
-    "json",
     "javascriptreact"
   ],
   "tslint.run": "onSave",

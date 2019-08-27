@@ -1,5 +1,5 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Leader 
+" => Leader
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let mapleader = ","
 let maplocalleader = "\<space>"
@@ -22,7 +22,7 @@ command! VimPlugInstall :call VimPlugInstall()<bar>PlugInstall<CR>
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Global flags 
+" => Global flags
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " enable only one of the below variables
 " to use LSP (coc.nvim) or YCM
@@ -54,8 +54,10 @@ Plug 'guns/xterm-color-table.vim'
 ".......................................
 
 
-" Utilities 
+" Utilities
 "......................................................
+Plug 'jceb/vim-orgmode'
+Plug 'tpope/vim-projectionist'
 
 "" File explorer
 Plug 'scrooloose/NERDTree', { 'on': 'NERDTreeToggle'  }
@@ -75,14 +77,14 @@ Plug 't9md/vim-choosewin'
 " Undo tree visualizer
 Plug 'mbbill/undotree'
 
-" A dynamic calendar in vim 
+" A dynamic calendar in vim
 Plug 'itchyny/calendar.vim'
 
 " fzf, like help or ivy in emacs
 Plug 'junegunn/fzf', { 'do': './install --no-bash' }
 Plug 'junegunn/fzf.vim'
 
-" Like General or Hydra for emacs 
+" Like General or Hydra for emacs
 "   it show a menu with the list of maps
 Plug 'liuchengxu/vim-which-key' " {{{
   " register dictionaries
@@ -98,18 +100,18 @@ Plug 'liuchengxu/vim-which-key' " {{{
 Plug 'editorconfig/editorconfig-vim'
 
 " Comment code faster
-Plug 'scrooloose/nerdcommenter'                 
+Plug 'scrooloose/nerdcommenter'
 
 " For brackets parens quoutes
 Plug 'jiangmiao/auto-pairs'
 
-"" Tagbar 
+"" Tagbar
 Plug 'majutsushi/tagbar'
 
 "" Show indent lines
 Plug 'yggdroot/indentLine'
 
-"" Auto generate tags 
+"" Auto generate tags
 " Plug 'ludovicchabant/vim-gutentags'
 
 "" snippets
@@ -125,6 +127,7 @@ Plug 'mhinz/vim-signify', { 'on': 'SignifyToggle'  }
 
 " html
 Plug 'mattn/emmet-vim'
+Plug 'alvan/vim-closetag'
 
 "" toml
 Plug 'cespare/vim-toml', {'for': 'toml'}
@@ -140,6 +143,11 @@ Plug 'posva/vim-vue'
 
 "" python
 Plug 'vim-python/python-syntax', {'for': 'python'}
+
+"" php
+Plug 'jwalton512/vim-blade', {'for': 'php'}
+Plug 'StanAngeloff/php.vim', { 'for': 'php' }
+" Plug 'noahfrederick/vim-laravel', {'for': 'php'}
 
 if g:nvim_use_ycm && ( has('python') || has('python3') )
   " python
@@ -265,10 +273,15 @@ set t_co=256
 
 try
     colorscheme deep-space
+    " fix for deep-space, I hate the original matchparen
+    hi! MatchParen cterm=NONE,bold gui=NONE,bold ctermfg=NONE guifg=NONE ctermbg=7 guibg=#eee8d5
+    " original
+    " MatchParen     xxx cterm=bold ctermbg=6 gui=bold guifg=#232936 guibg=#c47ebd
+
     " highlight linenr
           " \ term=bold cterm=none ctermfg=darkgrey ctermbg=none
           " \ gui=none guifg=darkgrey guibg=none
-catch 
+catch
     colorscheme elflord
 endtry
 
@@ -281,12 +294,12 @@ augroup vimrc
 
   " custom task tags
   if v:version > 701
-    autocmd syntax * call matchadd('Todo', 
+    autocmd syntax * call matchadd('Todo',
           \ '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
   endif
 
   " remember line position
-  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") 
+  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$")
         \ | exe "normal! g`\"" | endif
 
   " remove all trailing whitespaces
@@ -306,6 +319,7 @@ augroup vimrc
 
   " Disable automatic comment insertion after a comment line
   autocmd FileType * set formatoptions-=r formatoptions-=c formatoptions-=o
+
 
   " hide cursor line in inactive windows
   " augroup cursorline
@@ -339,6 +353,9 @@ augroup bats
   autocmd bufread,bufnewfile *.bats set filetype=sh
 augroup end
 
+augroup bladephp
+  autocmd BufNewFile,BufRead *.blade.php set ft=blade
+augroup end
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Functions
@@ -486,6 +503,11 @@ nnoremap <expr> lp '`[' . strpart(getregtype(), 0, 1) . '`]'
 " find current word
 nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
 
+" tags {{{
+  nnoremap tg <ESC><C-]>
+  nnoremap tb <ESC><C-t>
+  nnoremap ts :tselect<CR>
+" }}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Plugin settings
@@ -507,7 +529,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
   augroup NERDTree
     autocmd!
     " close vim if the only window is a NERDTree
-    autocmd BufEnter * if (winnr("$") == 1 && 
+    autocmd BufEnter * if (winnr("$") == 1 &&
           \ exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
   augroup end
 "}}}
@@ -549,7 +571,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
   " open undotree in the right side
   let g:undotree_WindowLayout=3
   " short indicators for time (5 seconds ago) -> (5s)
-  let g:undotree_ShortIndicators=1 
+  let g:undotree_ShortIndicators=1
   " undotree windows size
   let g:undotree_SplitWidt=50
   " autofocus undotree window
@@ -560,7 +582,10 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
   "" easier to remember
   command! Search :BLines<space>
   " like ctrl+p
-  nnoremap <C-P> :<C-U>Files<CR>
+  nnoremap <leader>p :<C-U>Files<CR>
+  " ctrl+p for tags
+  nnoremap <leader>t :Tags <C-R><C-W><CR>
+
   " search in all buffers
   nnoremap <C-F> :<C-U>Lines<CR>
   " search only in current buffer
@@ -619,7 +644,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
   let g:which_key_map_leader.8 = 'which_key_ignore'
   let g:which_key_map_leader.9 = 'which_key_ignore'
   let g:which_key_map_leader.0 = 'which_key_ignore'
-" }}} 
+" }}}
 
 "nerdcommenter {{{
   " add spaces after comment delimiters by default
@@ -635,9 +660,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
 "}}}
 
 "tagbar {{{
-  nnoremap <silent>tt :TagbarToggle<CR>
-  nnoremap tg <ESC><C-]>
-  nnoremap tb <ESC><C-t>
+  nnoremap <silent><leader>tt :TagbarToggle<CR>
   " autofocus on tagbar open
   let g:tagbar_autofocus = 1
 "}}}
@@ -652,7 +675,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
 "   let g:gutentags_modules = ['ctags']
 "   " config project root markers.
 "   let g:gutentags_project_root = ['.root']
-"   " generate datebases in my cache directory, 
+"   " generate datebases in my cache directory,
 "   " prevent gtags files polluting my project
 "   let g:gutentags_cache_dir = expand('~/.cache/tags')
 " " }}}
@@ -660,8 +683,8 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
 "ultisnips | vim-snippets {{{
   set rtp+=$HOME/.config/.snippets.vim/
   let g:UltiSnipsExpandTrigger="<TAB>"
-  let g:UltiSnipsJumpForwardTrigger="<c-j>"
-  let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+  let g:UltiSnipsJumpBackwardTrigger="<c-j>"
+  let g:UltiSnipsJumpForwardTrigger="<c-k>"
   let g:UltiSnipsListSnippets = "<c-l>"
   let g:ultisnips_python_style = "google"
   " let g:UltiSnipssnippetdirectories = ['~/.vim/ultisnips', 'ultisnips']
@@ -671,6 +694,10 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<CR>:copen<CR>
   let g:signify_disable_by_default = 0
   nnoremap <leader>g :<C-U>SignifyToggle<CR>
 "}}}
+
+"vim-closetag {{{
+  let g:closetag_filenames = "*.html,*.xhtml,*.phtml,*.blade.php"
+" }}}
 
 "python-syntax {{{
   let g:python_highlight_all = 1
@@ -703,7 +730,7 @@ if !g:nvim_use_lsp
   if has('python3') && executable('black')
     "black formatter {{{
       let g:black_linelength = 80
-    "}}} 
+    "}}}
   elseif has('python') && executable('yapf')
     "yapf formatter {{{
       let g:yapf_style = "facebook"
@@ -780,7 +807,7 @@ if g:nvim_use_lsp
   nnoremap <silent> <localleader>lc :<C-U>LspCommands<CR>
   " fix
   nnoremap <silent> <localleader>lf :<C-U>Format<CR>
-  " fix current 
+  " fix current
   nnoremap <silent> <localleader>lF <Plug>(coc-fix-current)
   " yank history
   nnoremap <silent> <space>p  :<C-U>LspYankHistory<CR>
@@ -801,7 +828,7 @@ if g:nvim_use_lsp
 
   nnoremap <silent> H :call <SID>show_documentation()<CR>
 
-  " " remap for do codeaction of selected region, 
+  " " remap for do codeaction of selected region,
   " " ex: `<leader>aap` for current paragraph
   " xmap <leader>a  <Plug>(coc-codeaction-selected)
 endif
@@ -849,23 +876,23 @@ hi vertsplit guibg=white guifg=white ctermbg=white ctermfg=white
    endfunction
 
 
-   hi StMode 
-         \ term=bold cterm=none ctermbg=7 ctermfg=255 
+   hi StMode
+         \ term=bold cterm=none ctermbg=7 ctermfg=255
          \ guibg=#808080 guifg=#eeeeee
-   hi StPasteMode   
-         \ term=bold cterm=none ctermbg=202 ctermfg=255 
+   hi StPasteMode
+         \ term=bold cterm=none ctermbg=202 ctermfg=255
          \ guibg=#ff5f00 guifg=#eeeeee
-   hi StBranch 
-         \ term=bold cterm=none ctermbg=107 ctermfg=255 
+   hi StBranch
+         \ term=bold cterm=none ctermbg=107 ctermfg=255
          \ guibg=#87af5f guifg=#eeeeee
-   hi StFilename  
-         \ term=bold cterm=none ctermbg=109 ctermfg=0 
+   hi StFilename
+         \ term=bold cterm=none ctermbg=109 ctermfg=0
          \ guibg=#87afaf guifg=#000000
-   hi StSeparator    
-         \ term=bold cterm=none ctermbg=236 ctermfg=255 
+   hi StSeparator
+         \ term=bold cterm=none ctermbg=236 ctermfg=255
          \ guibg=#303030 guifg=#eeeeee
-   hi stposition  
-         \ term=bold cterm=none ctermbg=253 ctermfg=0 
+   hi stposition
+         \ term=bold cterm=none ctermbg=253 ctermfg=0
          \ guibg=#dadada guifg=#000000
 
 
@@ -889,9 +916,9 @@ hi vertsplit guibg=white guifg=white ctermbg=white ctermfg=white
 
    " " coc.nvim {{{
    " if g:nvim_use_lsp
-   "   set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}
+     set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}
    "   set statusline+=\ %{get(b:,'coc_current_function','')}\ \|
-   "   set statusline+=\ %{coc#status()}
+   " set statusline+=\ %{coc#status()}
    " endif
    " " }}}
 

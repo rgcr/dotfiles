@@ -1,5 +1,5 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; => initialize package 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; => initialize package
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (package-initialize)
@@ -19,6 +19,10 @@
 (eval-when-compile
   (require 'use-package))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; => start as server
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (server-start)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => custom definitions
@@ -56,7 +60,11 @@
 (tooltip-mode    -1)
 (menu-bar-mode   -1)
 (show-paren-mode 1)
+(electric-pair-mode 1)
 (column-number-mode t)
+
+
+(global-linum-mode t)
 
 ;; ;; Somewhat better formatting when showing line numbers, but still...
 (setq linum-format "%4d \u2502 ")
@@ -74,8 +82,6 @@
 ;; (add-to-list 'default-frame-alist '(font . "mononoki-12"))
 ;; (add-to-list 'default-frame-alist '(height . 24))
 ;; (add-to-list 'default-frame-alist '(width . 80))
-;; ;; Enable line numbers globally
-(global-linum-mode t)
 
 ;; ;; Turn off autosave and backup files
 (setq backup-inhibited t)
@@ -97,12 +103,23 @@
 ;; ;; No wrap lines
 (set-default 'truncate-lines t)
 
-;; ;; Recent files
+;; ;; keep the list of recent files
 (setq recentf-max-saved-items 200)
 (setq recentf-max-menu-items 200)
 (recentf-mode 1)
 
-;; (load-theme 'wombat)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; => global hooks
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; => file type overrides (modes)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'auto-mode-alist '("\\.html$" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.restc$" . restclient-mode))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -167,12 +184,72 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; => packages 
+;; => packages
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setq use-package-always-ensure t)
 
-;; Utilities
+;; -------------------------
+;; >>>> UI
+;; -------------------------
+
+;; ;; Icons
+;; (use-package all-the-icons
+;;   :ensure t)
+
+;; (use-package all-the-icons-dired
+;;   :hook
+;;   (dired-mode . all-the-icons-dired-mode))
+
+;; Highlight the current line
+(use-package hl-line
+  :ensure t
+  :config
+  (global-hl-line-mode 1)
+  (set-face-background hl-line-face "color-235")
+  )
+
+(use-package hl-todo
+  :ensure t
+  :init
+  (setq hl-todo-highlight-punctuation ":")
+  )
+
+;; ;; Theme
+(use-package doom-themes
+  :ensure t
+  :after (spaceline)
+  :init
+  (setq
+      doom-themes-enable-bold t
+      doom-themes-enable-italic t
+      doom-one-brighter-comments t
+      ;; doom-neotree-file-icons t)
+      )
+  (load-theme 'doom-Iosvkem t)
+  ;; :config
+  ;; (doom-themes-neotree-config)
+  )
+
+(use-package spaceline
+  :ensure t
+  :init
+  (require 'spaceline-config)
+  (setq powerline-default-separator 'arrow)
+  ;; (set-face-background 'spaceline-highlight-face "#005fff")
+  (spaceline-emacs-theme)
+  (spaceline-toggle-minor-modes-on)
+  (spaceline-toggle-version-control-on)
+  (spaceline-toggle-buffer-size-off)
+  (spaceline-toggle-buffer-id-on)
+  (spaceline-toggle-evil-state-on)
+  (spaceline-toggle-selection-info-on)
+  (spaceline-toggle-which-function-on)
+  )
+
+;; -------------------------
+;; >>>> General utils
+;; -------------------------
 
 ;; Use double key combination
 (use-package use-package-chords
@@ -180,12 +257,27 @@
   :config
   (key-chord-mode 1))
 
-;; ;; Emacs package from source
+;; Make sure that delight is available as soon as any package triggers it.
+(use-package delight
+  :commands delight)
+
+
+;; org
+(use-package org
+  :mode ("\\.org\\'" . org-mode)
+  :ensure t)
+(use-package org-bullets
+  :ensure t
+  :commands (org-bullets-mode)
+  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
+;; Emacs package from source
 (use-package quelpa
   :ensure t)
 
 (use-package ivy
   :ensure t
+  :delight
   :init
   (setq ivy-use-virtual-buffers t)
   (setq enable-recursive-minibuffers t)
@@ -199,7 +291,7 @@
 	  (t . ivy--regex-plus)))
   ;; Skip errors
   (setq ivy-on-del-error-function nil)
-  ;; Delete symbol ^ 
+  ;; Delete symbol ^
   (setq ivy-initial-inputs-alist nil)
   ;; no regexp by default
   ;; (setq ivy-initial-inputs-alist nil)
@@ -224,29 +316,50 @@
       "rg -i -M 120 --no-heading --line-number --color never %s .")
 )
 
+(use-package hydra
+  :ensure t)
+
 (use-package ace-window
   :ensure t
+  :defer t
+  :init
+  (global-set-key [remap other-window] #'ace-window)
   :config
-  (setq aw-scope 'frame)
-  ;; (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
-  )
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
+        aw-scope 'frame
+        aw-background t))
+
+;; custom keybindings
+(use-package general
+  :ensure t)
 
 ;; Which Key
 (use-package which-key
   :ensure t
+  :delight
   :init
   (setq which-key-popup-type 'minibuffer)
   ;; (setq which-key-separator " ")
   (setq which-key-prefix-prefix "+")
+  (setq which-key-sort-uppercase-first nil)
+  (setq which-key-min-display-lines 6)
   :config
   (which-key-mode))
 
 (use-package projectile
   :ensure t
+  :delight "pj"
   :init
   (setq projectile-require-project-root nil)
+  (setq projectile-completion-system 'ivy)
   :config
-  (projectile-mode 1))
+  (projectile-mode t))
+
+(use-package counsel-projectile
+  :ensure t
+  :delight
+  :config
+  (counsel-projectile-mode))
 
 (use-package neotree
   :ensure t
@@ -254,32 +367,23 @@
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
   )
 
+;; Copy/paste
+;; (use-package simpleclip
+;;   :ensure t
+;;   :config
+;;   (simpleclip-mode))
 
-;; ------------------------------------
-;; VIM Mode, welcome to the dark side
+
+;; -------------------------
+;; >>>> Evil mode (vim)
+;; -------------------------
 
 (use-package evil
   :ensure t
   :init
-  ;; (setq evil-emacs-state-cursor '("red" box))
-  ;; (setq evil-normal-state-cursor '("green" box))
-  ;; (setq evil-visual-state-cursor '("orange" box))
-  ;; (setq evil-insert-state-cursor '("red" bar))
-  ;; (setq evil-replace-state-cursor '("red" bar))
-  ;; setq evil-operator-state-cursor '("red" hollow))
-  (evil-mode t)
-  :config
-  ;; Keybindings for neotree
-  ;; (evil-define-key 'insert evil-insert-state-map (kbd "TAB") 'tab-to-tab-stop)
-  (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-change-root)
-  (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-quick-look)
-  (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
-  (evil-define-key 'normal neotree-mode-map (kbd "g") 'neotree-refresh)
-  (evil-define-key 'normal neotree-mode-map (kbd "n") 'neotree-next-line)
-  (evil-define-key 'normal neotree-mode-map (kbd "p") 'neotree-previous-line)
-  (evil-define-key 'normal neotree-mode-map (kbd "A") 'neotree-stretch-toggle)
-  (evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle)
-  )
+  ;; fix for <tab> in terminal (-nw)
+  (setq evil-want-C-i-jump nil)
+  (evil-mode t))
 
 (use-package evil-leader
   :commands (evil-leader-mode)
@@ -288,25 +392,7 @@
   :init
   :config
   (progn
-    (evil-leader/set-leader ",")
-    (evil-leader/set-key
-      "b"  'ivy-switch-buffer            ;; Switch to buffer
-      "ci" 'rgcr/comment-dwim            ;; Comment/Uncomment
-      "e"  'find-file  
-      "i"  'highlight-indent-guides-mode  
-      "l"  'whitespace-mode              ;; Toggle invisible characters
-      "n"  'neotree-toggle               ;; Open file explorer (sidebar)
-      "p"  'counsel-yank-pop             ;; fzf - paste
-      "q"  'rgcr/kill-this-buffer        ;; Close current buffer
-      "Q" 'delete-other-windows          ;; Close all other windows
-      "R" 'rgcr/reload-init-file         ;; Reload emacs config
-      "S"  'delete-trailing-whitespace
-      "w"  'save-buffer
-      "x"  'rgcr/close-and-kill-this-pane ;; I hate M-x
-      "/"  'counsel-rg                    ;; fzf - ripgrep
-      ","  'other-window                  ;; Switch to other window
-      )
-  )
+    (evil-leader/set-leader ","))
   (global-evil-leader-mode)
 )
 
@@ -316,11 +402,6 @@
   (evil-goggles-mode)
   (evil-goggles-use-diff-faces))
 
-;; ;; Copy/paste
-(use-package simpleclip
-  :ensure t
-  :config
-  (simpleclip-mode))
 
 (use-package exec-path-from-shell
   :ensure t
@@ -332,97 +413,65 @@
   :config
   (add-hook 'js-mode-hook 'add-node-modules-path))
 
-;; Flycheck
+;; -------------------------
+;; >>>> Dev utils
+;; -------------------------
+
+(use-package diff-hl
+  :commands global-diff-hl-mode
+  :config (global-diff-hl-mode))
+
+(use-package company
+  :ensure t
+  :delight
+  :custom
+  (company-idle-delay 0.1)
+  (company-minimum-prefix-length 2)
+  (company-tooltip-align-annotations 't)
+  (global-company-mode t))
+
 (use-package flycheck
   :ensure t
+  :delight
   :init
   (setq flycheck-disabled-checkers '(emacs-lisp-checkdoc))
   :config
   (global-flycheck-mode))
 
-;; Vimrc
-(use-package vimrc-mode
+;; snippets
+(use-package yasnippet
   :ensure t
-  :init
-  (add-to-list 'auto-mode-alist '("\\.vim\\(rc\\)?\\'" . vimrc-mode)))
-
-;; ------------------------------------
-;; Appearances
-
-
-;; ;; Icons
-;; (use-package all-the-icons
-;;   :ensure t)
-
-;; (use-package all-the-icons-dired
-;;   :hook
-;;   (dired-mode . all-the-icons-dired-mode))
-
-;; Highlight the current line
-(use-package hl-line
+  :delight yas-minor-mode "ys"
+  :diminish yas-minor-mode)
+(use-package yasnippet-snippets
   :ensure t
+  :after yasnippet
   :config
-  (global-hl-line-mode 1)
-  (set-face-background hl-line-face "color-235")
-  )
-
-;; ;; Theme
-(use-package doom-themes
-  :after (spaceline)
-  :init
-  (setq
-      doom-themes-enable-bold t
-      doom-themes-enable-italic t
-      doom-one-brighter-comments t
-      ;; doom-neotree-file-icons t)
-      )
-  (load-theme 'doom-Iosvkem t)
-  ;; :config
-  ;; (doom-themes-neotree-config)
-  )
-
-;; (use-package monokai-theme
-;;   :defer t
-;;   :config
-;;   (setq monokai-line-number "#444444")
-;;   (setq monokai-background  "#444444")
-;;   )
-
-(use-package spaceline
+  (yas-global-mode t))
+(use-package ivy-yasnippet
   :ensure t
-  :init
-  (require 'spaceline-config)
-  (setq powerline-default-separator 'arrow)
-  ;; (set-face-background 'spaceline-highlight-face "#005fff")
-  (spaceline-emacs-theme)
-  (spaceline-toggle-minor-modes-off)
-  (spaceline-toggle-version-control-on)
-  (spaceline-toggle-buffer-size-off)
-  (spaceline-toggle-buffer-id-on)
-  (spaceline-toggle-evil-state-on)
-  (spaceline-toggle-selection-info-on)
-  (spaceline-toggle-which-function-on)
-  )
+  :after yasnippet)
+
 
 (use-package highlight-indent-guides
   :ensure t
   :config
-  (setq highlight-indent-guides-method 'character)
-  ;; :init
-  ;; (progn
-    ;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-    ;; )
-  )
+  (setq highlight-indent-guides-method 'character))
 
 (use-package rainbow-delimiters
   :ensure t
   :init
   (progn
-    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
-    )
-  )
+    (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)))
 
-;; ------------------------------------
+(use-package magit
+  :ensure t)
+
+
+(use-package smartparens
+  :ensure t
+  :hook
+  (after-init . smartparens-global-mode))
 
 (use-package dimmer
   :ensure t
@@ -431,66 +480,81 @@
   (setq dimmer-exclusion-regexp "^\*helm.*\\|^ \*Minibuf-.*\\|^ \*Echo.*")
   (dimmer-mode))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; => Langs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; ------------------------------------
-;; Git
 
-(use-package magit
-  :ensure t)
+;; python
+(use-package python-mode
+  :ensure t
+  :delight "π "
+  :commands python-mode
+  :mode ("\\.py\\'" . python-mode))
 
+(use-package lsp-python-ms
+  :ensure t
+  :defer 0.3
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-python-ms)
+                         (lsp))))
+
+;; (use-package pipenv
+;;   :ensure t
+;;   :hook (python-mode . pipenv-mode)
+;;   :init
+;;   (setq
+;;    pipenv-projectile-after-switch-function
+;;    #'pipenv-projectile-after-switch-extended))
+
+;; (use-package elpy
+;;   :ensure t
+;;   :init
+;;   (elpy-enable))
+
+
+;; php
+(use-package phpactor :ensure t)
+(use-package company-phpactor :ensure t)
+(use-package php-mode
+  :ensure t
+  :mode "\\.php\\'"
+  :hook ((php-mode . (lambda () (set (make-local-variable 'company-backends)
+       '(;; list of backends
+         company-phpactor
+         company-files
+         )))))
+  :init
+  (add-hook 'php-mode-hook
+          (lambda ()
+            (make-local-variable 'eldoc-documentation-function)
+            (setq eldoc-documentation-function
+                  'phpactor-hover))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => LSP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package lsp-mode
-  :config
-  (setq lsp-prefer-flymake nil) ;; Prefer using lsp-ui (flycheck) over flymake.
-  (add-hook 'python-mode-hook #'lsp)
+  :hook ((python-mode) . lsp)
+  :custom
+  (lsp-prefer-flymake nil)
+  ;; (setq-default lsp-pyls-configuration-sources ["flake8"]))
   )
 
-(use-package lsp-ui
-  :requires lsp-mode flycheck
+(use-package lsp-ui)
+(use-package company-lsp)
+
+(use-package dap-mode
+  :after lsp-mode
   :config
-  (setq lsp-ui-doc-enable t
-        lsp-ui-doc-use-childframe t
-        lsp-ui-doc-position 'top
-        lsp-ui-doc-include-signature t
-        lsp-ui-sideline-enable nil
-        lsp-ui-flycheck-enable t
-        lsp-ui-flycheck-list-position 'right
-        lsp-ui-flycheck-live-reporting t
-        lsp-ui-peek-enable t
-        lsp-ui-peek-list-width 60
-        lsp-ui-peek-peek-height 25)
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-  )
+  (dap-mode t)
+  (dap-ui-mode t))
 
-;; Show flake8 errors in lsp-ui
-(defun lsp-set-cfg ()
-  (let ((lsp-cfg `(:pyls (:configurationSources ("flake8")))))
-    (lsp--set-configuration lsp-cfg)))
 
-;; Activate that after lsp has started
-(add-hook 'lsp-after-initialize-hook 'lsp-set-cfg)
-
-(use-package company
-  :config
-  (setq company-idle-delay 0.3)
-
-  (global-company-mode 1)
-
-  (global-set-key (kbd "C-<tab>") 'company-complete))
-
-(use-package company-lsp
-  :requires company
-  :config
-  (push 'company-lsp company-backends)
-
-   ;; Disable client-side cache because the LSP server does a better job.
-  (setq company-transformers nil
-        company-lsp-async t
-        company-lsp-cache-candidates nil))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; => langs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 
@@ -498,67 +562,209 @@
 ;; => Custom keybinding
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; global maps
+(global-set-key (kbd "C-s") 'swiper-isearch)
 
-(use-package general
-  :ensure t
-  :config
-  (general-define-key
-   :states '(normal visual insert emacs)
-   :prefix "SPC"
-   :non-normal-prefix "C-SPC"
-   "-"   '(ace-window :which-key "switch window")
-   "/"   '(counsel-rg :which-key "ripgrep")
-   "SPC" '(execute-extended-command :which-key "M-x")
-   ;; Buffers
-   "b"   '(nil :which-key "buffer prefix")
-   "bb"  '(switch-to-buffer :which-key "switch buffer")
-   "bk"  '(rgcr/kill-this-buffer :which-key "kill buffer")
-   ;; Git
-   "g"   '(magit :which-key "magit")
-   ;; Neotree
-   "n"  '(neotree-toggle :which-key "neotree toggle")
-   ;; Ace Windows 
-   ;; "o"   '(ace-window :which-key "switch window")
-   ;; Search
-   "s"   '(nil :which-key "search prefix")
-   "ss"  '(swiper-isearch :which-key "swipper search")
-   ;; Window
-   "w"   '(nil :which-key "window prefix")
-   ;; "wl"  '(windmove-right :which-key "move right")
-   ;; "wh"  '(windmove-left :which-key "move left")
-   ;; "wk"  '(windmove-up :which-key "move up")
-   ;; "wj"  '(windmove-down :which-key "move bottom")
-   ;; "w|"  '(split-window-right :which-key "split right")
-   ;; "w-"  '(split-window-below :which-key "split bottom")
-   "wx"  '(delete-window :which-key "delete window")
-   )
-
-  (general-define-key
-   :states '(normal emacs)
-   :prefix "TAB"
-   "TAB"     '(ivy-switch-buffer :which-key "Switch buffer")
-   )
-
-  (general-define-key
-   :states '(normal visual insert emacs)
-   :prefix "C-c"
-   ;; Windows movemetn with C-c
-   "<up>"    '(windmove-up :which-key "move up")
-   "<down>"  '(windmove-down :which-key "move down")
-   "<left>"  '(windmove-left :which-key "move left")
-   "<right>" '(windmove-right :which-key "move right")
-   ;; Split windows
-   "|"       '(split-window-right :which-key "split right")
-   "-"       '(split-window-below :which-key "split bottom")
-   )
+;; global evil maps, leader => ","
+(evil-leader/set-key
+  "b"  'ivy-switch-buffer            ;; Switch to buffer
+  "ci" 'rgcr/comment-dwim            ;; Comment/Uncomment
+  "e"  'find-file
+  "i"  'highlight-indent-guides-mode
+  "n"  'neotree-toggle               ;; Open file explorer (sidebar)
+  "p"  'counsel-yank-pop             ;; fzf - paste
+  "q"  'rgcr/kill-this-buffer        ;; Close current buffer
+  "Q"  'delete-other-windows         ;; Close all other windows
+  "R"  'rgcr/reload-init-file        ;; Reload emacs config
+  "s"  'whitespace-mode              ;; Toggle invisible characters
+  "S"  'delete-trailing-whitespace
+  "u"  'undo-tree-visualize
+  "w"  'save-buffer
+  "x"  'rgcr/close-and-kill-this-pane ;; close and kill buffer
+  "/"  'counsel-rg                    ;; fzf - ripgrep
+  ","  'other-window                  ;; Switch to other window
   )
 
+;; evil leader for mode
+;; (evil-leader/set-key-for-mode 'emacs-lisp-mode
+  ;; "b" 'byte-compile-file)
 
-(global-set-key (kbd "C-c p") 'counsel-fzf)
-(global-set-key (kbd "C-s") 'swiper-isearch)
-;; (global-set-key (kbd "C-w k") 'rgcr/kill-this-buffer)
-(global-set-key (kbd "C-x k") 'rgcr/kill-this-buffer)
 
+;; global general keys
+(general-define-key
+ :states '(normal visual insert emacs)
+ :prefix "SPC"
+ :non-normal-prefix "C-SPC"
+ "SPC" '(execute-extended-command :which-key "M-x")
+ "/"   '(counsel-rg :which-key "Ripgrep")
+ ;; flycheck
+ "f"   '(hydra-flycheck/body :which-key "Flycheck")
+ ;; Git
+ "g"   '(hydra-magit/body :which-key "Magit")
+ ;; lsp
+ "l"  '(hydra-lsp/body :which-key "LSP")
+ ;; Neotree
+ "n"  '(neotree-toggle :which-key "Neotree")
+ ;; projectile
+ "p"  '(hydra-projectile/body :which-key "Projectile")
+ ;; yasnippet
+ "y"   '(hydra-yasnippet/body :which-key "Yasnippet")
+ ;; Window
+ ;; "wx"  '(delete-window :which-key "delete window")
+ )
+
+;; fix for evil and neotree
+(evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-change-root)
+(evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-quick-look)
+(evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
+(evil-define-key 'normal neotree-mode-map (kbd "g") 'neotree-refresh)
+(evil-define-key 'normal neotree-mode-map (kbd "n") 'neotree-next-line)
+(evil-define-key 'normal neotree-mode-map (kbd "p") 'neotree-previous-line)
+(evil-define-key 'normal neotree-mode-map (kbd "A") 'neotree-stretch-toggle)
+(evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle)
+
+
+;; evil maps
+(with-eval-after-load 'evil-maps
+  ;; windows
+  (define-prefix-command 'evil-window-map)
+  (define-key evil-window-map (kbd "C-w") 'other-window)
+  (define-key evil-window-map (kbd "<up>") 'evil-window-up)
+  (define-key evil-window-map (kbd "<down>") 'evil-window-down)
+  (define-key evil-window-map (kbd "<left>") 'evil-window-left)
+  (define-key evil-window-map (kbd "<right>") 'evil-window-right)
+  (define-key evil-window-map "-" 'split-window-below)
+  (define-key evil-window-map "|" 'split-window-right)
+  ;; Ex commands
+  ;;; general
+  (evil-ex-define-cmd "ls" #'ivy-switch-buffer)
+  ;;; git
+  (evil-ex-define-cmd "git" #'magit-status)
+  (evil-ex-define-cmd "gstage" #'magit-stage)
+  (evil-ex-define-cmd "gunstage" #'magit-unstage)
+  (evil-ex-define-cmd "gblame" #'magit-blame)
+  )
+
+;; -------------------------
+;; >>>> Hydras
+;; -------------------------
+
+;; yasnippet
+(defhydra hydra-magit (:color blue)
+  "
+^
+^Magit^             ^Do^
+^─────^─────────────^──^────────────────
+_q_ quit            _b_ blame
+^^                  _c_ clone
+^^                  _i_ init
+^^                  _s_ status
+^^                  ^^
+"
+  ("q" nil)
+  ("b" magit-blame)
+  ("c" magit-clone)
+  ("i" magit-init)
+  ("s" magit-status))
+
+
+;; yasnippet
+(defhydra hydra-yasnippet (:color blue :hint nil)
+  "
+              ^YASnippets^
+--------------------------------------------
+  Modes:    Load/Visit:    Actions:
+
+ _g_lobal  _d_irectory    _i_nsert
+ _m_inor   _f_ile         _t_ryout
+ _e_xtra   _l_ist         _n_ew
+         _a_ll
+"
+  ("d" yas-load-directory)
+  ("e" yas-activate-extra-mode)
+  ("i" yas-insert-snippet)
+  ("f" yas-visit-snippet-file :color blue)
+  ("n" yas-new-snippet)
+  ("t" yas-tryout-snippet)
+  ("l" yas-describe-tables)
+  ("g" yas-global-mode)
+  ("m" yas-minor-mode)
+  ("a" yas-reload-all)
+  ("q" nil))
+
+;; flycheck
+(defhydra hydra-flycheck
+    (:pre (flycheck-list-errors)
+     :post (quit-windows-on "*Flycheck errors*")
+     :hint nil)
+    "
+  ^
+  ^Flycheck^          ^Do^
+  ^─────────^──────────^──^────────
+  _q_ quit             _?_ describe
+  ^^                   _d_ disable
+  ^^                   _m_ mode
+  ^^                   _f_ filter
+  ^^                   _n_ next
+  ^^                   _p_ previous
+  ^^                   _gg_ first
+  ^^                   _G_ last
+  "
+  ("?" flycheck-describe-checker)
+  ("d" flycheck-disable-checker)
+  ("m" flycheck-mode)
+  ("f" flycheck-error-list-set-filter)
+  ("n" flycheck-next-error)
+  ("p" flycheck-previous-error)
+  ("gg" flycheck-first-error)
+  ("G" (progn (goto-char (point-max)) (flycheck-previous-error)))
+  ("q" nil))
+
+
+;; lsp
+(defhydra hydra-lsp (:exit t :hint nil)
+  "
+ Buffer^^               Server^^                   Symbol
+-------------------------------------------------------------------------------------
+ [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_h_] documentation
+ [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
+ [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature"
+  ("d" lsp-find-declaration)
+  ("D" lsp-ui-peek-find-definitions)
+  ("R" lsp-ui-peek-find-references)
+  ("i" lsp-ui-peek-find-implementation)
+  ("t" lsp-find-type-definition)
+  ("s" lsp-signature-help)
+  ("h" lsp-describe-thing-at-point)
+  ("r" lsp-rename)
+  ("f" lsp-format-buffer)
+  ("m" lsp-ui-imenu)
+  ("x" lsp-execute-code-action)
+
+  ("M-s" lsp-describe-session)
+  ("M-r" lsp-restart-workspace)
+  ("S" lsp-shutdown-workspace))
+
+;; projectile
+(defhydra hydra-projectile (:color teal :hint nil
+			    :columns 4)
+  "
+PROJECTILE: %(projectile-project-root)
+"
+  ("f"   projectile-find-file                "Find File")
+  ("r"   projectile-recentf                  "Recent Files")
+  ("z"   projectile-cache-current-file       "Cache Current File")
+  ("x"   projectile-remove-known-project     "Remove Known Project")
+
+  ("d"   projectile-find-dir                 "Find Directory")
+  ("b"   projectile-switch-to-buffer         "Switch to Buffer")
+  ("c"   projectile-invalidate-cache         "Clear Cache")
+  ("X"   projectile-cleanup-known-projects   "Cleanup Known Projects")
+
+  ("o"   projectile-multi-occur              "Multi Occur")
+  ("s"   projectile-switch-project           "Switch Project")
+  ("k"   projectile-kill-buffers             "Kill Buffers")
+  ("q"   nil "Cancel" :color blue))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => custom faces
@@ -602,7 +808,7 @@
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
+    (ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
  '(weechat-color-list

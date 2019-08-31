@@ -1,28 +1,11 @@
-# startup
-exec --no-startup-id feh --randomize --bg-fill /usr/share/backgrounds/gnome/*
-exec --no-startup-id compton
-exec --no-startup-id xsettingsd &
-
 # i3 config file (v4)
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
-
 set $mod Mod4
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 font pango:monospace 8
-
-# This font is widely installed, provides lots of unicode glyphs, right-to-left
-# text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango:DejaVu Sans Mono 8
-
-# Before i3 v4.8, we used to recommend this one as the default:
-# font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
-# The font above is very space-efficient, that is, it looks good, sharp and
-# clear in small sizes. However, its unicode glyph coverage is limited, the old
-# X core fonts rendering does not support right-to-left and this being a bitmap
-# font, it doesn’t scale on retina/hidpi displays.
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -31,9 +14,6 @@ floating_modifier $mod
 #bindsym $mod+Return exec st
 bindsym $mod+Return exec lxterminal
 
-# kill focused window
-bindsym $mod+Shift+q kill
-
 # start dmenu (a program launcher)
 bindsym $mod+d exec --no-startup-id dmenu_run
 
@@ -41,6 +21,9 @@ bindsym $mod+d exec --no-startup-id dmenu_run
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+
+# kill focused window
+bindsym $mod+Shift+q kill
 
 # change focus
 bindsym $mod+j focus left
@@ -133,25 +116,16 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
+
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
+
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
         # These bindings trigger as soon as you enter the resize mode
-
-        # Pressing left will shrink the window’s width.
-        # Pressing right will grow the window’s width.
-        # Pressing up will shrink the window’s height.
-        # Pressing down will grow the window’s height.
-        #bindsym j resize shrink width 10 px or 10 ppt
-        #bindsym k resize grow height 10 px or 10 ppt
-        #bindsym l resize shrink height 10 px or 10 ppt
-        #bindsym semicolon resize grow width 10 px or 10 ppt
-
-        # same bindings, but for the arrow keys
         bindsym Left resize shrink width 10 px or 10 ppt
         bindsym Down resize grow height 10 px or 10 ppt
         bindsym Up resize shrink height 10 px or 10 ppt
@@ -175,7 +149,6 @@ set $mode_gaps_right Right Gaps: +|-|0 (local), Shift + +|-|0 (global)
 set $mode_gaps_bottom Bottom Gaps: +|-|0 (local), Shift + +|-|0 (global)
 set $mode_gaps_left Left Gaps: +|-|0 (local), Shift + +|-|0 (global)
 bindsym $mod+Shift+g mode "$mode_gaps"
-
 mode "$mode_gaps" {
         bindsym o      mode "$mode_gaps_outer"
         bindsym i      mode "$mode_gaps_inner"
@@ -188,7 +161,6 @@ mode "$mode_gaps" {
         bindsym Return mode "$mode_gaps"
         bindsym Escape mode "default"
 }
-
 mode "$mode_gaps_outer" {
         bindsym plus  gaps outer current plus 5
         bindsym minus gaps outer current minus 5
@@ -285,11 +257,42 @@ mode "$mode_gaps_left" {
         bindsym Return mode "$mode_gaps"
         bindsym Escape mode "default"
 }
-
 # smart_gaps on
 smart_borders on
-gaps inner 3
+gaps inner 7
 # }}}
+
+# focus
+# set $go_mode "go (f)irefox, (e)macs, (m)ark, (g)o, (1-5)marks 1-5, (s+1-5)go to mark 1-5"
+# bindsym $mod+g mode $go_mode
+# mode $go_mode {
+#         # hardcoded focus keybindings
+#         bindsym f [class="(?i)firefox"] focus; mode "default"
+#         bindsym e [class="(?i)emacs"] focus; mode "default"
+
+#         # # keybindings for marking and jumping to clients
+#         # bindsym m exec i3-input -F 'mark %s' -P 'Mark name: '
+#         # bindsym g exec i3-input -F '[con_mark=%s] focus' -P 'Go to mark: '
+
+#         # # Assign marks to keys 1-5
+#         # bindsym Shift+1 mark mark1; mode "default"
+#         # bindsym Shift+2 mark mark2; mode "default"
+#         # bindsym Shift+3 mark mark3; mode "default"
+#         # bindsym Shift+4 mark mark4; mode "default"
+#         # bindsym Shift+5 mark mark5; mode "default"
+
+#         # # Jump to clients marked 1-5
+#         # bindsym 1 [con_mark="mark1"] focus; mode "default"
+#         # bindsym 2 [con_mark="mark2"] focus; mode "default"
+#         # bindsym 3 [con_mark="mark3"] focus; mode "default"
+#         # bindsym 4 [con_mark="mark4"] focus; mode "default"
+#         # bindsym 5 [con_mark="mark5"] focus; mode "default"
+
+#         # Exit to the default mode
+#         bindsym Return mode "default"
+#         bindsym Escape mode "default"
+# }
+
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
@@ -339,15 +342,18 @@ bindsym $mod+Escape exec dm-tool lock
 # rofi
 bindsym $mod+space exec --no-startup-id "rofi -show combi -combi-modi window,drun -show-icons"
 
-# window rules
+# Autostart
+exec --no-startup-id feh --randomize --bg-fill /usr/share/backgrounds/gnome/*
+exec --no-startup-id compton
+exec --no-startup-id xsettingsd &
+
+# Window rules
 assign [class=Navigator|firefox|Chrome|Chromium] $ws2
-assign [class=Spotify|spotify] $ws9
-assign [class=Nemo|nemo] $ws4
 for_window [class=".*"] border pixel 2
-for_window [class="copyq"] floating enable
-for_window [class="copyq"] resize set 400 400
-for_window [class="Nemo"] floating enable
-for_window [class="Nemo"] resize set 800 600
-
-
-
+for_window [class="copyq"] floating enable, resize set 400 400
+for_window [class="Nemo"] floating enable, resize set 800 600
+for_window [class="Nemo"] floating enable resize set 800 600 move to workspace $ws4, workspace --no-auto-back-and-forth $ws4
+for_window [class="Lxappearance"] floating enable sticky enable border normal
+for_window [class="Pavucontrol"] floating enable sticky enable border normale
+for_window [class="Gnome-alsamixer"] floating enable sticky enable border normale resize set 500 500
+for_window [class="Spotify"] move to workspace $ws10, workspace --no-auto-back-and-forth $ws10

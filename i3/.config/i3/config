@@ -250,8 +250,8 @@ mode "$mode_gaps_inner" {
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-        status_command i3status
-	position bottom
+    status_command i3status
+    position bottom
 
     colors {
         background #222D31
@@ -315,15 +315,19 @@ bindsym $mod+space exec --no-startup-id "rofi -show combi -combi-modi window,dru
 # exec --no-startup-id clipit
 exec --no-startup-id feh --randomize --bg-fill /usr/share/backgrounds/gnome/*
 exec --no-startup-id compton
-exec --no-startup-id xsettingsd &
+exec --no-startup-id xsettingsd
+exec --no-startup-id clipit
 
 # Window rules
+assign [class=Pidgin] $ws4
 assign [class=Navigator|firefox|Chrome|Chromium] $ws2
-for_window [class=".*"] border pixel 2
-for_window [class="copyq"] floating enable, resize set 400 400
-for_window [class="Nemo"] floating enable, resize set 800 600
-for_window [class="Nemo"] floating enable resize set 800 600 move to workspace $ws4, workspace --no-auto-back-and-forth $ws4
-for_window [class="Lxappearance"] floating enable sticky enable border normal
-for_window [class="Pavucontrol"] floating enable sticky enable border normale
-for_window [class="Gnome-alsamixer"] floating enable sticky enable border normale resize set 500 500
-for_window [class="Spotify"] move to workspace $ws10, workspace --no-auto-back-and-forth $ws10
+for_window [class=Spotify] move to workspace $ws10
+for_window [class=.*] border pixel 2
+for_window [class=copyq] floating enable resize set 400 400
+for_window [class=Pidgin] floating enable resize set 500 700
+for_window [class=Nemo] floating enable resize set 800 600 move to workspace $ws4
+for_window [class=Nitrogen] floating enable sticky enable border normal
+for_window [class=Arandr] floating enable resize set 400 400 sticky enable border normal
+for_window [class=Lxappearance] floating enable sticky enable border normal
+for_window [class=Pavucontrol] floating enable sticky enable border normale
+for_window [class=Gnome-alsamixer] floating enable sticky enable border normale resize set 500 500

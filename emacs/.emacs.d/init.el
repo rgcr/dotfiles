@@ -93,6 +93,7 @@
 
 ;; ;; Bell
 ;; (setq visible-bell t)
+(set-cursor-color "#ffffff")
 
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 (setq-default left-fringe-width nil)
@@ -529,16 +530,16 @@
   :config
   (setq lsp-ui-doc-enable t
         lsp-ui-doc-use-childframe t
-        lsp-ui-doc-position 'top
+        lsp-ui-doc-position 'bottom
         lsp-ui-doc-include-signature t
-        lsp-ui-sideline-enable nil
-        ;; lsp-ui-flycheck-enable t
-        ;; lsp-ui-flycheck-list-position ‘right
-        ;; lsp-ui-flycheck-live-reporting t
         lsp-ui-peek-enable t
         lsp-ui-peek-list-width 60
-        lsp-ui-peek-peek-height 25
-        lsp-ui-sideline-enable nil))
+        lsp-ui-peek-peek-height 25)
+(setq lsp-ui-sideline-enable nil)
+;; lsp-ui-flycheck-enable t
+;; lsp-ui-flycheck-list-position ‘right
+;; lsp-ui-flycheck-live-reporting t
+)
 (use-package company-lsp
   :ensure t
   :config

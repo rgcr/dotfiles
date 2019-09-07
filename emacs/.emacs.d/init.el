@@ -497,7 +497,10 @@
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)))
 
 (use-package magit
-  :ensure t)
+  :ensure t
+  :config
+  (setq magit-commit-show-diff nil
+        magit-revert-buffers 1))
 
 (use-package smartparens
   :ensure t
@@ -537,8 +540,7 @@
         ;; lsp-ui-flycheck-live-reporting t
         lsp-ui-peek-enable t
         lsp-ui-peek-list-width 60
-        lsp-ui-peek-peek-height 25
-        lsp-ui-sideline-enable nil))
+        lsp-ui-peek-peek-height 25))
 (use-package company-lsp
   :ensure t
   :config
@@ -610,6 +612,15 @@
   :ensure t
   ;; :delight "php"
   :mode ("\\.php\\'" . php-mode))
+
+(use-package web-mode
+  :ensure t
+  :commands web-mode
+  :mode ("\\.hbs\\'"
+         "\\.jsx\\'"
+         "\\.vue\\'"
+         "/\\([Vv]iews\\|[Hh]tml\\|[Tt]emplates\\)/.*\\.php\\'"
+         "\\.blade\\.php\\'"))
 
 (use-package dap-mode
   :after lsp-mode

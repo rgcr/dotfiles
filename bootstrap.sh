@@ -21,7 +21,7 @@ _backup(){
 _deploy(){
     # deploy dotfiles with stow
     printf "\nRestow dotfiles\n"
-    for d in $(find . -mindepth 1 -maxdepth 1 ! -path ./.git -type d -printf "%f\n"); do
+    for d in $(find . -mindepth 1 -maxdepth 1 ! -path ./.git ! -path i3-hibernate -type d -printf "%f\n"); do
         stow -v -R ${d} -d . -t ~
     done
 }
@@ -29,18 +29,19 @@ _deploy(){
 _caveat(){
     cat <<_EOL_
 
+- i3-hibernate requries root permisions
+    sudo rsync -rvzh i3-hibernate/ /
+
 - Install antibody
     curl -sL git.io/antibody | sh -s
 
 - Install vim-plug on vim
     mkdir -p ~/.vim/autoload;
-    curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 - Install vim-plug on neovim
     mkdir -p ~/.config/nvim/;
-    curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 - Install all plugins automatically:
     vim +PlugInstall +qall

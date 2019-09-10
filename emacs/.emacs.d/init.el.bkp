@@ -77,7 +77,7 @@
       inhibit-startup-message t
       inhibit-startup-echo-area-message t)
 ;; ;; Font and Frame size
-(add-to-list 'default-frame-alist '(font . "Hack-9"))
+(add-to-list 'default-frame-alist '(font . "Hack-12"))
 (add-to-list 'default-frame-alist '(height . 24))
 (add-to-list 'default-frame-alist '(width . 80))
 
@@ -93,7 +93,6 @@
 
 ;; ;; Bell
 ;; (setq visible-bell t)
-(set-cursor-color "#ffffff")
 
 (setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
 (setq-default left-fringe-width nil)
@@ -106,10 +105,6 @@
 (setq recentf-max-menu-items 200)
 (recentf-mode 1)
 
-;; remember cursor position, for emacs 25.1 or later
-;; by default, the cursor position info is saved at ~/.emacs.d/places
-(save-place-mode 1)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => global hooks
@@ -120,7 +115,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => file type overrides (modes)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.html$" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.restc$" . restclient-mode))
 
 
@@ -185,6 +179,39 @@
       (delete-window)))
 
 
+(defun hydra-move-splitter-left (arg)
+  "Move window splitter left."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
+      (shrink-window-horizontally arg)
+    (enlarge-window-horizontally arg)))
+
+(defun hydra-move-splitter-right (arg)
+  "Move window splitter right."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
+      (enlarge-window-horizontally arg)
+    (shrink-window-horizontally arg)))
+
+(defun hydra-move-splitter-up (arg)
+  "Move window splitter up."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
+      (enlarge-window arg)
+    (shrink-window arg)))
+
+(defun hydra-move-splitter-down (arg)
+  "Move window splitter down."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
+      (shrink-window arg)
+    (enlarge-window arg)))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => packages
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -211,14 +238,6 @@
   (setq hl-todo-highlight-punctuation ":")
   :config
   (global-hl-todo-mode t))
-
-(use-package linum-relative
-  :ensure t
-  :config
-  (setq linum-relative-current-symbol ">>")
-  ;; (setq linum-format "%4d \u2502 ")
-  (setq linum-relative-format "%4s \u2502")
-  (linum-relative-on))
 
 ;; ;; Theme
 (use-package doom-themes
@@ -293,6 +312,7 @@
   :ensure t
   :commands (org-bullets-mode)
   :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
 
 (use-package ivy
   :ensure t
@@ -399,14 +419,6 @@
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
   )
 
-(use-package eyebrowse
-  :ensure t
-  :delight "¬¬"
-  :diminish eyebrowse-mode
-  :config
-  (setq eyebrowse-new-workspace t)
-  (eyebrowse-mode t))
-
 ;; Copy/paste
 ;; (use-package simpleclip
 ;;   :ensure t
@@ -428,6 +440,18 @@
   ;; fix for <tab> in terminal (-nw)
   (setq evil-want-C-i-jump nil)
   (evil-mode t))
+
+(use-package evil-leader
+  :commands (evil-leader-mode)
+  :ensure evil-leader
+  :demand evil-leader
+  :config
+  (progn
+    (setq evil-leader/in-all-states t)
+    (evil-leader/set-leader ",")
+    (global-evil-leader-mode)
+  )
+)
 
 (use-package evil-goggles
   :ensure t
@@ -505,10 +529,7 @@
     (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)))
 
 (use-package magit
-  :ensure t
-  :config
-  (setq magit-commit-show-diff nil
-        magit-revert-buffers 1))
+  :ensure t)
 
 (use-package smartparens
   :ensure t
@@ -540,17 +561,16 @@
   :config
   (setq lsp-ui-doc-enable t
         lsp-ui-doc-use-childframe t
-        lsp-ui-doc-position 'bottom
+        lsp-ui-doc-position 'top
         lsp-ui-doc-include-signature t
+        lsp-ui-sideline-enable nil
+        ;; lsp-ui-flycheck-enable t
+        ;; lsp-ui-flycheck-list-position ‘right
+        ;; lsp-ui-flycheck-live-reporting t
         lsp-ui-peek-enable t
         lsp-ui-peek-list-width 60
-        lsp-ui-peek-peek-height 25)
-  (setq lsp-ui-sideline-enable nil)
-;; lsp-ui-flycheck-enable t
-;; lsp-ui-flycheck-list-position ‘right
-;; lsp-ui-flycheck-live-reporting t
-)
-
+        lsp-ui-peek-peek-height 25
+        lsp-ui-sideline-enable nil))
 (use-package company-lsp
   :ensure t
   :config
@@ -625,12 +645,9 @@
 
 (use-package web-mode
   :ensure t
-  :commands web-mode
-  :mode ("\\.hbs\\'"
-         "\\.jsx\\'"
-         "\\.vue\\'"
-         "/\\([Vv]iews\\|[Hh]tml\\|[Tt]emplates\\)/.*\\.php\\'"
-         "\\.blade\\.php\\'"))
+  :mode (("\\.html\\'" . web-mode)
+         ("\\.erb\\'" . web-mode)
+         ("\\.vue\\'" . web-mode)))
 
 (use-package dap-mode
   :after lsp-mode
@@ -651,41 +668,31 @@
 (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
 (define-key dired-mode-map (kbd "DEL") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
 
-(general-evil-setup)
-(general-create-definer my-evil-leader-def
-  :prefix ",")
-
-(my-evil-leader-def
- :states '(normal visual emacs)
-  "b"  'ivy-switch-buffer            ;; switch to buffer
-  "ci" 'rgcr/comment-dwim            ;; comment/uncomment
+;; global evil maps, leader => ","
+(evil-leader/set-key
+  "b"  'ivy-switch-buffer            ;; Switch to buffer
+  "ci" 'rgcr/comment-dwim            ;; Comment/Uncomment
   "e"  'counsel-find-file
   "i"  'highlight-indent-guides-mode
   "k"  'kill-buffer
-  "n"  'linum-relative-toggle
+  "n"  'neotree-toggle               ;; Open file explorer (sidebar)
   "p"  'projectile-find-file         ;; like ctrl-p
-  "p"  'counsel-yank-pop             ;; fzf - paste
-  "q"  'rgcr/kill-this-buffer        ;; close current buffer
-  "q"  'delete-other-windows         ;; close all other windows
-  "r"  'rgcr/reload-init-file        ;; reload emacs config
-  "s"  'whitespace-mode              ;; toggle invisible characters
-  "s"  'delete-trailing-whitespace
+  "P"  'counsel-yank-pop             ;; fzf - paste
+  "q"  'rgcr/kill-this-buffer        ;; Close current buffer
+  "Q"  'delete-other-windows         ;; Close all other windows
+  "R"  'rgcr/reload-init-file        ;; Reload emacs config
+  "s"  'whitespace-mode              ;; Toggle invisible characters
+  "S"  'delete-trailing-whitespace
   "u"  'undo-tree-visualize
   "w"  'save-buffer
   "x"  'rgcr/close-and-kill-this-pane ;; close and kill buffer
   "/"  'counsel-rg                    ;; fzf - ripgrep
-  ","  'other-window                  ;; switch to other window
-  ;; eyebrowse
-  "1"  'eyebrowse-switch-to-window-config-1
-  "2"  'eyebrowse-switch-to-window-config-2
-  "3"  'eyebrowse-switch-to-window-config-3
-  "4"  'eyebrowse-switch-to-window-config-4
-  "5"  'eyebrowse-switch-to-window-config-5
-  "6"  'eyebrowse-switch-to-window-config-6
-  "7"  'eyebrowse-switch-to-window-config-7
-  "8"  'eyebrowse-switch-to-window-config-8
-  "9"  'eyebrowse-switch-to-window-config-9
+  ","  'other-window                  ;; Switch to other window
   )
+
+;; evil leader for mode
+;; (evil-leader/set-key-for-mode 'emacs-lisp-mode
+  ;; "b" 'byte-compile-file)
 
 ;; global general keys
 (general-define-key
@@ -712,8 +719,6 @@
  "y"   '(hydra-yasnippet/body :which-key "Yasnippet")
  ;; Window
  ;; "wx"  '(delete-window :which-key "delete window")
- ;; zoom
- ;; "z"   '(hydra-zoom/body :which-key "Zoom")
  )
 
 ;; fix for evil and neotree
@@ -737,6 +742,7 @@
   (define-key evil-window-map (kbd "<right>") 'evil-window-right)
   (define-key evil-window-map "-" 'split-window-below)
   (define-key evil-window-map "|" 'split-window-right)
+  (define-key evil-window-map "r" 'hydra-window/body)
   ;; Ex commands
   (evil-ex-define-cmd "ls" #'ivy-switch-buffer)
   ;;; git
@@ -749,11 +755,21 @@
 ;; -------------------------
 ;; >>>> Hydras
 ;; -------------------------
+(defhydra hydra-window (:hint nil)
+  "
+^      _w_
+^^      ↑
+ _a_ ←     → _d_
+^      _s_
+^^      ↓
+"
+  ("a" hydra-move-splitter-left)
+  ("d" hydra-move-splitter-right)
+  ;; ("w" shrink-window)
+  ("w" hydra-move-splitter-up)
+  ("s" hydra-move-splitter-down)
+  ("q" nil))
 
-;; (defhydra hydra-zoom ()
-;;   "zoom"
-;;   ("+" text-scale-increase "in")
-;;   ("-" text-scale-decrease "out"))
 
 ;; yasnippet
 (defhydra hydra-magit (:color blue :hint nil)
@@ -932,7 +948,7 @@ LSP Actions:
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (linum-relative eyebrowse ledger-mode yaml-mode ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
+    (ledger-mode yaml-mode ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
  '(weechat-color-list

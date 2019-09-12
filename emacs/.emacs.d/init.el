@@ -240,6 +240,22 @@
   (spaceline-toggle-which-function-on)
   )
 
+;; (use-package centaur-tabs
+;;   :demand
+;;   :config
+;;   (setq centaur-tabs-style "bar"
+;; 	  centaur-tabs-height 32
+;; 	  ;; centaur-tabs-set-icons t
+;; 	  centaur-tabs-set-modified-marker t
+;; 	  centaur-tabs-set-bar 'left)
+;;    (centaur-tabs-headline-match)
+;;    (centaur-tabs-mode t)
+;;    (setq uniquify-separator "/")
+;;    (setq uniquify-buffer-name-style 'forward)
+;;    :hook
+;;    (dired-mode . centaur-tabs-local-mode)
+;;   )
+
 ;; -------------------------
 ;; >>>> General utils
 ;; -------------------------
@@ -280,7 +296,13 @@
 (use-package org-bullets
   :ensure t
   :commands (org-bullets-mode)
-  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :init
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+
+(use-package org-autolist
+  :ensure t
+  :init
+  (add-hook 'org-mode-hook (lambda () (org-autolist-mode 1))))
 
 
 (use-package ivy
@@ -387,6 +409,23 @@
   :config
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
   )
+
+;; (use-package perspective
+;;   :ensure t
+;;   :commands persp-mode
+;;   :init (persp-mode)
+;;   :config
+;;   (set-face-attribute 'persp-selected-face nil :foreground "#81a2be"))
+
+;; (use-package persp-projectile
+;;   :after (perspective))
+
+(use-package eyebrowse
+  :ensure t
+  :diminish eyebrowse-mode
+  :config
+  (setq eyebrowse-new-workspace t)
+  (eyebrowse-mode t))
 
 ;; Copy/paste
 ;; (use-package simpleclip
@@ -664,6 +703,17 @@
   "x"  'rgcr/close-and-kill-this-pane ;; close and kill buffer
   "/"  'counsel-rg                    ;; fzf - ripgrep
   ","  'other-window                  ;; Switch to other window
+  ;; eyebrowse
+  "1"  'eyebrowse-switch-to-window-config-1
+  "2"  'eyebrowse-switch-to-window-config-2
+  "3"  'eyebrowse-switch-to-window-config-3
+  "4"  'eyebrowse-switch-to-window-config-4
+  "5"  'eyebrowse-switch-to-window-config-5
+  "6"  'eyebrowse-switch-to-window-config-6
+  "7"  'eyebrowse-switch-to-window-config-7
+  "8"  'eyebrowse-switch-to-window-config-8
+  "9"  'eyebrowse-switch-to-window-config-9
+  "$"  'eyebrowse-rename-windows-config
   )
 
 ;; evil leader for mode
@@ -693,6 +743,8 @@
  "p"  '(hydra-projectile/body :which-key "Projectile")
  ;; yasnippet
  "y"   '(hydra-yasnippet/body :which-key "Yasnippet")
+ ;; perspective
+    ;; "x"  '(hydra-perspective/body :which-key "Perspective")
  ;; Window
  ;; "wx"  '(delete-window :which-key "delete window")
  )
@@ -731,18 +783,15 @@
 ;; >>>> Hydras
 ;; -------------------------
 
-;; yasnippet
+;; magit
 (defhydra hydra-magit (:color blue :hint nil)
   "
       Magit: %(magit-get \"remote\" \"origin\" \"url\")
 
 ^Magit^
-^─────^────────────────────^
-_b_ blame     [_q_]: Cancel
-_c_ clone
-_i_ init
-_p_ pull
-_s_ status
+^─────^───────────────────────────
+_b_ blame   _i_ init   _s_ status
+_c_ clone   _p_ pull
 "
   ("s" magit-status)
   ("b" magit-blame)
@@ -862,6 +911,23 @@ LSP Actions:
   ("q"   nil :color red)
   )
 
+;; perpective
+;; (defhydra hydra-perspective (:columns 4 :color blue)
+;;   "Perspective"
+;;   ("a" persp-add-buffer "Add Buffer")
+;;   ("A" persp-set-buffer "Set Buffer")
+;;   ("b" persp-switch-to-buffer "Switch to Buffer")
+;;   ("c" persp-kill "Close")
+;;   ("i" persp-import "Import")
+;;   ("k" persp-remove-buffer "Kill Buffer")
+;;   ("n" persp-next "Next")
+;;   ("p" persp-prev "Prev")
+;;   ("r" persp-rename "Rename")
+;;   ("s" persp-switch "Switch")
+;;   ("x" persp-switch-last "Switch Last")
+;;   ("P" projectile-persp-switch-project "Switch Project")
+;;   ("q" nil "Quit"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => custom faces
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -908,7 +974,7 @@ LSP Actions:
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (ledger-mode yaml-mode ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
+    (org-autolist ledger-mode yaml-mode ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
  '(weechat-color-list

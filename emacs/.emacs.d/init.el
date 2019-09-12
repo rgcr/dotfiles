@@ -106,6 +106,10 @@
 (setq recentf-max-menu-items 200)
 (recentf-mode 1)
 
+;; remember cursor position, for emacs 25.1 or later
+;; by default, the cursor position info is saved at ~/.emacs.d/places
+(save-place-mode 1)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => global hooks
@@ -208,6 +212,14 @@
   :config
   (global-hl-todo-mode t))
 
+(use-package linum-relative
+  :ensure t
+  :config
+  (setq linum-relative-current-symbol ">>")
+  ;; (setq linum-format "%4d \u2502 ")
+  (setq linum-relative-format "%4s \u2502")
+  (linum-relative-on))
+
 ;; ;; Theme
 (use-package doom-themes
   :ensure t
@@ -303,7 +315,6 @@
   :ensure t
   :init
   (add-hook 'org-mode-hook (lambda () (org-autolist-mode 1))))
-
 
 (use-package ivy
   :ensure t
@@ -410,18 +421,9 @@
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
   )
 
-;; (use-package perspective
-;;   :ensure t
-;;   :commands persp-mode
-;;   :init (persp-mode)
-;;   :config
-;;   (set-face-attribute 'persp-selected-face nil :foreground "#81a2be"))
-
-;; (use-package persp-projectile
-;;   :after (perspective))
-
 (use-package eyebrowse
   :ensure t
+  :delight "¬¬"
   :diminish eyebrowse-mode
   :config
   (setq eyebrowse-new-workspace t)
@@ -448,18 +450,6 @@
   ;; fix for <tab> in terminal (-nw)
   (setq evil-want-C-i-jump nil)
   (evil-mode t))
-
-(use-package evil-leader
-  :commands (evil-leader-mode)
-  :ensure evil-leader
-  :demand evil-leader
-  :config
-  (progn
-    (setq evil-leader/in-all-states t)
-    (evil-leader/set-leader ",")
-    (global-evil-leader-mode)
-  )
-)
 
 (use-package evil-goggles
   :ensure t
@@ -683,21 +673,25 @@
 (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
 (define-key dired-mode-map (kbd "DEL") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
 
-;; global evil maps, leader => ","
-(evil-leader/set-key
-  "b"  'ivy-switch-buffer            ;; Switch to buffer
-  "ci" 'rgcr/comment-dwim            ;; Comment/Uncomment
+(general-evil-setup)
+(general-create-definer my-evil-leader-def
+  :prefix ",")
+
+(my-evil-leader-def
+ :states '(normal visual emacs)
+  "b"  'ivy-switch-buffer            ;; switch to buffer
+  "ci" 'rgcr/comment-dwim            ;; comment/uncomment
   "e"  'counsel-find-file
   "i"  'highlight-indent-guides-mode
   "k"  'kill-buffer
-  "n"  'neotree-toggle               ;; Open file explorer (sidebar)
+  "n"  'linum-relative-toggle
   "p"  'projectile-find-file         ;; like ctrl-p
-  "P"  'counsel-yank-pop             ;; fzf - paste
-  "q"  'rgcr/kill-this-buffer        ;; Close current buffer
-  "Q"  'delete-other-windows         ;; Close all other windows
-  "R"  'rgcr/reload-init-file        ;; Reload emacs config
-  "s"  'whitespace-mode              ;; Toggle invisible characters
-  "S"  'delete-trailing-whitespace
+  "p"  'counsel-yank-pop             ;; fzf - paste
+  "q"  'rgcr/kill-this-buffer        ;; close current buffer
+  "q"  'delete-other-windows         ;; close all other windows
+  "r"  'rgcr/reload-init-file        ;; reload emacs config
+  "s"  'whitespace-mode              ;; toggle invisible characters
+  "s"  'delete-trailing-whitespace
   "u"  'undo-tree-visualize
   "w"  'save-buffer
   "x"  'rgcr/close-and-kill-this-pane ;; close and kill buffer
@@ -715,10 +709,6 @@
   "9"  'eyebrowse-switch-to-window-config-9
   "$"  'eyebrowse-rename-windows-config
   )
-
-;; evil leader for mode
-;; (evil-leader/set-key-for-mode 'emacs-lisp-mode
-  ;; "b" 'byte-compile-file)
 
 ;; global general keys
 (general-define-key
@@ -747,6 +737,8 @@
     ;; "x"  '(hydra-perspective/body :which-key "Perspective")
  ;; Window
  ;; "wx"  '(delete-window :which-key "delete window")
+ ;; zoom
+ ;; "z"   '(hydra-zoom/body :which-key "Zoom")
  )
 
 ;; fix for evil and neotree
@@ -974,7 +966,7 @@ LSP Actions:
  '(magit-diff-use-overlays nil)
  '(package-selected-packages
    (quote
-    (org-autolist ledger-mode yaml-mode ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-leader evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
+    (linum-relative eyebrowse ledger-mode yaml-mode ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
  '(pos-tip-background-color "#FFFACE")
  '(pos-tip-foreground-color "#272822")
  '(weechat-color-list

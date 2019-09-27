@@ -278,6 +278,8 @@
 (use-package quelpa
   :ensure t)
 
+; (awesome-tab-mode t)
+
 ;; Use double key combination
 ;; (use-package use-package-chords
 ;;   :ensure t

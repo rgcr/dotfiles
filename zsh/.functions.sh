@@ -30,14 +30,11 @@
 #######################################
 ## shortcut for creating/attaching named sessions
 t() {
-  if [ -z "$1" ]; then
-      tmux list-sessions
-  else
-      local _session="${1}"; shift
-      # tmux has -t $1 && tmux attach -t $1 2>/dev/null || echo "Creating new session..." && tmux new -s $1
-      tmux attach -t "${_session}" "${@}" 2>/dev/null || \
-          echo "Starting new session..." && tmux new -s "${_session}"
-  fi
+    [ -z "$1" ] && { tmux list-sessions; return 1; }
+
+    local _session="${1}"; shift
+    tmux attach -t "${_session}" "${@}" 2>/dev/null || \
+        { echo "Starting new session..." && tmux new -s "${_session}" "$@" }
 }
 
 # tmuxinator 'alias' funciton,

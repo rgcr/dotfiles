@@ -231,14 +231,14 @@
       doom-one-brighter-comments t
       ;; doom-neotree-file-icons t)
       )
-  ;; (load-theme 'doom-Iosvkem t)
-  (load-theme 'doom-molokai t)
+  (load-theme 'doom-Iosvkem t)
+  ;; (load-theme 'doom-molokai t)
   )
 
-(use-package kaolin-themes
-  :config
-  ;; (load-theme 'kaolin-dark t)
-  (kaolin-treemacs-theme))
+;; (use-package kaolin-themes
+;;   :config
+;;   ;; (load-theme 'kaolin-dark t)
+;;   (kaolin-treemacs-theme))
 
 (use-package spaceline
   :ensure t
@@ -256,18 +256,26 @@
   (spaceline-toggle-which-function-on)
   )
 
+(use-package color-identifiers-mode
+    :ensure t
+    :config
+    (global-color-identifiers-mode)
+    )
+
 (use-package centaur-tabs
-  ;;   :demand
+  :ensure t
+  ;; :demand t
+  :init
+  (centaur-tabs-mode)
   :config
-  (centaur-tabs-mode t)
   (setq centaur-tabs-style "bar")
   (setq centaur-tabs-set-bar t)
   (setq centaur-tabs-set-modified-marker t)
-  (centaur-tabs-headline-match)
-  (setq centaur-tabs-background-color (face-background 'region))
-  ;; (centaur-tabs-inherit-tabbar-faces)
-  (setq centaur-tabs-close-button "X")
+  ;; (centaur-tabs-headline-match)
+  ;; (setq centaur-tabs-close-button "X")
   (setq centaur-tabs-modified-marker "*")
+  (set-face-foreground 'centaur-tabs-unselected "brightblack")
+  (set-face-foreground 'centaur-tabs-selected "cyan")
   )
 
 ;; -------------------------
@@ -278,11 +286,6 @@
 (use-package quelpa
   :ensure t)
 
-;; Use double key combination
-;; (use-package use-package-chords
-;;   :ensure t
-;;   :config
-;;   (key-chord-mode 1))
 
 ;; Make sure that delight is available as soon as any package triggers it.
 (use-package delight
@@ -571,8 +574,6 @@
         lsp-ui-peek-list-width 60
         lsp-ui-peek-peek-height 25)
   (setq lsp-ui-sideline-enable nil)
-;; lsp-ui-flycheck-enable t
-;; lsp-ui-flycheck-list-position ‘right
 ;; lsp-ui-flycheck-live-reporting t
 )
 
@@ -867,7 +868,7 @@ _c_ clone   _p_ pull
 _f_ format             _d_ declaration    _i_ implementationa    _h_ documentation
 _x_ execute action     _D_ definition     _t_ type               _n_ rename
 ^^                     _r_ references     _s_ signature
-^^
+
 LSP Actions:
     [_R_] Restart    [_S_] Shutdown     [_I_] Session info
 "
@@ -881,7 +882,6 @@ LSP Actions:
   ("s" lsp-signature-help)
   ("h" lsp-describe-thing-at-point)
   ("n" lsp-rename)
-  ;; ("m" lsp-ui-imenu)
   ("I" lsp-describe-session)
   ("R" lsp-workspace-restart)
   ("S" lsp-workspace-shutdown))
@@ -936,56 +936,3 @@ LSP Actions:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => custom faces
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(evil-goggles-change-face ((t (:inherit diff-removed))))
- '(evil-goggles-delete-face ((t (:inherit diff-removed))))
- '(evil-goggles-paste-face ((t (:inherit diff-added))))
- '(evil-goggles-undo-redo-add-face ((t (:inherit diff-added))))
- '(evil-goggles-undo-redo-change-face ((t (:inherit diff-changed))))
- '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-removed))))
- '(evil-goggles-yank-face ((t (:inherit diff-changed)))))
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(add-to-list (quote company-backends) t)
- '(company--show-numbers t t)
- '(company-idle-delay 0.1)
- '(company-minimum-prefix-length 1)
- '(company-tooltip-align-annotations t)
- '(compilation-message-face (quote default))
- '(custom-safe-themes
-   (quote
-    ("6bc387a588201caf31151205e4e468f382ecc0b888bac98b2b525006f7cb3307" "34c99997eaa73d64b1aaa95caca9f0d64229871c200c5254526d0062f8074693" "669e02142a56f63861288cc585bee81643ded48a19e36bfdf02b66d745bcc626" "b0fd04a1b4b614840073a82a53e88fe2abc3d731462d6fde4e541807825af342" "0f1733ad53138ddd381267b4033bcb07f5e75cd7f22089c7e650f1bb28fc67f4" "a9d67f7c030b3fa6e58e4580438759942185951e9438dd45f2c668c8d7ab2caf" "11e0bc5e71825b88527e973b80a84483a2cfa1568592230a32aedac2a32426c1" "7d4340a89c1f576d1b5dec57635ab93cdc006524bda486b66d01a6f70cffb08e" "26d49386a2036df7ccbe802a06a759031e4455f07bda559dcf221f53e8850e69" "a7051d761a713aaf5b893c90eaba27463c791cd75d7257d3a8e66b0c8c346e77" "8e04ea7bf8a736b0bfacd363f4810ffce774ff9ba24f356172ae2b83307aebb2" "f5568ed375abea716d1bdfae0316d1d179f69972eaccd1f331b3e9863d7e174a" "045496bf9a9de2be2266930507bf6533a0e61c4686994af5602d172ebab8347a" "155a5de9192c2f6d53efcc9c554892a0d87d87f99ad8cc14b330f4f4be204445" "a2cde79e4cc8dc9a03e7d9a42fabf8928720d420034b66aecc5b665bbf05d4e9" "427fa665823299f8258d8e27c80a1481edbb8f5463a6fb2665261e9076626710" "274fa62b00d732d093fc3f120aca1b31a6bb484492f31081c1814a858e25c72e" "4e132458143b6bab453e812f03208075189deca7ad5954a4abb27d5afce10a9a" "db10381a554231a40b7474eaac28bd58f05067faacce3b25d294bb179a3511a1" "868abc288f3afe212a70d24de2e156180e97c67ca2e86ba0f2bf9a18c9672f07" default)))
- '(global-company-mode t)
- '(highlight-changes-colors (quote ("#FD5FF0" "#AE81FF")))
- '(highlight-tail-colors
-   (quote
-    (("#3C3D37" . 0)
-     ("#679A01" . 20)
-     ("#4BBEAE" . 30)
-     ("#1DB4D0" . 50)
-     ("#9A8F21" . 60)
-     ("#A75B00" . 70)
-     ("#F309DF" . 85)
-     ("#3C3D37" . 100))))
- '(jdee-db-active-breakpoint-face-colors (cons "#1b1d1e" "#fc20bb"))
- '(jdee-db-requested-breakpoint-face-colors (cons "#1b1d1e" "#60aa00"))
- '(jdee-db-spec-breakpoint-face-colors (cons "#1b1d1e" "#505050"))
- '(lsp-prefer-flymake nil)
- '(magit-diff-use-overlays nil)
- '(objed-cursor-color "#d02b61")
- '(package-selected-packages
-   (quote
-    (cyberpunk-theme kaolin-themes moe-theme org-autolist linum-relative eyebrowse ledger-mode yaml-mode ivy-yasnippet yasnippet-snippets php-mode switch-window org-bullets dracula-theme zenburn-theme vimrc-mode use-package-chords spaceline simpleclip rainbow-delimiters projectile popup monokai-theme molokai-theme magit ibuffer-vc highlight-indent-guides git-gutter-fringe fzf flycheck exec-path-from-shell evil-nerd-commenter evil-goggles evil-commentary doom-themes dimmer counsel atom-one-dark-theme add-node-modules-path)))
- '(pos-tip-background-color "#FFFACE")
- '(pos-tip-foreground-color "#272822")
- '(weechat-color-list
-   (quote
-    (unspecified "#272822" "#3C3D37" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0"))))

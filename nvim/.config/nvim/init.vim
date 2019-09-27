@@ -821,7 +821,7 @@ if g:nvim_use_lsp
 
   " jump to next or prev diagnostic
   nmap <silent> <localleader>j <Plug>(coc-diagnostic-next)
-  nmap <silent> <locallseaer>k <Plug>(coc-diagnostic-prev)
+  nmap <silent> <localleader>k <Plug>(coc-diagnostic-prev)
 
   " " search workspace symbols
   " nnoremap <silent> <localleader>s  :<C-U>CocList -i symbols<CR>
@@ -915,11 +915,11 @@ hi vertsplit guibg=white guifg=white ctermbg=white ctermfg=white
    set statusline+=\ %=
 
    " " coc.nvim {{{
-   " if g:nvim_use_lsp
+   if g:nvim_use_lsp
      set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}
    "   set statusline+=\ %{get(b:,'coc_current_function','')}\ \|
    " set statusline+=\ %{coc#status()}
-   " endif
+   endif
    " " }}}
 
    " file encoding and file format

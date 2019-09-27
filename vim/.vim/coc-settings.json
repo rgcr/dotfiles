@@ -1,6 +1,6 @@
 {
   "diagnostic.displayByAle": false,
-  "coc.preferences.formatOnType": true,
+  "coc.preferences.formatOnType": false,
   "coc.preferences.formatOnSaveFiletypes": [
     // "json",
     // "javascript",
@@ -17,6 +17,5 @@
   "python.linting.flake8Enabled": true,
   "python.linting.enabled": true,
   "python.formatting.provider": "black",
-  "python.formatting.blackArgs": "--line-length 80"
-
+  "python.formatting.blackArgs": ["--line-length", "80"]
 }

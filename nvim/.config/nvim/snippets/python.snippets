@@ -1,0 +1,31 @@
+snippet future
+	from __future__ import absolute_import
+	from __future__ import division
+	from __future__ import print_function
+
+snippet docg Google-style docstring
+	"""
+	${1:Summary line}
+
+	Extended description of function.
+
+	Args:
+		${2:arg1} (${3:str}): Description of arg1
+		${4:arg2} (${5:str}): Description of arg2
+
+	Returns:
+		${6:bool}: Description of return value
+
+	Raises:
+		AttributeError: The Raises section is a list of all exceptions
+			that are relevant to the interface.
+
+	Examples:
+		Examples should be written in doctest format, and should illustrate how
+		to use the function.
+
+		>>> a=[1,2,3]
+		>>> print [x + 3 for x in a]
+		[4, 5, 6]
+
+	"""

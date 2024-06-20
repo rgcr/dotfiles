@@ -10,7 +10,7 @@ let maplocalleader = "\<space>"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " enable only one of the below variables
 " to use LSP (coc.nvim) or YCM
-let g:vim_use_lsp = 1
+let g:vim_use_lsp = 0
 let g:vim_use_ycm = 0
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

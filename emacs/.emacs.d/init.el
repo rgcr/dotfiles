@@ -36,13 +36,29 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => global settings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(normal-erase-is-backspace-mode 0)
 
-;; ;; Use always y-or-n instead yes-or-not
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(load custom-file)
+
+(add-hook 'window-setup-hook 'toggle-frame-maximized t)
+
+;; Esc to quit from prompts
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+;; Font and Frame size
+(add-to-list 'default-frame-alist '(font . "Hack-9"))
+
+;; start the initial frame maximized
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+
+;; start every frame maximized
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Use always y-or-n instead yes-or-not
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; ;; Disable flycheck for emacs
-
-;; ;; UTF-8 please
+;; UTF-8 please
 (setq locale-coding-system 'utf-8) ; pretty
 (set-terminal-coding-system 'utf-8) ; pretty
 (set-keyboard-coding-system 'utf-8) ; pretty
@@ -63,35 +79,31 @@
 (electric-pair-mode 1)
 (column-number-mode t)
 
+;(global-linum-mode 1)
+(winner-mode t)
 
-(global-linum-mode t)
-
-;; ;; Somewhat better formatting when showing line numbers, but still...
+;; Somewhat better formatting when showing line numbers, but still...
 (setq linum-format "%4d \u2502 ")
 
 ;; (global-hl-line-mode 1)
 ;; (set-face-background ‘highlight “#222222”)
 
-;; ;; Hide the startup message
+;; Hide the startup message
 (setq inhibit-splash-screen t
       inhibit-startup-message t
       inhibit-startup-echo-area-message t)
-;; ;; Font and Frame size
-(add-to-list 'default-frame-alist '(font . "Hack-9"))
-(add-to-list 'default-frame-alist '(height . 24))
-(add-to-list 'default-frame-alist '(width . 80))
 
-;; ;; Turn off autosave and backup files
+;; Turn off autosave and backup files
 (setq backup-inhibited t)
 (setq auto-save-default nil)
 
-;; ;; Spaces, not tabs
+;; Spaces, not tabs
 (setq-default indent-tabs-mode nil)
 
-;; ;; Follow symlinks
+;; Follow symlinks
 (setq vc-follow-symlinks t)
 
-;; ;; Bell
+;; Bell
 ;; (setq visible-bell t)
 (set-cursor-color "#ffffff")
 
@@ -99,11 +111,12 @@
 (setq-default left-fringe-width nil)
 (setq-default indicate-empty-lines t)
 
-;; ;; No wrap lines
+;; No wrap lines
 (set-default 'truncate-lines t)
-;; ;; keep the list of recent files
-(setq recentf-max-saved-items 200)
-(setq recentf-max-menu-items 200)
+
+;; keep the list of recent files
+(setq recentf-max-saved-items 100)
+(setq recentf-max-menu-items 100)
 (recentf-mode 1)
 
 ;; remember cursor position, for emacs 25.1 or later
@@ -120,7 +133,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => file type overrides (modes)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'auto-mode-alist '("\\.html$" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.restc$" . restclient-mode))
 
 
@@ -133,23 +145,6 @@
   (interactive)
   (load-file user-init-file))
 
-
-(defun rgcr/comment-dwim ()
-  "Like `comment-dwim', but toggle comment if cursor is not at end of line."
-  (interactive)
-  (if (region-active-p)
-      (comment-dwim nil)
-    (let (($lbp (line-beginning-position))
-          ($lep (line-end-position)))
-      (if (eq $lbp $lep)
-          (progn
-            (comment-dwim nil))
-        (if (eq (point) $lep)
-            (progn
-              (comment-dwim nil))
-          (progn
-            (comment-or-uncomment-region $lbp $lep)
-            (forward-line )))))))
 
 ;; enable/disable tabs
 (defun rgcr/disable-tab () (setq indent-tabs-mode nil))
@@ -194,6 +189,9 @@
 ;; -------------------------
 ;; >>>> UI
 ;; -------------------------
+(use-package recentf
+  ;; Loads after 1 second of idle time.
+  :defer 1)
 
 ;; Highlight the current line
 (use-package hl-line
@@ -307,8 +305,37 @@
   :mode ("\\.org\\'" . org-mode)
   :config
   (setq org-cycle-separator-lines 2
-        org-deadline-warning-days 30
-        org-log-done 'time))
+        org-deadline-warning-days 30)
+  (setq org-icalendar-timezone "America/Monterrey")
+  ;; When a TODO item enters DONE, add a CLOSED: property with current date-time stamp and into drawer
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer "LOGBOOK")
+
+  (setq org-agenda-files
+	'("~/.onedrive/org/personal.org"
+          "~/.onedrive/org/work.org"
+	  "~/.onedrive/org/diary.org"))
+   ;; I use my own diary file
+   (setq org-agenda-include-diary nil)
+   (setq org-archive-location "~/.onedrive/archive/%s_archive.org::datetree/")
+   (setq org-todo-keywords
+         '((sequence "TODO(t!)"
+                     "IN PROCESS(i!)"
+                     "BLOCKED(b!)"
+                     "|" "DONE(d!)" "ARCHIVE(a!)")))
+   (setq org-todo-keyword-faces
+         '(("TODO" . "orange")
+           ("IN PROCESS" . "yellow")
+           ("BLOCKED" . "red")
+           ("DONE" . "green")
+           ("ARCHIVE" .  "blue")))
+
+   ;; Save Org buffers after refiling!
+  (advice-add 'org-refile :after 'org-save-all-org-buffers)
+  (add-hook 'org-mode-hook 'org-indent-mode)
+  (add-hook 'org-mode-hook 'visual-line-mode)
+
+  )
 
 (use-package org-bullets
   :ensure t
@@ -410,7 +437,7 @@
   :init
   (setq projectile-completion-system 'ivy)
   (setq projectile-require-project-root nil)
-  (setq projectile-project-search-path '("~/projects/" "~/workspace/"))
+  (setq projectile-project-search-path '("~/workspace/"))
   :config
   (projectile-mode t))
 
@@ -440,6 +467,11 @@
 ;;   :config
 ;;   (simpleclip-mode))
 
+(use-package zoom-window
+  :ensure t
+  :config
+  (setq zoom-window-mode-line-color "DarkGreen"))
+
 ;; -------------------------
 ;; >>>> for os
 ;; -------------------------
@@ -454,7 +486,15 @@
   :init
   ;; fix for <tab> in terminal (-nw)
   (setq evil-want-C-i-jump nil)
+  ;(setq evil-undo-system 'undo-redo)
+  (global-undo-tree-mode)
+  (setq evil-undo-system 'undo-tree)
   (evil-mode t))
+
+(use-package evil-nerd-commenter
+  :after evil
+  :init
+  (evilnc-default-hotkeys))
 
 (use-package evil-goggles
   :ensure t
@@ -462,10 +502,13 @@
   (evil-goggles-mode)
   (evil-goggles-use-diff-faces))
 
-(use-package exec-path-from-shell
-  :ensure t
-  :config
-  (exec-path-from-shell-initialize))
+; XXX: Takes too much time to load on other envs like WSL
+;(use-package exec-path-from-shell
+;  :ensure t
+;  :init
+;  (setq exec-path-from-shell-arguments '("-l"))
+;  :config
+;  (exec-path-from-shell-initialize))
 
 (use-package add-node-modules-path
   :ensure t
@@ -482,20 +525,37 @@
 
 (use-package company
   :ensure t
+  :after lsp-mode
   :delight
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
+  (:map lsp-mode-map
+        ("<tab>" . company-indent-or-complete-common))
   :custom
   (company-idle-delay 0.1)
   (company-minimum-prefix-length 1)
   (company-tooltip-align-annotations 't)
   (company--show-numbers t)
-  (add-to-list 'company-backends '(company-dabbrev))
+  (add-to-list 'company-backends '(company-tabnine company-capf company-dabbrev company-yasnippet))
+  (setq company-files-exclusions '(".git/"))
   (global-company-mode t))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 
 (use-package company-quickhelp
   :ensure t
   :after company
   :config
   (company-quickhelp-mode 1))
+
+(use-package company-tabnine
+  :ensure t
+  :config
+  ;; Trigger completion immediately.
+  (setq company-idle-delay 0)
+  ;; Number the candidates (use M-1, M-2 etc to select completions).
+  (setq company-show-numbers t))
 
 (use-package flycheck
   :ensure t
@@ -510,7 +570,7 @@
   :ensure t
   :delight yas-minor-mode "ψ"
   :config
-  (add-to-list 'company-backends '(company-yasnippet))
+  ;(add-to-list 'company-backends '(company-yasnippet))
   (yas-global-mode t))
 
 (use-package yasnippet-snippets
@@ -551,6 +611,11 @@
   (setq dimmer-exclusion-regexp "^\*helm.*\\|^ \*Minibuf-.*\\|^ \*Echo.*")
   (dimmer-mode))
 
+(use-package org-mime
+  :ensure t
+  :config
+  (setq org-mime-library 'mml))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => LSP
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -577,15 +642,15 @@
 ;; lsp-ui-flycheck-live-reporting t
 )
 
-(use-package company-lsp
-  :ensure t
-  :config
-  (setq company-lsp-enable-snippet t
-        company-lsp-cache-candidates t)
-  (push 'company-lsp company-backends))
+;; (use-package company-lsp
+  ;; :ensure t
+  ;; :config
+  ;; (setq company-lsp-enable-snippet t
+        ;; company-lsp-cache-candidates t)
+  ;; (push 'company-lsp company-backends))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; => Langs
+;; => Development
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -596,12 +661,19 @@
   :commands python-mode
   :mode ("\\.py\\'" . python-mode))
 
-(use-package lsp-python-ms
+(use-package lsp-pyright
   :ensure t
-  :defer 0.3
   :hook (python-mode . (lambda ()
-                         (require 'lsp-python-ms)
-                         (lsp))))
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+
+;; (use-package lsp-python-ms
+;;   :ensure t
+;;   :defer 0.3
+;;   :init (setq lsp-python-ms-auto-install-server t)
+;;   :hook (python-mode . (lambda ()
+;;                          (require 'lsp-python-ms)
+;;                          (lsp))))
 (use-package pipenv
   :ensure t
   :diminish 'pipenv-mode
@@ -638,10 +710,10 @@
   :ensure t
   :mode ("\\.md$"))
 
-(use-package markdown-mode+
-  :ensure t
-  :after markdown-mode
-  :defer t)
+;; (use-package markdown-mode+
+  ;; :ensure t
+  ;; :after markdown-mode
+  ;; :defer t)
 
 ;; php
 (use-package php-mode
@@ -652,7 +724,12 @@
 (use-package web-mode
   :ensure t
   :commands web-mode
-  :mode ("\\.hbs\\'"
+  :mode ("\\.html$"
+         "\\.hthml?\\'"
+         "\\/css\\'"
+         "\\.js\\'"
+         "\\.php\\'"
+         "\\.hbs\\'"
          "\\.jsx\\'"
          "\\.vue\\'"
          "/\\([Vv]iews\\|[Hh]tml\\|[Tt]emplates\\)/.*\\.php\\'"
@@ -684,18 +761,17 @@
 (my-evil-leader-def
  :states '(normal visual emacs)
   "b"  'ivy-switch-buffer            ;; switch to buffer
-  "ci" 'rgcr/comment-dwim            ;; comment/uncomment
   "e"  'counsel-find-file
   "i"  'highlight-indent-guides-mode
   "k"  'kill-buffer
   "n"  'linum-relative-toggle
   "p"  'projectile-find-file         ;; like ctrl-p
-  "p"  'counsel-yank-pop             ;; fzf - paste
+  "P"  'counsel-yank-pop             ;; fzf - paste
   "q"  'rgcr/kill-this-buffer        ;; close current buffer
   "Q"  'delete-other-windows         ;; close all other windows
   "r"  'rgcr/reload-init-file        ;; reload emacs config
   "s"  'whitespace-mode              ;; toggle invisible characters
-  "s"  'delete-trailing-whitespace
+  "S"  'delete-trailing-whitespace
   "u"  'undo-tree-visualize
   "w"  'save-buffer
   "x"  'rgcr/close-and-kill-this-pane ;; close and kill buffer
@@ -735,6 +811,8 @@
  "."   '(ivy-resume :which-key "Ivy Resume")
  ;; ripgrep
  "/"   '(counsel-rg :which-key "Ripgrep")
+ ;; org-agenda
+ "a"  '(org-agenda :which-key "ORG Agenda")'
  ;; dired
  "d"   '(counsel-dired :which-key "Dired")
  ;; eyebrowse
@@ -931,8 +1009,3 @@ LSP Actions:
   ("8" eyebrowse-switch-to-window-config-8 "ws8")
   ("9" eyebrowse-switch-to-window-config-9 "ws9")
   )
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; => custom faces
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -1,0 +1,42 @@
+(undo-tree-save-format-version . 1)
+"4d62519d401b0ab6c7578863cfa08dcf5c28a469"
+[nil nil nil nil (25655 37027 529131 95000) 0 nil]
+([nil nil ((1095 . 1765) (#("(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(evil-goggles-change-face ((t (:inherit diff-removed))))
+ '(evil-goggles-delete-face ((t (:inherit diff-removed))))
+ '(evil-goggles-paste-face ((t (:inherit diff-added))))
+ '(evil-goggles-undo-redo-add-face ((t (:inherit diff-added))))
+ '(evil-goggles-undo-redo-change-face ((t (:inherit diff-changed))))
+ '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-removed))))
+ '(evil-goggles-yank-face ((t (:inherit diff-changed)))))" 0 670 (fontified nil)) . -1095) (1092 . 1094) (#("
+" 0 1 (fontified nil)) . -1092) (375 . 1093) (#(" " 0 1 (fontified nil)) . 375) (102 . 376) (#("(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(zoom-window company-tabnine lsp-pyright dap-mode web-mode php-mode markdown-mode+ flycheck-ledger ledger-mode vimrc-mode yaml-mode json-mode pipenv lsp-python-ms python-mode company-lsp lsp-ui lsp-mode dimmer smartparens magit rainbow-delimiters highlight-indent-guides ivy-yasnippet yasnippet-snippets yasnippet flycheck company-quickhelp company diff-hl add-node-modules-path exec-path-from-shell evil-goggles evil daemons eyebrowse neotree counsel-projectile projectile which-key general ace-window hydra ivy-rich counsel swiper ivy org-autolist org-bullets undo-tree delight quelpa centaur-tabs color-identifiers-mode spaceline doom-themes linum-relative hl-todo use-package)))" 0 960 (fontified nil)) . -102) (t 25644 45102 636363 779000)) nil (25655 37027 529122 985000) 0 nil])
+([nil current ((1104 . 1774) (#("(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(evil-goggles-change-face ((t (:inherit diff-removed))))
+ '(evil-goggles-delete-face ((t (:inherit diff-removed))))
+ '(evil-goggles-paste-face ((t (:inherit diff-added))))
+ '(evil-goggles-undo-redo-add-face ((t (:inherit diff-added))))
+ '(evil-goggles-undo-redo-change-face ((t (:inherit diff-changed))))
+ '(evil-goggles-undo-redo-remove-face ((t (:inherit diff-removed))))
+ '(evil-goggles-yank-face ((t (:inherit diff-changed)))))" 0 670 (fontified nil)) . -1104) (1101 . 1103) (#("
+" 0 1 (fontified nil)) . -1101) (375 . 1102) (#(" " 0 1 (fontified nil)) . 375) (102 . 376) (#("(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(company-box evil-nerd-commenter zoom-window company-tabnine lsp-pyright dap-mode web-mode php-mode markdown-mode+ flycheck-ledger ledger-mode vimrc-mode yaml-mode json-mode pipenv lsp-python-ms python-mode company-lsp lsp-ui lsp-mode dimmer smartparens magit rainbow-delimiters highlight-indent-guides ivy-yasnippet yasnippet-snippets yasnippet flycheck company-quickhelp company diff-hl add-node-modules-path exec-path-from-shell evil-goggles evil daemons eyebrowse neotree counsel-projectile projectile which-key general ace-window hydra ivy-rich counsel swiper ivy org-autolist org-bullets undo-tree delight quelpa centaur-tabs color-identifiers-mode spaceline doom-themes linum-relative hl-todo use-package)))" 0 992 (fontified nil)) . -102) (t 25669 34100 622326 158000)) nil (25669 38328 802112 185000) 0 nil])
+nil

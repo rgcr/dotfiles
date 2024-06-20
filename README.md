@@ -1,4 +1,4 @@
-My personal configuration
+My configuration
 =========================
 
 Requirements
@@ -15,6 +15,7 @@ Contains dotfiles for
 ------------
 * `zsh`: I use [antibody](https://github.com/getantibody/antibody) as plugin manager
 * `vim`: I use [vim-plug](https://github.com/junegunn/vim-plug) as plugin manager
+* `nvim`
 * `tmux`
 * `ag`
 * `i3`: Arch

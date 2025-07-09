@@ -1,0 +1,8 @@
+node_modules/
+# mac
+Library/
+Pictures/
+.DS_Store
+.npm
+.cache
+

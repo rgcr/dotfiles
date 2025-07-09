@@ -1,7 +1,18 @@
 [alias]
+    # show aliases
+    alias = config --get-regexp ^alias
+    # shortcut to diff
     d = diff
+    #  ranking of commits
     rank = shortlog -sn --no-merges
-    lh = log --color --graph --pretty=format:'%C(red)%h%C(reset) %C(green)(%ai)%C(reset) %C(yellow)|%C(reset) %s %C(bold blue)<%an> %C(red)%d' --abbrev-commit
-    lol = log --color --graph --pretty=format:'%C(red)%h%C(reset) %C(green)(%ar)%C(reset) %C(yellow)|%C(reset) %s %C(bold blue)<%an> %C(red)%d' --abbrev-commit
+    # show pretty log
+    lol = log --color --graph --pretty=format:'%C(red)%h%C(reset) %C(green)(%ai)%C(reset) %C(yellow)|%C(reset) %s %C(bold blue)<%an> %C(red)%d' --abbrev-commit
+    # show pretty log with relative time
+    lh = log --color --graph --pretty=format:'%C(red)%h%C(reset) %C(green)(%ar)%C(reset) %C(yellow)|%C(reset) %s %C(bold blue)<%an> %C(red)%d' --abbrev-commit
+    # force pull with rebase and autostash
+    pullf = pull --rebase --autostash
+    # show files in commits
+    show-files = show --name-only --pretty=""
+    ; show-files
 
 # vim: ft=gitconfig

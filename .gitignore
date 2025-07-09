@@ -1,3 +1,15 @@
+# nvim
+lazy-lock.json
+
+# vim
 vim/.vim/undodir
 vim/.vim/autoload
 vim/.vim/plugged
+
+# emacs
+*.~undo-tree~
+emacs/.emacs.d/elpa
+emacs/.emacs.d/places
+emacs/.emacs.d/projectile*
+emacs/.emacs.d/recentf
+emacs/.emacs.d/transient

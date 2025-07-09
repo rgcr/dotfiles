@@ -1,15 +1,6 @@
 mafredri/zsh-async
 sindresorhus/pure
 sharat87/zsh-vim-mode
-knu/z
-robbyrussell/oh-my-zsh path:plugins/vagrant
-robbyrussell/oh-my-zsh path:plugins/docker
-robbyrussell/oh-my-zsh path:plugins/docker-compose
-robbyrussell/oh-my-zsh path:plugins/ruby
-robbyrussell/oh-my-zsh path:plugins/pip
-robbyrussell/oh-my-zsh path:plugins/django
-# nodejs
-# robbyrussell/oh-my-zsh path:plugins/yarn
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
 zsh-users/zsh-syntax-highlighting

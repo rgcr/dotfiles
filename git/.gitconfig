@@ -1,0 +1,10 @@
+[init]
+    defaultBranch = main
+[pull]
+    ff = true
+    rebase = true
+[credential]
+    helper = cache --timeout=999999
+# Aliases
+[include]
+path = ~/.gitalias

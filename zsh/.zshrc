@@ -3,7 +3,7 @@ set -o vi
 
 # ZSH_UNAME=$(uname)
 
-autoload -Uz compinit 
+autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24)  ]]
 then
     compinit;
@@ -28,10 +28,13 @@ bindkey '^R' history-incremental-search-backward
 # vi-mode, search on hisotry with '?'
 bindkey -M vicmd '?' history-incremental-search-backward
 
+bindkey '\e[H'  beginning-of-line
+bindkey '\e[F'  end-of-line
+
 # source ~/.zsh/thzshrcemes/rho.zsh-theme
 
 # antibody plugins
-[ ! -f "${HOME}/.zsh_plugins.sh" ] || source "${HOME}/.zsh_plugins.sh"
+[ -e "${HOME}/.zsh_plugins.sh" ] && source "${HOME}/.zsh_plugins.sh"
 
 
 #############################################
@@ -97,10 +100,15 @@ setopt share_history
 #               Source
 #############################################
 
-[ ! -f "${HOME}/.aliases.sh" ] || source "${HOME}/.aliases.sh"
-[ ! -f "${HOME}/.exports.sh" ] || source "${HOME}/.exports.sh"
-[ ! -f "${HOME}/.functions.sh" ] || source "${HOME}/.functions.sh"
-[ ! -f "${HOME}/.completions.sh" ] || source "${HOME}/.completions.sh"
+[ -e "${HOME}/.aliases.sh" ] && source "${HOME}/.aliases.sh"
+[ -e "${HOME}/.exports.sh" ] && source "${HOME}/.exports.sh"
+[ -e "${HOME}/.functions.sh" ] && source "${HOME}/.functions.sh"
+[ -e "${HOME}/.completions.sh" ] && source "${HOME}/.completions.sh"
+
+# Adding path with custom function to avoid duplicates
+path add ${HOME}/.local/bin
+path add ${HOME}/.yarn/bin
+path add ${HOME}/.cargo/bin
 
 # local config
-[ ! -f "${HOME}/.profile.local" ] || source "${HOME}/.profile.local"
+[ -e "${HOME}/.profile.local" ] && source "${HOME}/.profile.local"

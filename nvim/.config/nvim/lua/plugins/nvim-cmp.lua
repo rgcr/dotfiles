@@ -70,6 +70,7 @@ cmp.setup {
     { name = 'luasnip' },
     { name = 'path' },
     { name = 'buffer' },
+    { name = 'emoji' },
   },
 }
 -- Load snippets from my-snippets folder

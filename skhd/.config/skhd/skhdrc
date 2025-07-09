@@ -1,0 +1,48 @@
+# vim: set ft=sh ts=4 sw=4 tw=0 et :
+
+# application specific bindings
+#
+# cmd - n [
+#     "kitty"       : echo "hello kitty"
+#     *             : echo "hello everyone"
+#     "qutebrowser" : echo "hello qutebrowser"
+#     "terminal"    ~
+#     "finder"      : false
+# ]
+
+# prevent skhd from monitoring events for specific applications.
+#
+# .blacklist [
+#    "kitty"
+#    "terminal"
+#    "qutebrowser"
+# ]
+
+# Quit any application
+# cmd + shift - q : osascript -e 'tell application (path to frontmost application as text) to quit'
+
+# open terminal, blazingly fast compared to iTerm/Hyper
+# cmd - return : /Applications/iTerm.app/Contents/MacOS/iTerm2
+
+# minimize all windows (cmd + alt + d)
+# cmd + alt - d : open ~/minimize_all.app
+
+# # Focus on terminal (cmd + alt + '.' or cmd + alt + ',')
+# ctrl + alt - 0x2F : osascript -e 'tell application "iTerm2" to activate'
+# ctrl + alt - 0x2B : osascript -e 'tell application "iTerm2" to activate'
+#
+# # Focus on Browsers
+# ctrl + alt - f : osascript -e 'tell application "firefox" to activate'
+# ctrl + alt - c : osascript -e 'tell application "Google Chrome" to activate'
+#
+# # Focus on MS applications
+# ctrl + alt - m : osascript -e 'tell application "Microsoft Outlook" to activate' -e 'set miniaturized of windows to false'
+# ctrl + alt - t : osascript -e 'tell application "Microsoft Teams" to activate' -e 'set miniaturized of windows to false'
+# ctrl + alt - o : osascript -e 'tell application "Microsoft OneNote" to activate' -e 'set miniaturized of windows to false'
+#
+# # Focus on finder
+# ctrl + alt - e : osascript -e 'tell application "Finder" to activate' -e 'set miniaturized of windows to false'
+#
+# # Focus on VSCode
+# ctrl + alt - v : osascript -e 'tell application "Visual Studio Code" to activate' -e 'set miniaturized of windows to false'
+

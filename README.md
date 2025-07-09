@@ -1,43 +1,82 @@
-My configuration
-=========================
+# My Personal Configuration
 
-Requirements
-------------
+I use [**GNU Stow**](https://www.gnu.org/software/stow/) to handle my dotfiles.
 
-* [stow](https://www.gnu.org/software/stow/)
+### 📦 Installation
+- **macOS**:  
+  ```bash
+  brew install stow
+  ```
 
-    **Installation from Mac:** `brew install stow`
+- **Arch Linux**:  
+  ```bash
+  pacman -S stow
+  ```
 
-    **Installation from Arch Linux:** `pacman -S stow`
+---
 
+## Requirements
 
-Contains dotfiles for
-------------
-* `zsh`: I use [antibody](https://github.com/getantibody/antibody) as plugin manager
-* `vim`: I use [vim-plug](https://github.com/junegunn/vim-plug) as plugin manager
-* `nvim`
-* `tmux`
-* `ag`
-* `i3`: Arch
-* `slate`: MacOS
+### 📝 `vim-plug` for Vim
 
+```bash
+mkdir -p ~/.vim/autoload
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
 
-Installation
--------------
+### 🧬 `antibody` for ZSH (optional)
 
-1. `cd ~; git clone https://github.com/rgcr/dotfiles .dotfiles`
-2. `cd .dotfiles; chmod +x bootstrap.sh; ./boostrap.sh`
+*(May need to install manually as it's not in all package managers)*
 
+```bash
+curl -sL git.io/antibody | sh -s
+```
 
+---
 
-**Note:** If you want to copy only certain configuration just run `stow -R config-that-i-want`
+## Installation
 
-**Example:**
-  `stow -d . -t ~ -R zsh`
+### 🔗 Link the config you want
 
+```bash
+stow --no-folding -d . -t ~ -vR <config>
+```
 
+Example:
 
-My terminal, it's pretty simple but functional for me.
------------
-<img alt="terminal" src="https://private-user-images.githubusercontent.com/1203422/341237487-6dd2a833-6498-461c-b0be-be36f066c87a.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTg4NDcyMzQsIm5iZiI6MTcxODg0NjkzNCwicGF0aCI6Ii8xMjAzNDIyLzM0MTIzNzQ4Ny02ZGQyYTgzMy02NDk4LTQ2MWMtYjBiZS1iZTM2ZjA2NmM4N2EucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDYyMCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA2MjBUMDEyODU0WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9ZDhiOTc0MDM4ZWI4MTE2NjFhZGVlZTllNjc5NTdlYTM2MWY2YTI5ZTBlOTVkNmY4MWYyNzE3YWNhN2NmOTYyZCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.H4hTADJ7ZTZ4Bzcf2o_eBy2B8RJGaiqFA-CbM8VFVy4">
+```bash
+stow --no-folding -d . -t ~ -vR zsh
+```
 
+### To remove a specific config
+
+```bash
+stow --no-folding -d . -t ~ -vD <config>
+```
+
+### To remove all configs
+
+```bash
+stow --no-folding -d . -t ~ -vD *
+```
+
+> ⚠️ **Do not use `bootstrap.sh`**, as it may break your current configuration.
+
+---
+
+## Notes
+
+### ⚙️ ZSH config requires `antibody` to install plugins
+
+Once deployed, install plugins with:
+
+```bash
+antibody -sync --force
+```
+
+### 💡 `i3-hibernate` config requires `sudo` privileges
+
+```bash
+sudo rsync -rvzh i3-hibernate/ /
+```

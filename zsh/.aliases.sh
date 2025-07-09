@@ -1,18 +1,15 @@
 #############################################
 #               Aliases
 #############################################
-#
-# source zshrc
-alias reload='source ~/.zshrc'
-
 # General {{{
 # I hate the 'whence' function
 # command which which>/dev/null 2>&1 && {
     # alias which="$(command which which)"
 # }
 
-alias ls='ls --color=always'
+
 # alias :q='exit'
+alias ls='ls --color=always'
 alias ..='cd ..'
 alias ...='cd ../../'
 alias ll='ls -l'
@@ -20,14 +17,21 @@ alias lla='ls -la'
 alias week='date +%V'
 # }}}
 
+# 'man' formmat for bat to pipe '--help' outputs
+alias batman='bat --language=man --style=plain --paging=always --theme=TwoDark'
+
+# alias for my dotfiles
+alias boostrap-config='stow --no-folding -d . -t ~ -vR'
+
 # systemctl {{{
-alias s='sudo systemctl'
+alias ctl='sudo systemctl'
 # }}}
 
+#
 # vim / neovim {{{
 alias v='vim'
 alias n='nvim'
-alias vo='vim $(fzf)'
+alias nn='nvim $(FZF_DEFAULT_COMMAND="rg --files --hidden --ignore-vcs -L" fzf)'
 # }}}
 
 # git {{{
@@ -37,6 +41,8 @@ alias gb='git branch -v'
 alias gd='git diff'
 alias gp='git pull'
 alias gpom='git pull origin master'
+alias git-name='git config user.name'
+alias git-email='git config user.email'
 # }}}
 
 # docker {{{
@@ -49,8 +55,9 @@ alias tks='tmux kill-session -t'
 # }}}
 
 # python {{{
-alias py='python'
-alias lsvirtualenv='lsvirtualenv -b'
+# alias py='python'
+# alias lsvirtualenv='lsvirtualenv -b'
+# alias pip='_pip'
 # }}}
 
 # Django {{{
@@ -79,4 +86,26 @@ alias j="jobs -l"
 # better pgrep
 alias pgrep='pgrep -fl'
 
+# Arch yay package manager and fzf {{{
+# search and install package
+alias ys='fyay'
+# search and remove package
+alias yr='fyay_rm'
+# }}}
+
+# MacOS
 alias b='brew'
+
+# emacs
+alias em='emacs -nw'
+
+# sudo
+# alias s='sudo'
+
+# yazi
+alias yz='yazi'
+
+# copilot
+alias gce='gh copilot explain'
+alias gcs='gh copilot suggest'
+

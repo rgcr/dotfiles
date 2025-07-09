@@ -1,0 +1,9 @@
+configuration {
+  /* rofi.width: 60 */
+  /* rofi.columns: 2 */
+  lines: 20;
+  width: 500px;
+}
+// @theme "rounded-blue-dark"
+// @theme "windows11-list-dark"
+@theme "spotlight"

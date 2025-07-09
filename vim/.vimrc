@@ -291,8 +291,8 @@ augroup vimrc
   autocmd InsertEnter * silent! match ExtraWhitespace /\s\+\%#\@<!$/
 
   " warn for lines that exceed 80 column line
-  autocmd BufWinEnter * let w:m1=matchadd('search', '\%<82v.\%>81v', -1)
-  autocmd BufWinEnter * let w:m2=matchadd('errormsg', '\%>81v.\+', -1)
+  " autocmd BufWinEnter * let w:m1=matchadd('search', '\%<82v.\%>81v', -1)
+  " autocmd BufWinEnter * let w:m2=matchadd('errormsg', '\%>81v.\+', -1)
 
   " Unset paste on InsertLeave 
   autocmd InsertLeave * silent! set nopaste

@@ -27,7 +27,7 @@ opt.wildignore = {
 	'*/*.dsym/*','', '*.dylib'
 }
 
-opt.tags = ".tags,./.git/tags"
+opt.tags = "./tags;,./.tags;,./.git/tags;"
 opt.undodir = fn.expand('~/.config/undodir.nvim')
 opt.undofile = true
 
@@ -51,6 +51,7 @@ opt.linebreak = true        -- Wrap on word boundary
 opt.termguicolors = true    -- Enable 24-bit RGB colors
 -- opt.laststatus = 2            -- statusline
 opt.laststatus = 3            -- Set global statusline
+opt.list = false -- Show whitespace characters
 
 -----------------------------------------------------------
 -- Tabs, indent
@@ -65,7 +66,7 @@ opt.smartindent = true      -- Autoindent new lines
 -----------------------------------------------------------
 opt.hidden = true           -- Enable background buffers
 opt.history = 100           -- Remember N lines in history
-opt.lazyredraw = true       -- Faster scrolling
+opt.lazyredraw = false      -- Faster scrolling
 opt.synmaxcol = 240         -- Max column for syntax highlight
 opt.updatetime = 250        -- ms to wait for trigger an event
 

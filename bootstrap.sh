@@ -11,6 +11,18 @@ _die(){
     exit 1
 }
 
+_confirm(){
+    read -r -p "${1:-Are you sure? [y/N]} " response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
 _backup(){
     mkdir -p ${BACKUPDIR}
     for f in ${HOME}/.zshrc* ${HOME}/.vim* ${HOME}/.i3* ${HOME}/.tmux* ${HOME}/.zplug*; do
@@ -22,43 +34,37 @@ _deploy(){
     # deploy dotfiles with stow
     printf "\nRestow dotfiles\n"
     for d in $(find . -mindepth 1 -maxdepth 1 ! -path ./.git ! -path i3-hibernate -type d -printf "%f\n"); do
-        stow -v -R ${d} -d . -t ~
+        stow --no-folding -vR ${d} -d . -t ~
     done
 }
 
-_caveat(){
+_msg(){
     cat <<_EOL_
 
-- i3-hibernate requries root permisions
+    - i3-hibernate requries root permisions, Don't deploy it using stow
     sudo rsync -rvzh i3-hibernate/ /
 
-- Install antibody
+    - Install antibody
     curl -sL git.io/antibody | sh -s
 
-- Install vim-plug on vim
+    - vim-plug for VIM:
     mkdir -p ~/.vim/autoload;
     curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-- Install vim-plug on neovim
-    mkdir -p ~/.config/nvim/;
-    curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-- Install all plugins automatically:
+    # Install all plugins automatically:
     vim +PlugInstall +qall
-
 
 _EOL_
 }
 
-##
+#mkdir -p ${HOME}/.vim/
+#mkdir -p ${HOME}/.emacs.d/
 
 if ! _has "stow"; then
     _die '"stow" not found, you need to install stow'
 fi
 
-rm -fv ${HOME}/.zcompdump*
-
 # _backup
-_deploy
-_caveat
+_confirm && _deploy
+_msg
 

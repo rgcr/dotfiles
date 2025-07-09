@@ -12,7 +12,7 @@ SAVEHIST=50000
     export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 }
 
-export EDITOR=vim
+export EDITOR=nvim
 
 # virtualenvwrapper {{{
 unset  VIRTUAL_ENV_DISABLE_PROMPT
@@ -24,7 +24,7 @@ export NVM_DIR=~/.nvm
 
 # FZF {{{
 # export FZF_DEFAULT_COMMAND='ag -g ""'
-export FZF_DEFAULT_COMMAND='rg --files --ignore-vcs'
+# export FZF_DEFAULT_COMMAND='rg --ignore-vcs'
 # }}}
 
 export PYTHONDONTWRITEBYTECODE=1

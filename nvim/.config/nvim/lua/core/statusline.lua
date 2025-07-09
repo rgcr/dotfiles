@@ -64,7 +64,7 @@ local filename = {
 
 local function pastemode()
   if vim.o.paste then
-    return '[P]'
+    return '%#IncSearch#[P]'
   end
   return ''
 end
@@ -78,7 +78,7 @@ lualine.setup({
     section_separators = { left = '', right = '' },
     -- component_separators = { left = '', right = '' },
 		component_separators = { left = "|", right = "" },
-		disabled_filetypes = { "alpha", "dashboard", "NvimTree", "Outline" },
+		disabled_filetypes = { "alpha", "dashboard", "NvimTree", "neo-tree","Outline" },
 		always_divide_middle = true,
 	},
 	sections = {
@@ -99,7 +99,7 @@ lualine.setup({
 		lualine_z = {},
 	},
 	tabline = {},
-	extensions = { "nvim-tree" },
+	extensions = { },
 })
 
 options = {

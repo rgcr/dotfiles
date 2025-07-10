@@ -104,7 +104,7 @@ utils.tnoremap('<Esc>', '<C-\\><C-n>', { desc = "Exit Terminal Mode" })
 
 -- Close terminal (ctrl-t or ctrl-x)
 utils.tnoremap('<C-t>', utils.close_terminal, { desc = "Close Terminal" })
-utils.tnoremap('<leader>t', utils.close_terminal, { desc = "Close Terminal" })
+utils.tnoremap('<C-x>', utils.close_terminal, { desc = "Close Terminal" })
 
 
 -- NvimTree

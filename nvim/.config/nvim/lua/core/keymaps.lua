@@ -96,24 +96,16 @@ utils.nnoremap('B', 'i<CR><esc>k$' , { desc = "Split Current Line" })
 -----------------------------------------------------------
 
 -- Open a terminal (ctrl-t)
-utils.nnoremap('<C-t>', function()
-  local shell = os.getenv("SHELL") or vim.o.shell
-  vim.cmd("botright split term://" .. shell)
-  vim.cmd("startinsert")
-end, { desc = "Open Terminal" })
+utils.nnoremap('<C-t>', utils.open_terminal, { desc = "Open Terminal" })
+utils.nnoremap('<leader>t', utils.open_terminal, { desc = "Open Terminal" })
 
 -- Esc to exit terminal mode (this doesn't close the terminal)
 utils.tnoremap('<Esc>', '<C-\\><C-n>', { desc = "Exit Terminal Mode" })
 
 -- Close terminal (ctrl-t or ctrl-x)
-utils.tnoremap('<C-t>', function()
-  vim.api.nvim_chan_send(vim.b.terminal_job_id, "exit\n")
-end, { desc = "Close Terminal" })
-utils.tnoremap('<C-x>', function()
-  vim.api.nvim_chan_send(vim.b.terminal_job_id, "exit\n")
-end, { desc = "Close Terminal" })
+utils.tnoremap('<C-t>', utils.close_terminal, { desc = "Close Terminal" })
+utils.tnoremap('<leader>t', utils.close_terminal, { desc = "Close Terminal" })
 
--- utils.tnoremap('<Esc>', '<C-\\><C-n>') -- exit terminal mode
 
 -- NvimTree
 utils.nnoremap('<space>n', ':Neotree toggle=true<CR>', { desc = "Toggle Neotree" })
@@ -122,7 +114,7 @@ utils.nnoremap('<space>n', ':Neotree toggle=true<CR>', { desc = "Toggle Neotree"
 utils.nnoremap('<leader>i', ':IBLToggle<CR>', { desc = "Toggle Indent Blankline" })
 
 -- Tagbar
-utils.nnoremap('<leader>t', ':Vista!!<CR>', { desc = "Toggle Tagbar" })
+utils.nnoremap('<space>T', ':Vista!!<CR>', { desc = "Toggle Tagbar" })
 
 -- nvim-window
 utils.nnoremap('-', ':lua require("nvim-window").pick()<CR>', { desc = "Pick Window" })

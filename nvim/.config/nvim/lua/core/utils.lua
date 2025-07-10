@@ -10,6 +10,16 @@
 
 local M = {}
 
+function M.open_terminal()
+  local shell = os.getenv('SHELL') or vim.o.shell
+  vim.cmd('botright split term://' .. shell)
+  vim.cmd('startinsert')
+end
+
+function M.close_terminal()
+  vim.api.nvim_chan_send(vim.b.terminal_job_id, 'exit\n')
+end
+
 function M.close_buffer()
   local bufnr = vim.api.nvim_get_current_buf()
   local listed = vim.fn.getbufinfo({ buflisted=1 })

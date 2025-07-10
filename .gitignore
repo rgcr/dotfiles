@@ -13,3 +13,6 @@ emacs/.emacs.d/places
 emacs/.emacs.d/projectile*
 emacs/.emacs.d/recentf
 emacs/.emacs.d/transient
+
+# mac
+.DS_Store

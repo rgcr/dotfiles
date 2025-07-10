@@ -93,9 +93,24 @@ utils.nnoremap('B', 'i<CR><esc>k$' , { desc = "Split Current Line" })
 -- Applications and Plugins shortcuts
 -----------------------------------------------------------
 
+-- Open a terminal (ctrl-t)
+utils.nnoremap('<C-t>', function()
+  local shell = os.getenv("SHELL") or vim.o.shell
+  vim.cmd("botright split term://" .. shell)
+  vim.cmd("startinsert")
+end, { desc = "Open Terminal" })
 
--- Terminal mappings
--- utils.nnoremap('<C-t>', ':Term<CR>') -- open terminal
+-- Esc to exit terminal mode (this doesn't close the terminal)
+utils.tnoremap('<Esc>', '<C-\\><C-n>', { desc = "Exit Terminal Mode" })
+
+-- Close terminal (ctrl-t or ctrl-x)
+utils.tnoremap('<C-t>', function()
+  vim.api.nvim_chan_send(vim.b.terminal_job_id, "exit\n")
+end, { desc = "Close Terminal" })
+utils.tnoremap('<C-x>', function()
+  vim.api.nvim_chan_send(vim.b.terminal_job_id, "exit\n")
+end, { desc = "Close Terminal" })
+
 -- utils.tnoremap('<Esc>', '<C-\\><C-n>') -- exit terminal mode
 
 -- NvimTree
@@ -147,6 +162,12 @@ utils.nnoremap('<leader>cc', ":lua require('neogen').generate()<CR>", { desc = "
 
 -- inc-rename
 utils.nnoremap('<leader>rn', ":IncRename ", { desc = "Rename Symbol" })
+
+-- oil.nvim
+utils.nnoremap('<space>o', function()
+  require('oil').open_float()
+end, { desc = "Open Oil" })
+-- utils.nnoremap('<space>o', ':Oil<CR>', { desc = "Open Oil" })
 
 
 -- goto-preview keeymaps

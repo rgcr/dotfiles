@@ -80,6 +80,23 @@ lazy.setup({
       },
     },
 
+    -- oil.nvim
+    {
+      'stevearc/oil.nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons',
+      },
+      opts = {
+        default_file_explorer = false,
+        view_options = {
+          show_hidden = true,
+        },
+      },
+      config = function(_, opts)
+        require('oil').setup(opts)
+      end,
+    },
+
     -- Statusline
     {
       -- 'freddiehaddad/feline.nvim',
@@ -404,6 +421,8 @@ lazy.setup({
     -- -- -- -- -- -- -- -- --
 
     { 'tpope/vim-repeat'  },
+
+    { 'tpope/vim-fugitive' },
 
     -- Tag viewer
     -- { 'preservim/tagbar' },

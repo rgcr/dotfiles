@@ -62,7 +62,9 @@ utils.nnoremap( '<leader>R', ':so %<CR>', { desc = "Reload Configuration" })
 utils.nnoremap('<leader>w', ':w<CR>', { desc = "Save File" })
 
 -- Close current buffer (without close the window)
-utils.nnoremap('<leader>q', ':bp<bar>bd#<CR>', { desc = "Close Current Buffer" })
+-- utils.nnoremap('<leader>q', ':bp<bar>bd#<CR>', { desc = "Close Current Buffer" }) -- this is not like vim
+utils.nnoremap('<leader>q', utils.close_buffer, { desc = "Close Current Buffer" }) -- this is like vim
+
 
 -- Close all windows and exit from Neovim with <leader> and q
 utils.nnoremap('<leader>Q', ':qa!<CR>', { desc = "Quit Neovim" })

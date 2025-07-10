@@ -10,6 +10,16 @@
 
 local M = {}
 
+function M.close_buffer()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local listed = vim.fn.getbufinfo({ buflisted=1 })
+  if #listed > 1 then
+    vim.cmd('bp | bd' .. bufnr)
+  else
+    vim.cmd('enew | bd' .. bufnr)
+  end
+end
+
 function M.map(mode, lhs, rhs, opts)
     opts = opts or {}
     vim.keymap.set(mode, lhs, rhs, opts)

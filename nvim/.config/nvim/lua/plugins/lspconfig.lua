@@ -143,7 +143,7 @@ end
 -- map buffer local keybindings when the language server attaches.
 -- Add your language server below:
 -- local servers = { 'bashls', 'pylsp', 'clangd', 'html', 'cssls', 'tsserver' }
-local servers = { 'bashls', 'clangd', 'cssls', 'pyright','ts_ls', 'phpactor' }
+local servers = { 'bashls', 'clangd', 'cssls', 'pyright','ts_ls', 'phpactor', 'gopls' }
 
 -- Call setup
 for _, k in ipairs(servers) do

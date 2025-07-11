@@ -35,6 +35,8 @@ utils.inoremap('jk', '<Esc>', { desc = "Exit Insert Mode with jk" })
 utils.inoremap('jj', '<Esc>', { desc = "Exit Insert Mode with jj" })
 utils.inoremap('kk', '<Esc>', { desc = "Exit Insert Mode with kk" })
 
+utils.nnoremap('<leader>rr', [[:%s/<C-r><C-w>//g<Left><Left>]], { desc = "Replace word under cursor" })
+
 -- Toggle auto-rndenting for code paste
 utils.nnoremap('<leader>p', ':silent! set invpaste paste?<CR>', { desc = "Toggle Paste Mode" })
 
@@ -56,7 +58,7 @@ utils.nnoremap('<C-l>', '<C-w>l', { desc = "Move to right split" })
 -- utils.nnoremap('', '<C-w>L')
 
 -- Reload configuration without restart nvim
-utils.nnoremap( '<leader>R', ':so %<CR>', { desc = "Reload Configuration" })
+utils.nnoremap( '<leader>R', ':ReloadConfig<CR>', { desc = "Reload Configuration" })
 
 --  Save file
 utils.nnoremap('<leader>w', ':w<CR>', { desc = "Save File" })
@@ -131,6 +133,7 @@ utils.nnoremap('<leader>g', '<cmd>Telescope git_commits<cr>', { desc = "Show Git
 
 utils.nnoremap('<leader>b', '<cmd>Telescope buffers<cr>', { desc = "Show Buffers" })
 utils.nnoremap('<leader>o', '<cmd>Telescope oldfiles<cr>', { desc = "Show Old Files" })
+utils.nnoremap('<C-O>', '<cmd>Telescope oldfiles<cr>', { desc = "Show Old Files" })
 
 -- bufferline.nvim
 utils.nnoremap('<leader>1', '<cmd>BufferLineGoToBuffer 1<CR>', { desc = "Go to Buffer 1" })

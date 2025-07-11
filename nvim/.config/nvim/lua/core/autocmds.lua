@@ -132,6 +132,17 @@ autocmd("FileType", {
   end,
 })
 
+-- Replace word under cursor globally, requires confirmation
+usercmd("ReplaceWord", function()
+  local word = vim.fn.expand("<cword>")
+  local replacement = vim.fn.input("Replace \"" .. word .. "\" with: ")
+  if replacement ~= "" then
+    -- vim.cmd(string.format("%%s/\\<%s\\>/%s/g", vim.fn.escape(word, "/\\"), vim.fn.escape(replacement, "/\\")))
+    vim.cmd(string.format("%%s/\\<%s\\>/%s/gc", vim.fn.escape(word, "/\\"), vim.fn.escape(replacement, "/\\")))
+  end
+end, { desc = "Replace word under cursor globally" })
+
+
 -- Ruff commands for Python filetypes
 augroup("RuffCmds", { clear = true })
 autocmd("FileType", {

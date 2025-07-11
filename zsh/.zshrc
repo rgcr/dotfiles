@@ -3,6 +3,7 @@ set -o vi
 
 # ZSH_UNAME=$(uname)
 
+# completion cache
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24)  ]]
 then
@@ -33,8 +34,8 @@ bindkey '\e[F'  end-of-line
 
 # source ~/.zsh/thzshrcemes/rho.zsh-theme
 
-# antibody plugins
-[ -e "${HOME}/.zsh_plugins.sh" ] && source "${HOME}/.zsh_plugins.sh"
+[ -e "${HOME}/.local/bin/antidote.sh" ] && source "${HOME}/.local/bin/antidote.sh"
+antidote load ${ZDOTDIR:-$HOME}/.zsh_plugins.txt
 
 
 #############################################

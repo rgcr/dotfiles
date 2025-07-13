@@ -37,12 +37,12 @@ alias nn='nvim $(fzf)'
 
 # git {{{
 alias g='git'
+alias ga='git add'
 alias gc='git commit -m'
-alias gst='git status'
 alias gb='git branch -v'
 alias gd='git diff'
 alias gp='git pull'
-alias gpom='git pull origin master'
+alias gst='git status'
 alias git-user='git config user.name'
 alias git-name='git config user.name'
 alias git-email='git config user.email'
@@ -112,4 +112,3 @@ alias yz='yazi'
 # copilot
 alias gce='gh copilot explain'
 alias gcs='gh copilot suggest'
-

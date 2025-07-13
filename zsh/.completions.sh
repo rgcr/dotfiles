@@ -5,6 +5,7 @@
 # git {{{
 compdef g=git
 compdef _git gd=git-diff
+compdef _git ga=git-add
 # }}} -- end git
 
 # tmux {{{

@@ -37,6 +37,7 @@ alias nn='nvim $(fzf)'
 
 # git {{{
 alias g='git'
+alias gc='git commit -m'
 alias gst='git status'
 alias gb='git branch -v'
 alias gd='git diff'

@@ -87,7 +87,7 @@ lazy.setup({
         'nvim-tree/nvim-web-devicons',
       },
       opts = {
-        default_file_explorer = false,
+        default_file_explorer = true,
         view_options = {
           show_hidden = true,
         },

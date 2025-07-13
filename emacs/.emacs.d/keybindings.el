@@ -191,19 +191,30 @@
 ;; Magit
 (defhydra hydra-magit (:color blue :hint nil)
   "
-      Magit: %(magit-get \"remote\" \"origin\" \"url\")
-
+ Repo:  %(magit-get \"remote\" \"origin\" \"url\")
+^─────^───────────────────────────────────────────^
+^
 ^Magit^
-^─────^───────────────────────────
-_b_ blame   _i_ init   _s_ status
-_c_ clone   _p_ pull
+^
+_s_tatus   _b_ranch  _f_etch  _p_ull
+^
+_c_ommit   _d_iff     _l_og    _P_ush
+^
+^
+_q_: Quit
 "
   ("s" magit-status)
-  ("b" magit-blame)
-  ("c" magit-clone)
-  ("i" magit-init)
+  ("b" magit-branch)
+  ("f" magit-fetch)
   ("p" magit-pull)
-  ("q" nil))
+  ("c" magit-commit)
+  ("d" magit-diff)
+  ("l" magit-log)
+  ("t" magit-show-commit-tree)
+  ("P" magit-push)
+  ("t" magit-tree)
+  ("q" nil)
+)
 
 
 ;; yasnippet

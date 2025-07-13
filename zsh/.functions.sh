@@ -137,23 +137,14 @@ pmrsp() { PORT=${1:-8000}; python manage.py runserver_plus 0.0.0.0:${PORT}  }
 #######################################
 # {{{
 
-# fzf, open selected file with the default editor
-fv() {
-    ${EDITOR:-vim} $(FZF_DEFAULT_COMMAND='rg --files --hidden --ignore-vcs -L' fzf)
-}
-
 # fd - cd to selected directory
 fcd() {
   local dir
   dir=$(find ${1:-.} -type d 2>/dev/null | fzf --prompt="Cd to > ")
   [[ -n "$dir" ]] && cd "$dir"
 }
+alias ccd='fcd'
 
-# fcda - including hidden directories
-fda() {
-    local dir
-    dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
-}
 
 # fkill - kill process
 fkill() {

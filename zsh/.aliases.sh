@@ -9,9 +9,9 @@
 
 
 # alias :q='exit'
-alias ls='ls --color=always'
 alias ..='cd ..'
 alias ...='cd ../../'
+alias ls='ls --color=always'
 alias ll='ls -l'
 alias lla='ls -la'
 alias week='date +%V'
@@ -30,8 +30,9 @@ alias ctl='sudo systemctl'
 #
 # vim / neovim {{{
 alias v='vim'
+alias vv='vim $(fzf)'
 alias n='nvim'
-alias nn='nvim $(FZF_DEFAULT_COMMAND="rg --files --hidden --ignore-vcs -L" fzf)'
+alias nn='nvim $(fzf)'
 # }}}
 
 # git {{{
@@ -41,8 +42,10 @@ alias gb='git branch -v'
 alias gd='git diff'
 alias gp='git pull'
 alias gpom='git pull origin master'
+alias git-user='git config user.name'
 alias git-name='git config user.name'
 alias git-email='git config user.email'
+alias git-mail='git config user.email'
 # }}}
 
 # docker {{{

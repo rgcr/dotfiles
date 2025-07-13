@@ -11,8 +11,33 @@
   (define-key dired-mode-map (kbd "a") 'find-file)
   (put 'dired-find-alternate-file 'disabled nil) ; disables warning
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
-  (define-key dired-mode-map (kbd "DEL") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
+  (define-key dired-mode-map (kbd "DEL") (lambda () (interactive) (find-alternate-file "..")))  ;dired-up-directory
+  (define-key dired-mode-map (kbd "-") (lambda () (interactive) (find-alternate-file "..")))  ; dired-up-directory
+  (define-key dired-mode-map (kbd "m") #'dired-mark)
+  (define-key dired-mode-map (kbd "M") #'dired-mark-all-files)
+  (define-key dired-mode-map (kbd "u") #'dired-unmark)
+  (define-key dired-mode-map (kbd "U") #'dired-unmark-all-marks)
+  (define-key dired-mode-map (kbd "D") #'dired-do-delete) ; delete all marked files
+  (define-key dired-mode-map (kbd "Y") #'dired-do-copy)
+  (define-key dired-mode-map (kbd "R") #'dired-do-rename)
+  (define-key dired-mode-map (kbd "e") 'wdired-change-to-wdired-mode)
+  (define-key dired-mode-map (kbd "!") #'dired-do-shell-command)
+  (define-key dired-mode-map (kbd "/") #'dired-narrow)
+
+  (define-key dired-mode-map (kbd "S")
+  (lambda () (interactive)
+    (select-window (split-window-right))
+    (find-file (dired-get-file-for-visit))))
+
+  (define-key dired-mode-map (kbd "C-t")
+   (lambda ()
+     (interactive)
+     (select-window (split-window-below))
+     (if (fboundp 'vterm)
+         (vterm)
+       (term (getenv "SHELL")))))
 )
+
 
 ;; Leader ','
 (general-evil-setup)
@@ -29,7 +54,8 @@
   "p"  'projectile-find-file         ;; like ctrl-p
   "P"  'consult-yank-pop             ;; fzf - paste
   "q"  'rgcr/kill-this-buffer        ;; close current buffer
-  "Q"  'delete-other-windows         ;; close all other windows
+  ;; "Q"  'delete-other-windows         ;; close all other windows
+  "Q"   'kill-emacs
   "r"  'rgcr/reload-init-file        ;; reload emacs config
   "s"  'whitespace-mode              ;; toggle invisible characters
   "S"  'delete-trailing-whitespace
@@ -69,7 +95,7 @@
  ;; org-agenda
  "a"  '(org-agenda :which-key "ORG Agenda")'
  ;; dired
- "d"   '(counsel-dired :which-key "Dired")
+ "d"   '(dired-jump   :which-key "Dired")
  ;; eyebrowse
  ;; "e"   '(hydra-eyebrowse/body :which-key "Eyebrowse")
  "e"   '(hydra-eyebrowse/body :which-key "Eyebrowse")
@@ -95,16 +121,22 @@
 
 
 ;; Evil Maps
+;; fix for evil and neotree
 (with-eval-after-load 'evil-maps
-  ;; fix for evil and neotree
-  (evil-define-key 'normal neotree-mode-map (kbd "RET") 'neotree-change-root)
-  (evil-define-key 'normal neotree-mode-map (kbd "TAB") 'neotree-quick-look)
-  (evil-define-key 'normal neotree-mode-map (kbd "q") 'neotree-hide)
-  (evil-define-key 'normal neotree-mode-map (kbd "g") 'neotree-refresh)
-  (evil-define-key 'normal neotree-mode-map (kbd "n") 'neotree-next-line)
-  (evil-define-key 'normal neotree-mode-map (kbd "p") 'neotree-previous-line)
-  (evil-define-key 'normal neotree-mode-map (kbd "A") 'neotree-stretch-toggle)
-  (evil-define-key 'normal neotree-mode-map (kbd "H") 'neotree-hidden-file-toggle)
+  (evil-define-key 'normal neotree-mode-map
+    (kbd "RET") 'neotree-enter
+    (kbd "TAB") 'neotree-quick-look
+    (kbd "S-TAB") 'neotree-collapse-all
+    (kbd "DEL") 'neotree-select-up-node
+    (kbd ".")   'neotree-change-root
+    (kbd "q")   'neotree-hide
+    (kbd "R")   'neotree-refresh
+    (kbd "a")   'neotree-create-node
+    (kbd "d")   'neotree-delete-node
+    (kbd "r")   'neotree-rename-node
+    (kbd "H")   'neotree-hidden-file-toggle
+    (kbd "n")   'neotree-next-line
+    (kbd "p")   'neotree-previous-line)
 
   ;; windows
   (define-prefix-command 'evil-window-map)
@@ -120,7 +152,8 @@
   (evil-ex-define-cmd "ls" #'consult-buffer)
 
   ;;; git
-  (evil-ex-define-cmd "git" #'magit-status)
+  (evil-ex-define-cmd "gstatus" #'magit-status)
+  (evil-ex-define-cmd "gst" #'magit-status)
   (evil-ex-define-cmd "gstage" #'magit-stage)
   (evil-ex-define-cmd "gunstage" #'magit-unstage)
   (evil-ex-define-cmd "gblame" #'magit-blame)
@@ -128,9 +161,28 @@
   ;; consult
   (evil-global-set-key 'normal (kbd "C-s") #'consult-line)
   (evil-global-set-key 'normal (kbd "C-f") #'consult-line)
+
+  (evil-global-set-key 'normal (kbd "C-t") (lambda ()
+    (interactive)
+    (select-window (split-window-below))
+    (if (fboundp 'vterm)
+        (vterm)
+      (term (getenv "SHELL")))))
 )
 
+;; copilot
+(with-eval-after-load 'copilot
+  (define-key copilot-completion-map (kbd "M-RET") 'copilot-accept-completion)
+  (define-key copilot-completion-map (kbd "M-<right>") 'copilot-next-completion)
+  (define-key copilot-completion-map (kbd "M-<left>") 'copilot-previous-completion)
+  ;; (define-key copilot-completion-map (kbd "C-d") 'copilot-accept-completion-by-word)
+  ;; (define-key copilot-completion-map (kbd "C-c") 'copilot-accept-completion-by-line)
+)
 
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd ",ci") #'comment-line) ;; normal mode
+  (define-key evil-visual-state-map (kbd ",ci") #'comment-region) ;; visual mode
+)
 ;; -------------------------
 ;; >>>> Hydras
 ;; -------------------------
@@ -246,7 +298,7 @@ LSP Actions:
   _o_ Multi ocur
 
   Actions for Projects:
-      [_s_] Switch    [_a_] Add    [_x_] Remove    [_X_] Cleanup
+     [_s_] Switch    [_a_] Add    [_x_] Remove    [_X_] Cleanup
 
   [_q_]: Cancel
 "

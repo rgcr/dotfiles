@@ -25,8 +25,8 @@
 
 ;; Font and Frame size
 (if (display-graphic-p)
-    (add-to-list 'default-frame-alist '(font . "Hack-10"))
-  (add-to-list 'default-frame-alist '(font . "Hack-8")))
+    (set-face-attribute 'default nil :font "FiraCode Nerd Font-11")
+  (set-face-attribute 'default nil :font "FiraCode Nerd Font-9"))
 
 
 ;; UTF-8 please
@@ -40,7 +40,11 @@
 (prefer-coding-system 'utf-8-unix)
 ;; (when (eq system-type 'windows-nt)
 ;;   (set-clipboard-coding-system 'utf-16le-dos))
-(setq select-enable-clipboard t)
+
+;; Clipboard settings
+(setq select-enable-clipboard t
+      select-enable-primary t
+      save-interprogram-paste-before-kill t)
 
 
 ;; Minimal UI
@@ -76,7 +80,7 @@
 (setq show-paren-delay 0.0)
 
 ;; Flash the screen instead of beeping
-(setq visible-bell t)
+(setq visible-bell nil)
 
 ;; Set the default line length
 ;; (setq-default fill-column 80)

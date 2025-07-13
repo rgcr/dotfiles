@@ -126,23 +126,6 @@
 ;; -------------------------
 
 
-;; Emacs packages from source code
-(use-package quelpa
-  :commands (quelpa quelpa-build-checkout)
-  :ensure t
-  :config
-  ;; Evitar que el buffer *quelpa-build-checkout* abra una ventana
-  (add-to-list 'display-buffer-alist
-               '("\\*quelpa-build-checkout\\*"
-                 (display-buffer-no-window))))
-
-
-;; Quelpa integration with use-package
-(use-package quelpa-use-package
-  :ensure t
-  :after quelpa)
-
-
 ;; Customize the mode line
 (use-package delight
   :commands delight
@@ -172,6 +155,11 @@
 ;; eldoc mode
 (use-package eldoc
   :config (add-hook 'prog-mode-hook 'eldoc-mode))
+
+;; clipboard integration
+(use-package clipetty
+  :ensure t
+  :hook (after-init . global-clipetty-mode))
 
 
 ;; -------------------------
@@ -325,16 +313,13 @@
         )
   )
 
-
-;; COPILOT
+;; Copilot
 (use-package copilot
-  :quelpa (copilot :fetcher github
-                   :repo "copilot-emacs/copilot.el"
-                   :branch "main"
-                   :files ("*.el"))
-  :ensure t
-  :delight
-  :hook (prog-mode . copilot-mode))
+  :vc (:url "https://github.com/copilot-emacs/copilot.el"
+            :rev :newest
+            :branch "main")
+  :hook ((prog-mode . copilot-mode))
+  )
 
 (defun my/copilot-tab ()
   "Smart fallback: yasnippet > cape > LSP > Copilot > indent."
@@ -343,9 +328,9 @@
               (completion-at-point))
     (indent-for-tab-command)))
 
-(with-eval-after-load 'copilot
-  (define-key copilot-mode-map (kbd "TAB") #'my/copilot-tab)
-  (define-key copilot-mode-map (kbd "<tab>") #'my/copilot-tab))
+;; (with-eval-after-load 'copilot
+  ;; (define-key copilot-mode-map (kbd "TAB") #'my/copilot-tab)
+  ;; (define-key copilot-mode-map (kbd "<tab>") #'my/copilot-tab))
 
 
 ;; -------------------------
@@ -429,6 +414,16 @@
 ;; -------------------------
 ;; >>>> Navigation and Keybindings
 ;; -------------------------
+(use-package dired
+  :ensure nil  ;; built-in package
+  :commands (dired dired-jump)
+  :hook (dired-mode . dired-omit-mode)
+  :config
+  (require 'dired-x)
+)
+
+(use-package dired-narrow
+  :ensure t)
 
 ;; Hydra
 (use-package hydra
@@ -461,12 +456,6 @@
    )
 
 
-;; (use-package avy
-;;   :bind (("C-'" . avy-goto-char)
-;;          ("M-g f" . avy-goto-line)
-;;          ("M-g w" . avy-goto-word-1)))
-
-
 ;; Which Key
 (use-package which-key
   :ensure t
@@ -486,7 +475,7 @@
   :ensure t
   :delight
   :init
-  (setq projectile-completion-system 'ivy)
+  (setq projectile-completion-system 'default)
   (setq projectile-require-project-root nil)
   (setq projectile-project-search-path '("~/workspace/"))
   :config
@@ -539,20 +528,21 @@
   :delight "♉"
   :init
   (setq evil-want-C-i-jump nil) ;; fix for <tab> in terminal (-nw)
-  (global-undo-tree-mode)
+
   (setq evil-undo-system 'undo-tree)
-  (setq select-enable-clipboard t
-        evil-clipboard "'+")
-  ;; relative nubers
-  ;; (setq display-line-numbers-type 'relative)
-  ;; (global-display-line-numbers-mode +1)
+  (global-undo-tree-mode)
+
+  (setq select-enable-clipboard t)
+  (setq save-interprogram-paste-before-kill t)
   :config
   (evil-mode 1))
 
 (use-package evil-nerd-commenter
+  :ensure t
   :after evil
   :delight
-  :init
+  :config
+  (setq evilnc-use-comment-style-indicator-flag nil)
   (evilnc-default-hotkeys))
 
 (use-package evil-goggles
@@ -561,6 +551,11 @@
   :config
   (evil-goggles-mode)
   (evil-goggles-use-diff-faces))
+
+;; (use-package evil-collection
+;;   :after evil
+;;   :config
+;;  (evil-collection-init))
 
 (use-package add-node-modules-path
   :ensure t

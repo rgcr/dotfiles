@@ -25,4 +25,8 @@ export NVM_DIR=~/.nvm
 # FZF
 export FZF_DEFAULT_COMMAND="rg --files --hidden --ignore-vcs -L"
 
+# PYTHON
 export PYTHONDONTWRITEBYTECODE=1
+
+# GO
+export GOPATH=${HOME}/.go

@@ -8,7 +8,7 @@ HISTSIZE=10000
 SAVEHIST=50000
 # }}}
 
-[ "${ZSH_UNAME}" = "Darwin" ] && {
+[ "$(uname)" = "Darwin" ] && {
     export LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 }
 

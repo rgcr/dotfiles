@@ -18,7 +18,7 @@ fi
 
 # UP and DOWN arrow keys
 zmodload zsh/terminfo
-if [ "${ZSH_UNAME}" = "Darwin" ]; then
+if [ "$(uname)" = "Darwin" ]; then
     #bindkey "$terminfo[cuu1]" history-substring-search-up
     #bindkey "$terminfo[cud1]" history-substring-search-down
     bindkey '^[[A' history-substring-search-up
@@ -82,7 +82,7 @@ zstyle ':completion:*' menu select
 
 # enable colors {{{
 export CLICOLOR=1
-if [ "${ZSH_UNAME}" = "Darwin" ]; then
+if [ "$(uname)" = "Darwin" ]; then
     #export LSCOLORS="exfxcxdxbxegedabagacad"
     export LSCOLORS="ExGxFxDxCxDxDxhbhdacEc"
     LS_COLORS="${LSCOLORS}"

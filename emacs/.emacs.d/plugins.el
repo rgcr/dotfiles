@@ -149,6 +149,10 @@
   :ensure t
   :delight
   :init
+  (setq undo-tree-history-directory-alist
+        `(("." . "~/.emacs.d/undo-tree/")))
+  (setq undo-tree-auto-save-history t)
+  :config
   (undo-tree-mode))
 
 

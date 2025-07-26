@@ -2,7 +2,6 @@
 ;; => PLUGINS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 ;; -------------------------
 ;; >>>> IU
 ;; -------------------------
@@ -29,7 +28,7 @@
 ;; Themes
 (use-package doom-themes
   :ensure t
-  :after (spaceline)
+  :demand t  ;; Load theme immediately
   :init
   (setq
       doom-themes-enable-bold t
@@ -45,6 +44,7 @@
 ;; Status line
 (use-package spaceline
   :ensure t
+  :demand t  ;; Load immediately for theme dependency
   :config
   (require 'spaceline-config)
   (setq powerline-default-separator 'arrow)
@@ -82,7 +82,7 @@
 (use-package centaur-tabs
   :ensure t
   :delight
-  :demand
+  :demand t
   :config
   ;; (centaur-tabs-headline-match)
   (setq centaur-tabs-style "bar"
@@ -98,6 +98,11 @@
   (set-face-foreground 'centaur-tabs-unselected "brightblack")
   (set-face-foreground 'centaur-tabs-selected "cyan")
   (centaur-tabs-mode)
+  ;; Show tabs immediately even with single buffer
+  (setq centaur-tabs-show-new-tab-button nil)
+  (centaur-tabs-headline-match)
+  ;; Force tabs to display on startup
+  (add-hook 'after-init-hook 'centaur-tabs-local-mode)
   )
 
 
@@ -174,6 +179,7 @@
 ;; Completion styles
 (use-package orderless
   :ensure t
+  :demand t  ;; Essential for completion
   :custom
   (completion-styles '(orderless))
   (completion-category-defaults nil)
@@ -186,6 +192,7 @@
 ;; Completion UI
 (use-package vertico
   :ensure t
+  :demand t  ;; Essential for completion
   :init (vertico-mode)
   :custom (vertico-cycle t))
 
@@ -291,7 +298,9 @@
   :ensure t
   :delight ""
   :commands lsp
-  :hook (prog-mode . lsp)
+  :defer t
+  ;; Remove automatic hook - load only when explicitly needed
+  ;; :hook (prog-mode . lsp)
   :init
   (setq lsp-completion-provider :none ;;:capf
         lsp-enable-snippet t
@@ -322,7 +331,10 @@
   :vc (:url "https://github.com/copilot-emacs/copilot.el"
             :rev :newest
             :branch "main")
-  :hook ((prog-mode . copilot-mode))
+  :defer t
+  :commands copilot-mode
+  ;; Load on demand instead of all prog-modes
+  ;; :hook ((prog-mode . copilot-mode))
   )
 
 (defun my/copilot-tab ()
@@ -464,6 +476,7 @@
 (use-package which-key
   :ensure t
   :delight
+  :demand t
   :init
   ;; (setq which-key-popup-type 'minibuffer)
   ;; (setq which-key-separator " ")
@@ -478,6 +491,8 @@
 (use-package projectile
   :ensure t
   :delight
+  :defer t
+  :commands (projectile-find-file projectile-switch-project)
   :init
   (setq projectile-completion-system 'default)
   (setq projectile-require-project-root nil)
@@ -489,6 +504,8 @@
 (use-package neotree
   :ensure t
   :delight
+  :defer t
+  :commands neotree-toggle
   :config
   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
   (setq neo-follow-symlink t
@@ -530,6 +547,7 @@
 (use-package evil
   :ensure t
   :delight "♉"
+  :demand t  ;; Evil should load immediately for vim users
   :init
   (setq evil-want-C-i-jump nil) ;; fix for <tab> in terminal (-nw)
 
@@ -625,6 +643,8 @@
 (use-package magit
   :ensure t
   :delight
+  :defer t
+  :commands (magit-status magit-blame magit-log magit-commit)
   :config
   (setq magit-commit-show-diff nil
         magit-revert-buffers 1))
@@ -641,7 +661,9 @@
   :config
   (setq dimmer-fraction 0.33)
   (setq dimmer-exclusion-regexp "^\*helm.*\\|^ \*Minibuf-.*\\|^ \*Echo.*")
-  (dimmer-mode))
+  ;; Only enable dimmer in graphical mode to prevent terminal display issues
+  (when (display-graphic-p)
+    (dimmer-mode)))
 
 (use-package org-mime
   :ensure t
@@ -683,6 +705,14 @@
 ;;   (setenv "WORKON_HOME" "~/.venvs/")
 ;;   (setq pipenv-projectile-after-switch-function
 ;;         #'pipenv-projectile-after-switch-extended))
+
+(use-package lua-mode
+  :ensure t
+  :defer t
+  :mode ("\\.lua\\'" . lua-mode)
+  :config
+  (setq lua-indent-level 2) ;; Set Lua indentation level
+  (setq lua-indent-nested-block-indent 2)) ;; Nested block indentation
 
 (use-package json-mode
   :ensure t

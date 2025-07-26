@@ -2,6 +2,17 @@
 ;; => FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Startup performance measurement
+(defun rgcr/display-startup-time ()
+  "Display startup time in echo area."
+  (message "Emacs loaded in %s with %d garbage collections."
+           (format "%.2f seconds"
+                   (float-time
+                    (time-subtract after-init-time before-init-time)))
+           gcs-done))
+
+(add-hook 'emacs-startup-hook #'rgcr/display-startup-time)
+
 ;;(define-prefix-command 'rgcr/help-map)
 ;; (add-hook 'eshell-mode 'rgcr/hide-fringes)
 

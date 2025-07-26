@@ -51,7 +51,7 @@
   "i"  'highlight-indent-guides-mode
   "k"  'kill-buffer
   "n"  'global-display-line-numbers-mode
-  "p"  'projectile-find-file         ;; like ctrl-p
+  ;; "p"  'projectile-find-file         ;; like ctrl-p
   "P"  'consult-yank-pop             ;; fzf - paste
   "q"  'rgcr/kill-this-buffer        ;; close current buffer
   ;; "Q"  'delete-other-windows         ;; close all other windows
@@ -182,7 +182,17 @@
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd ",ci") #'comment-line) ;; normal mode
   (define-key evil-visual-state-map (kbd ",ci") #'comment-region) ;; visual mode
+
+;; ctrl + p -> projectile-find-file
+  (define-key evil-normal-state-map (kbd "C-p") 'projectile-find-file)
+  (define-key evil-insert-state-map (kbd "C-p") 'projectile-find-file)
+  (define-key evil-visual-state-map (kbd "C-p") 'projectile-find-file)
 )
+
+;; ctrl-p global binding as fallback
+(global-set-key (kbd "C-p") 'projectile-find-file)
+
+
 ;; -------------------------
 ;; >>>> Hydras
 ;; -------------------------

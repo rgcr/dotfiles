@@ -138,6 +138,15 @@
 ;; No wrap lines
 (set-default 'truncate-lines t)
 
+;; Terminal-specific display optimizations
+(unless (display-graphic-p)
+  ;; Prevent flickering in terminal
+  (setq-default bidi-display-reordering nil)
+  ;; Disable expensive font-lock features
+  (setq font-lock-maximum-decoration 2)
+  ;; Reduce redisplay frequency
+  (setq redisplay-dont-pause t))
+
 
 ;; keep the list of recent files
 (setq recentf-max-saved-items 100)
@@ -149,13 +158,13 @@
 (save-place-mode 1)
 
 
-;; Highlight the current line
-(global-hl-line-mode)
+;; Highlight the current line - disable in terminal to prevent display issues
+(when (display-graphic-p)
+  (global-hl-line-mode)
+  (set-face-background hl-line-face "color-235"))
 
 ;; Cursor color
 (set-cursor-color "#ffffff")
-
-(set-face-background hl-line-face "color-235")
 
 ;; Call DELETE-TRAILING-WHITESPACE every time a buffer is saved."
 (add-hook 'before-save-hook 'delete-trailing-whitespace)

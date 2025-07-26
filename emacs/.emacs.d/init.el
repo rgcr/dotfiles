@@ -1,3 +1,8 @@
+;; Performance optimizations
+(setq gc-cons-threshold (* 50 1000 1000)) ;; 50mb
+(setq gc-cons-percentage 0.6)
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
+
 ;; Define base directory for config files
 (defconst my-config-dir (file-name-as-directory user-emacs-directory))
 
@@ -9,8 +14,8 @@
       (load file))))
 
 
-;; Package management
-(package-initialize)
+;; Package management - defer until needed
+;; (package-initialize)
 
 (require 'package)
 (setq package-enable-at-startup nil)
@@ -30,7 +35,7 @@
 (setq use-package-always-ensure t)
 
 ;; Always defer loading of packages
-;; (setq use-package-always-defer t)
+(setq use-package-always-defer t)
 
 
 ;; Load config modules
@@ -38,3 +43,9 @@
 (load-if-not-loaded "options.el")
 (load-if-not-loaded "plugins.el")
 (load-if-not-loaded "keybindings.el")
+
+;; Reset GC settings after startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 2 1000 1000))  ;; 2mb
+            (setq gc-cons-percentage 0.1)))

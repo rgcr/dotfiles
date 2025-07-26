@@ -250,7 +250,6 @@ _u_: undotree           _/_: search in file
 
 
 _c_: commands           _;_: commands history
-_p_: projects
 
 _h_: vim help           _k_: keymaps
 _O_: vim options        _?_: search history
@@ -286,7 +285,7 @@ Hydra({
       { 'k', cmd 'Telescope keymaps' },
       { 'O', cmd 'Telescope vim_options' },
       -- { 'r', cmd 'Telescope resume' },
-      { 'p', cmd 'Telescope projects', { desc = 'projects' } },
+      -- { 'p', cmd 'Telescope projects', { desc = 'projects' } },
       { '/', cmd 'Telescope current_buffer_fuzzy_find', { desc = 'search in file' } },
       { '?', cmd 'Telescope search_history',  { desc = 'search history' } },
       { ';', cmd 'Telescope command_history', { desc = 'command-line history' } },
@@ -387,3 +386,42 @@ Hydra({
 --     { '<ESC>', nil, { exit = true, nowait = true } },
 --   }
 -- })
+
+--hydra for avante.nvim
+local hint_avante = [[
+  Avante
+  ------
+  _a_: Ask
+  _c_: Chat
+  _t_: Toggle
+
+  ------
+  _<Esc>_ | _q_: Quit
+]]
+Hydra({
+  name = 'Avante',
+  hint = hint_avante,
+  config = {
+    color = 'teal',
+    invoke_on_body = true,
+    hint = {
+      position = 'bottom',
+      float_opts = {
+        -- overridden
+        style = "minimal",
+        focusable = false,
+        noautocmd = true,
+        border = 'rounded',
+      },
+    },
+  },
+  mode = 'n',
+  body = '<space>a',
+  heads = {
+    { 'a', cmd 'AvanteAsk', { desc = 'ask' } },
+    { 'c', cmd 'AvanteChat', { desc = 'chat' } },
+    { 't', cmd 'AvanteToggle', { desc = 'toggle' } },
+    { 'q', nil, { exit = true, nowait = true } },
+    { '<Esc>', nil, { exit = true, nowait = true } },
+  }
+})

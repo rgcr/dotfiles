@@ -69,6 +69,15 @@ local function pastemode()
   return ''
 end
 
+local function zoom_status()
+  -- Safe way to call zoom#statusline() function
+  local ok, result = pcall(vim.fn['zoom#statusline'])
+  if ok and result and result ~= '' then
+    return result
+  end
+  return ''
+end
+
 lualine.setup({
   global_status = true,
 	options = {
@@ -86,7 +95,7 @@ lualine.setup({
 		lualine_b = { mode },
 		lualine_c = { pastemode, filename },
 		-- lualine_x = { "encoding", "fileformat", "filetype" },
-		lualine_x = { "vim.fn['zoom#statusline']()",diff, filetype },
+		lualine_x = { zoom_status, diff, filetype },
 		lualine_y = { location },
 		lualine_z = { },
 	},

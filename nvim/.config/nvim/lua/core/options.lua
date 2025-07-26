@@ -21,10 +21,10 @@ opt.modeline = true                   -- Modelines
 opt.modelines = 5                     -- Number of lines to check modelines
 -- opt.backspace=indent,eol,start
 opt.wildignore = {
-	'*.dll','*.o,', '.class',
-	'*.pyc', '__pycache__','*.bak,', '*$py.class',
-	'.exe','*.jpg,', '*.jpeg','*.png,', '.gif',
-	'*/*.dsym/*','', '*.dylib'
+	'*.dll', '*.o', '*.class',
+	'*.pyc', '__pycache__', '*.bak', '*.py.class',
+	'*.exe', '*.jpg', '*.jpeg', '*.png', '*.gif',
+	'*/*.dsym/*', '*.dylib'
 }
 
 opt.tags = "./tags;,./.tags;,./.git/tags;"

@@ -273,6 +273,6 @@ autocmd("FileType", {
   pattern = "norg",
   callback = function()
     vim.keymap.set("n", "<tab>", "za", { buffer = true, silent = true, desc = "Toggle fold" })
-  end,
     vim.keymap.set("n", "<S-tab>", "zR", { buffer = true, silent = true, desc = "Open all folds" })
+  end,
 })

@@ -387,41 +387,43 @@ Hydra({
 --   }
 -- })
 
---hydra for avante.nvim
-local hint_avante = [[
-  Avante
-  ------
-  _a_: Ask
-  _c_: Chat
-  _t_: Toggle
+-- hydra for workspaces.nvim
+local hint_workspaces = [[
+  Workspaces
+  ----------
+  _l_: List Workspaces
+  _a_: Add Workspace
+  _r_: Remove Workspace
+  _s_: Switch Workspace
 
-  ------
+  ----------
   _<Esc>_ | _q_: Quit
 ]]
 Hydra({
-  name = 'Avante',
-  hint = hint_avante,
-  config = {
-    color = 'teal',
-    invoke_on_body = true,
-    hint = {
-      position = 'bottom',
-      float_opts = {
-        -- overridden
-        style = "minimal",
-        focusable = false,
-        noautocmd = true,
-        border = 'rounded',
-      },
-    },
-  },
-  mode = 'n',
-  body = '<space>a',
-  heads = {
-    { 'a', cmd 'AvanteAsk', { desc = 'ask' } },
-    { 'c', cmd 'AvanteChat', { desc = 'chat' } },
-    { 't', cmd 'AvanteToggle', { desc = 'toggle' } },
-    { 'q', nil, { exit = true, nowait = true } },
-    { '<Esc>', nil, { exit = true, nowait = true } },
-  }
+   name = 'Workspaces',
+   hint = hint_workspaces,
+   config = {
+      color = 'teal',
+      invoke_on_body = true,
+      hint = {
+         position = 'bottom',
+         float_opts = {
+           -- overridden
+           style = "minimal",
+           focusable = false,
+           noautocmd = true,
+           border = 'rounded',
+         },
+       },
+     },
+   mode = 'n',
+   body = '<space>w',
+   heads = {
+      { 'a', cmd 'WorkspacesAdd', { desc = 'add workspace' } },
+      { 'l', cmd 'WorkspacesList', { desc = 'list workspaces' } },
+      { 'r', cmd 'WorkspacesRemove', { desc = 'remove workspace' } },
+      { 's', cmd 'WorkspacesOpen', { desc = 'switch workspace' } },
+      { 'q', nil, { exit = true, nowait = true } },
+      { '<Esc>', nil, { exit = true, nowait = true } },
+   }
 })

@@ -44,13 +44,14 @@ lazy.setup({
     -- Dashboard (start screen)
     {
       'goolord/alpha-nvim',
+      lazy = false,
       dependencies = { 'kyazdani42/nvim-web-devicons' },
     },
 
     -- Tab/buffer line (like centaur tabs)
     {
       'akinsho/bufferline.nvim',
-      -- version = "v3.*",
+      event = 'VeryLazy',
       dependencies = 'kyazdani42/nvim-web-devicons',
       config = function()
         require("bufferline").setup{
@@ -64,6 +65,7 @@ lazy.setup({
     -- Statusline
     {
       'nvim-lualine/lualine.nvim',
+      event = 'VeryLazy',
       dependencies = {
         'kyazdani42/nvim-web-devicons',
         'lewis6991/gitsigns.nvim',
@@ -73,15 +75,20 @@ lazy.setup({
     -- Indent guides
     {
       'lukas-reineke/indent-blankline.nvim',
+      event = { 'BufReadPost', 'BufNewFile' },
       main = 'ibl',
     },
 
     -- Rainbow delimiters
-    { 'HiPhish/rainbow-delimiters.nvim' },
+    {
+      'HiPhish/rainbow-delimiters.nvim',
+      event = { 'BufReadPost', 'BufNewFile' },
+    },
 
     -- Notifications
     {
       'rcarriga/nvim-notify',
+      event = 'VeryLazy',
       config = function()
         local notify = require("notify")
         -- Set default timeout globally
@@ -100,6 +107,7 @@ lazy.setup({
     {
       'nvim-neo-tree/neo-tree.nvim',
       branch = "v3.x",
+      cmd = { 'Neotree' },
       dependencies = {
         'nvim-lua/plenary.nvim',
         'kyazdani42/nvim-web-devicons',
@@ -129,6 +137,7 @@ lazy.setup({
     -- File explorer
     {
       'stevearc/oil.nvim',
+      cmd = { 'Oil' },
       dependencies = {
         'nvim-tree/nvim-web-devicons',
       },
@@ -146,6 +155,7 @@ lazy.setup({
     -- Fuzzy finder
     {
       'nvim-telescope/telescope.nvim',
+      cmd = { 'Telescope' },
       dependencies = {
         'nvim-lua/plenary.nvim',
         "debugloop/telescope-undo.nvim",
@@ -156,12 +166,12 @@ lazy.setup({
           extensions = {
             undo = {},
           },
-          pickers = {
-            find_files = {
-              -- find_command = { "fd", "--type", "f", "--strip-cwd-prefix", "-L" }
-              find_command = { "rg", "--files", "--hidden","--ignore-vcs", "-L" }
-            },
-          }
+          -- pickers = {
+          --   find_files = {
+          --     -- find_command = { "fd", "--type", "f", "--strip-cwd-prefix", "-L" }
+          --     find_command = { "rg", "--files", "--hidden","--ignore-vcs", "-L" }
+          --   },
+          -- }
         })
       end
     },
@@ -169,6 +179,7 @@ lazy.setup({
     -- Window switching
     {
       'yorickpeterse/nvim-window',
+      event = 'VeryLazy',
       config = function()
         require('nvim-window').setup({
           -- The characters available for hinting windows.
@@ -193,15 +204,29 @@ lazy.setup({
     -- Git signs in gutter
     {
       'lewis6991/gitsigns.nvim',
-      lazy = true,
+      event = { 'BufReadPre', 'BufNewFile' },
       dependencies = {
         'nvim-lua/plenary.nvim',
         'kyazdani42/nvim-web-devicons',
       },
+      -- config = function()
+      --   require('gitsigns').setup({
+      --     signs = {
+      --       add          = { text = '+' },
+      --       change       = { text = '~' },
+      --       delete       = { text = '_' },
+      --       topdelete    = { text = '‾' },
+      --       changedelete = { text = '~' },
+      --     },
+      --   })
+      -- end,
     },
 
     -- Git commands
-    { 'tpope/vim-fugitive' },
+    {
+      'tpope/vim-fugitive',
+      cmd = { 'Git', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
+    },
 
     -- ===================================================================
     -- LSP/LANGUAGE SUPPORT
@@ -209,19 +234,21 @@ lazy.setup({
 
     -- LSP configuration
     {
-      'neovim/nvim-lspconfig'
+      'neovim/nvim-lspconfig',
+      event = { 'BufReadPre', 'BufNewFile' },
     },
 
     -- Syntax highlighting
     {
       'nvim-treesitter/nvim-treesitter',
+      event = { 'BufReadPost', 'BufNewFile' },
       build = ':TSUpdate',
       config = function()
         require'nvim-treesitter.configs'.setup {
           ensure_installed = {
-            'bash', 'c', 'cpp', 'css', 'html', 'javascript', 'json', 'lua', 'python',
-            'php','rust', 'typescript', 'vim', 'vue', 'yaml',
+            'lua', 'vim', 'vimdoc', -- Essential for nvim config
           },
+          auto_install = true, -- Install parsers when opening files
           sync_install = false,
           highlight = { enable = true },
           indent = { enable = true },
@@ -236,9 +263,7 @@ lazy.setup({
     -- Snippet engine
     {
       "L3MON4D3/LuaSnip",
-      -- follow latest release.
-      -- version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
-      -- install jsregexp (optional!).
+      event = 'InsertEnter',
       build = "make install_jsregexp"
     },
 
@@ -259,58 +284,13 @@ lazy.setup({
     },
 
     -- ===================================================================
-    -- AI/COPILOT
+    -- AI
     -- ===================================================================
-
-    -- -- AI assistant
-    -- {
-    --   "yetone/avante.nvim",
-    --   event = "VeryLazy",
-    --   lazy = false,
-    --   version = false, -- set this if you want to always pull the latest change
-    --   opts = {
-    --     -- add any opts here
-    --   },
-    --   -- Add the build step
-    --   build = "make",
-    --   dependencies = {
-    --     "stevearc/dressing.nvim",
-    --     "nvim-lua/plenary.nvim",
-    --     "MunifTanjim/nui.nvim",
-    --     --- The below dependencies are optional,
-    --     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-    --     "folke/snacks.nvim", -- for input provider snacks
-    --     {
-    --       -- support for image pasting
-    --       "HakonHarnes/img-clip.nvim",
-    --       event = "VeryLazy",
-    --       opts = {
-    --         -- recommended settings
-    --         default = {
-    --           embed_image_as_base64 = false,
-    --           prompt_for_file_name = false,
-    --           drag_and_drop = {
-    --             insert_mode = true,
-    --           },
-    --           -- required for Windows users
-    --           use_absolute_path = true,
-    --         },
-    --       },
-    --     },
-    --     {
-    --       -- Make sure to set this up properly if you have lazy=true
-    --       'MeanderingProgrammer/render-markdown.nvim',
-    --       opts = {
-    --         file_types = { "markdown", "Avante" },
-    --       },
-    --       ft = { "markdown", "Avante" },
-    --     },
-    --   },
-    -- },
 
     -- GitHub Copilot
     {
       'github/copilot.vim',
+      event = 'InsertEnter',
       config = function()
         vim.g.copilot_no_tab_map = true
       end
@@ -454,48 +434,12 @@ lazy.setup({
       end,
     },
 
-    -- Neorg format
+    -- Neorg
     {
       'nvim-neorg/neorg',
-      lazy = false, -- Disable lazy loading as some `lazy.nvim` distributions set `lazy = true` by default
-      version = "*", -- Replace with the latest tag/release version
+      ft = { 'norg' },
+      version = "*",
       dependencies = { 'nvim-lua/plenary.nvim' },
-      config = function()
-        require('neorg').setup({
-          load = {
-            ["core.defaults"] = {},
-            ["core.dirman"] = {
-              config = {},
-            },
-            ["core.keybinds"] = {
-              config = {
-                default_keybinds = true,
-                neorg_leader = "<leader>o",
-              },
-            },
-            ["core.concealer"] = {
-              config = {
-                icons_preset = "basic",
-                icons = {
-                  todo = {
-                    done = { icon = "", hl = "NeorgDone" },
-                    pending = { icon = "", hl = "NeorgPending" },
-                    undone = { icon = "", hl = "NeorgUndone" },
-                    on_hold = { icon = "", hl = "NeorgOnHold" },
-                    cancelled = { icon = "", hl = "NeorgCancelled" },
-                    recurring = { icon = "", hl = "NeorgRecurring" },
-                    uncertain = { icon = "", hl = "NeorgUncertain" },
-                  },
-                },
-              },
-            },
-          },
-        })
-        vim.wo.foldlevel = 99
-        vim.wo.foldenable = true
-        vim.wo.foldmethod = "expr"
-        vim.wo.foldexpr = "nvim_treesitter#foldexpr()"
-      end
     },
 
     -- ===================================================================
@@ -505,8 +449,30 @@ lazy.setup({
     -- Symbol viewer
     {
       'liuchengxu/vista.vim',
+      cmd = { 'Vista' },
       config = function()
         vim.g.vista_echo_cursor = 0
+      end
+    },
+
+    -- ===================================================================
+    -- PROJECT MANAGEMENT
+    -- ===================================================================
+    -- add workspaces.nvim
+    {
+      'natecraddock/workspaces.nvim',
+      event = 'VeryLazy',
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+        'nvim-tree/nvim-web-devicons',
+      },
+      config = function()
+        require('workspaces').setup({
+          -- Default workspace directory
+          workspace_dir = vim.fn.stdpath('data') .. '/workspaces',
+          -- Automatically open the workspace when entering a directory
+          auto_open = true,
+        })
       end
     },
 
@@ -542,23 +508,32 @@ lazy.setup({
     -- Hydra keymaps (like Emacs)
     {
       'nvimtools/hydra.nvim',
+      event = 'VeryLazy',
     },
 
     -- Repeat commands
-    { 'tpope/vim-repeat' },
+    {
+      'tpope/vim-repeat',
+      event = 'VeryLazy',
+    },
 
     -- Show marks in number column
-    { 'kshenoy/vim-signature' },
+    {
+      'kshenoy/vim-signature',
+      event = { 'BufReadPost', 'BufNewFile' },
+    },
 
     -- Auto disable search highlight
-    { 'romainl/vim-cool' },
+    {
+      'romainl/vim-cool',
+      event = { 'BufReadPost', 'BufNewFile' },
+    },
 
     -- Zoom windows
-    { 'dhruvasagar/vim-zoom' },
-
-    -- ===================================================================
-    -- PROJECT MANAGEMENT (COMMENTED OUT)
-    -- ===================================================================
+    {
+      'dhruvasagar/vim-zoom',
+      event = 'VeryLazy',
+    },
 
     -- ===================================================================
     -- COPILOT CHAT (COMMENTED OUT)

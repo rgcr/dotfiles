@@ -117,6 +117,8 @@
 
 ;; Spaces, not tabs
 (setq-default indent-tabs-mode nil)
+;; tab space (4)
+(setq-default tab-width 4)
 
 ;; Follow symlinks
 (setq vc-follow-symlinks t)

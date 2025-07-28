@@ -231,6 +231,61 @@
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 
+;; -------------------------
+;; >>>> Evil mode (vim)
+;; -------------------------
+(use-package evil
+  :ensure t
+  :delight "♉"
+  :demand t  ;; Evil should load immediately for vim users
+  :init
+  (setq evil-want-C-i-jump nil) ;; fix for <tab> in terminal (-nw)
+
+  (setq evil-undo-system 'undo-tree)
+  (global-undo-tree-mode)
+
+  (setq select-enable-clipboard t)
+  (setq save-interprogram-paste-before-kill t)
+  :config
+  (evil-mode 1))
+
+(use-package evil-nerd-commenter
+  :ensure t
+  :after evil
+  :delight
+  :config
+  (setq evilnc-use-comment-style-indicator-flag nil)
+  (evilnc-default-hotkeys))
+
+(use-package evil-goggles
+  :ensure t
+  :delight
+  :config
+  (evil-goggles-mode)
+  (evil-goggles-use-diff-faces))
+
+;; (use-package evil-collection
+;;   :after evil
+;;   :config
+;;  (evil-collection-init))
+
+;; General - better key definitions
+(use-package general
+  :ensure t
+  :after evil
+  :config
+  (general-evil-setup)
+
+  ;; Set up leader key
+  (general-create-definer my-leader-def
+    :keymaps 'override
+    :states '(normal visual)
+    :prefix ","))
+
+;; -------------------------
+;; >>>> Navigation and Search
+;; -------------------------
+
 ;;; Navigation and Search
 (use-package consult
   :ensure t
@@ -361,70 +416,15 @@
   :mode ("\\.org\\'" . org-mode)
   :hook
   (org-mode . visual-line-mode)
-  (org-mode . org-indent-mode)
+  (org-mode . org-indent-mode))
 
-  :config
-  (setq org-icalendar-timezone "America/Monterrey")
-  (setq org-startup-indented t          ;; indent text and headings
-        org-hide-leading-stars t        ;; hide leading stars for clean look
-        org-cycle-separator-lines 1     ;; number of lines to show when cycling
-        org-deadline-warning-days 30)
-  ;; When a TODO item enters DONE, add a CLOSED: property with current date-time stamp and into drawer
-  (setq org-log-done 'time)
-  (setq org-log-into-drawer "LOGBOOK")
-  (setq org-directory "~/org"                ;; default org files directory)
-        org-agenda-files '("~/org/agenda"))  ;; files for agenda
-
-  ;; (setq org-agenda-files
-  ;;       '("~/.onedrive/org/personal.org"
-  ;;         "~/.onedrive/org/work.org"
-  ;;         "~/.onedrive/org/diary.org"))
-
-   ;; I use my own diary file
-   ;; (setq org-agenda-include-diary nil)
-   ;; (setq org-archive-location "~/.onedrive/archive/%s_archive.org::datetree/")
-
-   (setq org-todo-keywords
-         '((sequence "TODO(t!)"
-                     "IN-PROGRESS(p!)"
-                     "BLOCKED(b!)"
-                     "|" "DONE(d!)" "CANCELLED(c!)" "ARCHIVE(a!)")))
-
-   (setq org-todo-keyword-faces
-         '(("TODO" . "orange")
-           ("IN PROCESS" . "yellow")
-           ("BLOCKED" . "red")
-           ("DONE" . "green")
-           ("CANCELLED" .  "red")
-           ("ARCHIVE" .  "blue")))
-
-   ;; Save Org buffers after refiling!
-  (advice-add 'org-refile :after 'org-save-all-org-buffers)
-  )
-
-;; Org modern style
-(use-package org-modern
+;; add org-bullets
+(use-package org-bullets
   :ensure t
-  :hook (org-mode . org-modern-mode)
-  :init
-  (setq
-   ;; Heading bullets, similar to org-bullets
-   org-modern-star '("◉" "○" "✿" "✸" "✦")
-
-   ;; Other optional visuals
-   org-modern-hide-stars t
-   org-modern-table t
-   org-modern-list '((43 . "➤") (45 . "–") (42 . "•")) ;; + - * symbols
-   org-modern-block-fringe nil
-   org-modern-label-border 1)
+  :after org
+  :hook (org-mode . org-bullets-mode)
   :config
-  ;; Also make sure indentation looks good
-  (add-hook 'org-mode-hook #'org-indent-mode))
-
-;; Autolist for org-mode
-(use-package org-autolist
-  :ensure t
-  :hook (org-mode . org-autolist-mode))
+  (setq org-bullets-bullet-list '("◉" "○" "✸" "✿" "❀")))
 
 
 ;; -------------------------
@@ -470,7 +470,6 @@
          aw-scope 'frame
          aw-background t)
    )
-
 
 ;; Which Key
 (use-package which-key
@@ -521,7 +520,6 @@
   :config
   (setq eyebrowse-new-workspace t)
   (eyebrowse-mode t))
-
 
 ;; Copy/paste
 ;; (use-package simpleclip
@@ -618,7 +616,6 @@
   :config
   (global-flycheck-mode))
 
-
 (use-package highlight-indent-guides
   :ensure t
   :hook (prog-mode . highlight-indent-guides-mode)
@@ -630,8 +627,7 @@
 
   (setq highlight-indent-guides-auto-enabled nil)      ;; Don't auto-switch method
   (set-face-foreground 'highlight-indent-guides-character-face "brightblack")
-  (set-face-background 'highlight-indent-guides-character-face nil)
-  )
+  (set-face-background 'highlight-indent-guides-character-face nil))
 
 (use-package rainbow-delimiters
   :ensure t
@@ -665,24 +661,18 @@
   (when (display-graphic-p)
     (dimmer-mode)))
 
-(use-package org-mime
-  :ensure t
-  :delight
-  :config
-  (setq org-mime-library 'mml))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; => Development
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;; python
-;; (use-package python-mode
-;;   :ensure t
-;;   :commands python-mode
-;;   :mode ("\\.py\\'" . python-mode))
-;;
+(use-package python-mode
+  :ensure t
+  :defer t
+  :commands python-mode
+  :mode ("\\.py\\'" . python-mode))
+
 ;; (use-package lsp-pyright
 ;;   :ensure t
 ;;   :hook (python-mode . (lambda ()
@@ -750,6 +740,7 @@
 (use-package php-mode
   :ensure t
   :mode ("\\.php\\'" . php-mode))
+
 
 (use-package web-mode
   :ensure t

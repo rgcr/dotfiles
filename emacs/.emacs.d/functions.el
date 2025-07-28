@@ -20,7 +20,6 @@
   (interactive)
   (load-file user-init-file))
 
-
 ;; enable/disable tabs
 (defun rgcr/disable-tab () (setq indent-tabs-mode nil))
 (defun rgcr/enable-tab  ()
@@ -54,33 +53,53 @@
   (if (not (one-window-p))
       (delete-window)))
 
-;; Funciones para usar xclip
-(defun my/copy-to-clipboard-xclip (text &optional push)
+;; xclip functions
+(defun rgcr/copy-to-clipboard-xclip (text &optional push)
   (let ((process-connection-type nil))
     (let ((proc (start-process "xclip" "*Messages*" "xclip" "-selection" "clipboard")))
       (process-send-string proc text)
       (process-send-eof proc))))
 
-(defun my/paste-from-clipboard-xclip ()
+(defun rgcr/paste-from-clipboard-xclip ()
   (shell-command-to-string "xclip -selection clipboard -o"))
 
-;; Funciones para usar xsel
-(defun my/copy-to-clipboard-xsel (text &optional push)
+;; xsel functions
+(defun rgcr/copy-to-clipboard-xsel (text &optional push)
   (let ((process-connection-type nil))
     (let ((proc (start-process "xsel" "*Messages*" "xsel" "--clipboard" "--input")))
       (process-send-string proc text)
       (process-send-eof proc))))
 
-(defun my/paste-from-clipboard-xsel ()
+(defun rgcr/paste-from-clipboard-xsel ()
   (shell-command-to-string "xsel --clipboard --output"))
 
-;; Detectar entorno y configurar interprogram-cut/paste
+;; cut/paste integration
 (cond
  ((and (not (display-graphic-p))
        (executable-find "xclip"))
-  (setq interprogram-cut-function #'my/copy-to-clipboard-xclip
-        interprogram-paste-function #'my/paste-from-clipboard-xclip))
+  (setq interprogram-cut-function #'rgcr/copy-to-clipboard-xclip
+        interprogram-paste-function #'rgcr/paste-from-clipboard-xclip))
  ((and (not (display-graphic-p))
        (executable-find "xsel"))
-  (setq interprogram-cut-function #'my/copy-to-clipboard-xsel
-        interprogram-paste-function #'my/paste-from-clipboard-xsel)))
+  (setq interprogram-cut-function #'rgcr/copy-to-clipboard-xsel
+        interprogram-paste-function #'rgcr/paste-from-clipboard-xsel)))
+
+;; toogle window zoom
+(defvar rgcr/zoomed-window-config nil
+  "Stores the window configuration before zooming.")
+
+(defun rgcr/toggle-zoom-window ()
+  "Toggle between zoomed and normal window layout.
+When zoomed, maximize current window. When unzoomed, restore previous layout."
+  (interactive)
+  (if rgcr/zoomed-window-config
+      ;; Currently zoomed - restore layout
+      (progn
+        (set-window-configuration rgcr/zoomed-window-config)
+        (setq rgcr/zoomed-window-config nil)
+        (message "Window unzoomed"))
+    ;; Not zoomed - save layout and zoom
+    (progn
+      (setq rgcr/zoomed-window-config (current-window-configuration))
+      (delete-other-windows)
+      (message "Window zoomed"))))

@@ -44,6 +44,10 @@
 (load-if-not-loaded "plugins.el")
 (load-if-not-loaded "keybindings.el")
 
+;; Load local config if it exists (private configurations)
+(when (file-exists-p (expand-file-name "local.el" my-config-dir))
+  (load-if-not-loaded "local.el"))
+
 ;; Reset GC settings after startup
 (add-hook 'emacs-startup-hook
           (lambda ()

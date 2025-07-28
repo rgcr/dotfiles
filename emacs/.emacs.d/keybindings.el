@@ -38,11 +38,17 @@
        (term (getenv "SHELL")))))
 )
 
-
-;; Leader ','
+;; General keybindings
 (general-evil-setup)
+
+;; Evil leader ','
 (general-create-definer my-evil-leader-def
   :prefix ",")
+
+;; General leader 'SPC'
+(general-create-definer my-general-leader-def
+  :prefix "SPC"
+  :non-normal-prefix "C-SPC")
 
 (my-evil-leader-def
  :states '(normal visual emacs)
@@ -64,6 +70,7 @@
   "x"  'rgcr/close-and-kill-this-pane ;; close and kill buffer
   "/"  'consult-ripgrep
   ","  'other-window                  ;; Switch to other window
+  "z"  'rgcr/toggle-zoom-window               ;; zoom window
   ;; centaur-tabs
   "1" '(lambda () (interactive) (awt-goto-tab 1))
   "2" '(lambda () (interactive) (awt-goto-tab 2))
@@ -83,17 +90,19 @@
   (centaur-tabs-select-visible-nth-tab n))
 
 
-;; global general keys
-(general-define-key
+;; General leader 'SPC'
+(my-general-leader-def
  :states '(normal visual insert emacs)
- :prefix "SPC"
- :non-normal-prefix "C-SPC"
  "SPC" '(execute-extended-command :which-key "M-x")
  "."   '(ivy-resume :which-key "Ivy Resume")
  ;; ripgrep
  "/"   '(counsel-rg :which-key "Ripgrep")
  ;; org-agenda
- "a"  '(org-agenda :which-key "ORG Agenda")'
+ "a"  '(org-agenda :which-key "ORG Agenda")
+ ;; org-capture
+ "c"  '(org-capture :which-key "ORG Capture")
+ ;; close active call
+ "x"  '(my/close-active-call :which-key "Close Active Call")
  ;; dired
  "d"   '(dired-jump   :which-key "Dired")
  ;; eyebrowse
@@ -102,21 +111,15 @@
  ;; flycheck
  "f"   '(hydra-flycheck/body :which-key "Flycheck")
  ;; maGit
- "g"   '(hydra-magit/body :which-key "Magit")
+ "g"   '(rgcr/magit-hydra :which-key "Magit")
  ;; lsp
  "l"  '(hydra-lsp/body :which-key "LSP")
  ;; Neotree
  "n"  '(neotree-toggle :which-key "Neotree")
  ;; projectile
- "p"  '(hydra-projectile/body :which-key "Projectile")
+ "p"  '(rgcr/projectile-hydra :which-key "Projectile")
  ;; yasnippet
  "y"   '(hydra-yasnippet/body :which-key "Yasnippet")
- ;; perspective
-    ;; "x"  '(hydra-perspective/body :which-key "Perspective")
- ;; Window
- ;; "wx"  '(delete-window :which-key "delete window")
- ;; zoom
- ;; "z"   '(hydra-zoom/body :which-key "Zoom")
  )
 
 
@@ -197,11 +200,29 @@
 ;; >>>> Hydras
 ;; -------------------------
 
+;; Wrapper functions to load hydras
+;; Because magit/projectile are being loaded lazily
+(defun rgcr/projectile-hydra ()
+  "Load projectile and show hydra."
+  (interactive)
+  (require 'projectile)
+  (projectile-mode 1)
+  ;; Force projectile to detect current project
+  (when (projectile-project-p)
+    (projectile-project-root))
+  (hydra-projectile/body))
+
+(defun rgcr/magit-hydra ()
+  "Load magit and show hydra."
+  (interactive)
+  (require 'magit)
+  (hydra-magit/body))
 
 ;; Magit
-(defhydra hydra-magit (:color blue :hint nil)
-  "
- Repo:  %(magit-get \"remote\" \"origin\" \"url\")
+(with-eval-after-load 'magit
+  (defhydra hydra-magit (:color blue :hint nil)
+    "
+ Repo:  %(if (fboundp 'magit-get) (magit-get \"remote\" \"origin\" \"url\") \"<Not in git repo>\")
 ^─────^───────────────────────────────────────────^
 ^
 ^Magit^
@@ -224,7 +245,7 @@ _q_: Quit
   ("P" magit-push)
   ("t" magit-tree)
   ("q" nil)
-)
+  ))
 
 
 ;; yasnippet
@@ -254,9 +275,9 @@ _q_: Quit
 
 ;; flycheck
 (defhydra hydra-flycheck
-    (:pre (flycheck-list-errors)
-     :post (quit-windows-on "*Flycheck errors*")
-     :hint nil)
+  (:pre (flycheck-list-errors)
+        :post (quit-windows-on "*Flycheck errors*")
+        :hint nil)
     "
   ^Flycheck^     ^Move^
   ^─────────^────^──^────────
@@ -306,9 +327,10 @@ LSP Actions:
 
 
 ;; projectile
-(defhydra hydra-projectile (:color teal :hint nil :exit t)
+(with-eval-after-load 'projectile
+  (defhydra hydra-projectile (:color teal :hint nil :exit t)
 "
-         PROJECTILE: %(projectile-project-root)
+         PROJECTILE
 
   ^Search^                ^Buffers^             ^Cache^
   ^^───────────────────────^^───────────────────^^─────────────────────
@@ -337,7 +359,7 @@ LSP Actions:
   ("z"   projectile-cache-current-file)
   ("c"   projectile-invalidate-cache)
   ("q"   nil :color red)
-  )
+  ))
 
 (defhydra hydra-eyebrowse (:color teal :hint nil :exit t)
   ("1" eyebrowse-switch-to-window-config-1 "ws1")

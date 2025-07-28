@@ -3,13 +3,13 @@ set -o vi
 
 # ZSH_UNAME=$(uname)
 
-# completion cache
+# completion cache - optimized for performance
 autoload -Uz compinit
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24)  ]]
-then
-    compinit;
+# Check if completion dump is older than 24 hours
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+    compinit
 else
-    compinit -C;
+    compinit -C
 fi
 
 #############################################
@@ -107,9 +107,9 @@ setopt share_history
 [ -e "${HOME}/.completions.sh" ] && source "${HOME}/.completions.sh"
 
 # Adding path with custom function to avoid duplicates
-path add ${HOME}/.local/bin
-path add ${HOME}/.yarn/bin
-path add ${HOME}/.cargo/bin
+[ -d "${HOME}/.local/bin" ] && path add ${HOME}/.local/bin
+[ -d "${HOME}/.yarn/bin" ] && path add ${HOME}/.yarn/bin
+[ -d "${HOME}/.cargo/bin" ] && path add ${HOME}/.cargo/bin
 
 # local config
 [ -e "${HOME}/.profile.local" ] && source "${HOME}/.profile.local"

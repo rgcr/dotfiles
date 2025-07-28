@@ -3,21 +3,15 @@
 I use [**GNU Stow**](https://www.gnu.org/software/stow/) to handle my dotfiles.
 
 ### 📦 Installation
-- **macOS**:  
-  ```bash
-  brew install stow
-  ```
 
-- **Arch Linux**:  
-  ```bash
-  pacman -S stow
-  ```
+- macOS: `brew install stow`
+- Arch Linux: `pacman -S stow`
 
 ---
 
 ## Requirements
 
-### 📝 `vim-plug` for Vim
+### `vim-plug` for Vim
 
 ```bash
 mkdir -p ~/.vim/autoload
@@ -25,13 +19,11 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
   https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 ```
 
-### 🧬 `antibody` for ZSH (optional)
+### [`antidote`](https://github.com/mattmc3/antidote) for ZSH
 
-*(May need to install manually as it's not in all package managers)*
+- macOS: `brew install antidote`
+- Arch Linux: `pacman -S zsh-antidote`
 
-```bash
-curl -sL git.io/antibody | sh -s
-```
 
 ---
 
@@ -67,15 +59,7 @@ stow --no-folding -d . -t ~ -vD *
 
 ## Notes
 
-### ⚙️ ZSH config requires `antibody` to install plugins
-
-Once deployed, install plugins with:
-
-```bash
-antibody -sync --force
-```
-
-### 💡 `i3-hibernate` config requires `sudo` privileges
+### `i3-hibernate` config requires `sudo` privileges
 
 ```bash
 sudo rsync -rvzh i3-hibernate/ /

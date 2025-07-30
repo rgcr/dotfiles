@@ -56,7 +56,9 @@ local app_bindings = {
     n = "Microsoft OneNote",
     t = "Microsoft Teams",
     c = "Google Chrome",
-    v = "Visual Studio Code",
+    v = "VsCodium",
+    -- v = "Visual Studio Code",
+
 }
 
 -- Focus on specific applications using hyper key | Cmd + Ctrl + Alt + Key

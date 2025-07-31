@@ -97,8 +97,6 @@
  "."   '(ivy-resume :which-key "Ivy Resume")
  ;; ripgrep
  "/"   '(counsel-rg :which-key "Ripgrep")
- ;; org-agenda
- "a"  '(org-agenda :which-key "ORG Agenda")
  ;; org-capture
  "c"  '(org-capture :which-key "ORG Capture")
  ;; close active call

@@ -389,20 +389,15 @@
   :defer t
   :commands copilot-mode
   ;; Load on demand instead of all prog-modes
-  ;; :hook ((prog-mode . copilot-mode))
+  :hook ((prog-mode . copilot-mode))
+  :init
+  ;; Suppress copilot indentation warnings - more comprehensive approach
+  (setq warning-suppress-log-types '((copilot)))
+  (setq warning-suppress-types '((copilot)))
+  ;; Alternative: suppress all copilot warnings in the *Warnings* buffer
+  (add-to-list 'warning-suppress-log-types '(copilot))
+  (add-to-list 'warning-suppress-types '(copilot))
   )
-
-(defun my/copilot-tab ()
-  "Smart fallback: yasnippet > cape > LSP > Copilot > indent."
-  (interactive)
-  (unless (or (copilot-accept-completion)
-              (completion-at-point))
-    (indent-for-tab-command)))
-
-;; (with-eval-after-load 'copilot
-  ;; (define-key copilot-mode-map (kbd "TAB") #'my/copilot-tab)
-  ;; (define-key copilot-mode-map (kbd "<tab>") #'my/copilot-tab))
-
 
 ;; -------------------------
 ;; >>>> Org
@@ -618,16 +613,35 @@
 
 (use-package highlight-indent-guides
   :ensure t
-  :hook (prog-mode . highlight-indent-guides-mode)
   :delight
+  :hook (prog-mode . (lambda ()
+                       (when (display-graphic-p)
+                         (highlight-indent-guides-mode 1))))
   :config
-  (setq highlight-indent-guides-method 'character)
-  (setq highlight-indent-guides-character ?\|) ;; terminal fallback
-  (setq highlight-indent-guides-responsive 'top)
+  ;; Configure based on display type
+  (if (display-graphic-p)
+      ;; GUI configuration - character-based with custom symbols
+      (progn
+        (setq highlight-indent-guides-method 'character)
+        (setq highlight-indent-guides-character ?┊)  ;; thin line character
+        (setq highlight-indent-guides-responsive 'top)
+        (setq highlight-indent-guides-delay 0.1)
+        ;; Custom colors for GUI
+        (set-face-foreground 'highlight-indent-guides-character-face "#4a4a4a")
+        (set-face-foreground 'highlight-indent-guides-top-character-face "#6a6a6a")
+        (set-face-background 'highlight-indent-guides-character-face nil)
+        (set-face-background 'highlight-indent-guides-top-character-face nil))
+    ;; Terminal configuration
+    (progn
+      (setq highlight-indent-guides-method 'character)
+      (setq highlight-indent-guides-character ?┊)  ;; dots for terminal
+      (setq highlight-indent-guides-responsive 'top)
+      ;; Terminal-friendly colors
+      (set-face-foreground 'highlight-indent-guides-character-face "brightblack")
+      (set-face-background 'highlight-indent-guides-character-face nil)))
 
-  (setq highlight-indent-guides-auto-enabled nil)      ;; Don't auto-switch method
-  (set-face-foreground 'highlight-indent-guides-character-face "brightblack")
-  (set-face-background 'highlight-indent-guides-character-face nil))
+  (setq highlight-indent-guides-auto-enabled nil)  ;; Don't auto-switch method
+)
 
 (use-package rainbow-delimiters
   :ensure t

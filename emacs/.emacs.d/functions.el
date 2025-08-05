@@ -13,6 +13,21 @@
 
 (add-hook 'emacs-startup-hook #'rgcr/display-startup-time)
 
+;; Copilot status command
+(defun rgcr/copilot-status ()
+  "Display current Copilot status and provide quick actions."
+  (interactive)
+  (let ((status (if (bound-and-true-p copilot-mode) "enabled" "disabled"))
+        (buffer-name (buffer-name)))
+    (message "Copilot is %s in buffer '%s'" status buffer-name)
+    ;; Show additional info if available
+    (when (bound-and-true-p copilot-mode)
+      (if (fboundp 'copilot--overlay-visible)
+          (message "Copilot: %s (suggestions: %s)"
+                   status
+                   (if (copilot--overlay-visible) "active" "none"))
+        (message "Copilot: %s" status)))))
+
 ;;(define-prefix-command 'rgcr/help-map)
 ;; (add-hook 'eshell-mode 'rgcr/hide-fringes)
 

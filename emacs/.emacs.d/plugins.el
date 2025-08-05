@@ -56,6 +56,23 @@
   (spaceline-toggle-evil-state-on)
   (spaceline-toggle-selection-info-on)
   (spaceline-toggle-which-function-on)
+
+  ;; Add copilot status variable
+  (defvar copilot-mode-line-status "")
+
+  ;; Update copilot status on mode changes
+  (defun update-copilot-mode-line ()
+    (setq copilot-mode-line-status
+          (if (bound-and-true-p copilot-mode) " 🤖" ""))
+    (force-mode-line-update))
+
+  ;; Hook to update when copilot mode changes
+  (add-hook 'copilot-mode-hook 'update-copilot-mode-line)
+  (add-hook 'window-buffer-change-functions
+            (lambda (frame) (update-copilot-mode-line)))
+
+  ;; Add to global mode string
+  (add-to-list 'global-mode-string 'copilot-mode-line-status)
   )
 
 ;; Icons

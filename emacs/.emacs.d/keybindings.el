@@ -174,15 +174,15 @@
 ;; copilot
 (with-eval-after-load 'copilot
   (define-key copilot-completion-map (kbd "M-RET") 'copilot-accept-completion)
-  (define-key copilot-completion-map (kbd "M-<right>") 'copilot-next-completion)
-  (define-key copilot-completion-map (kbd "M-<left>") 'copilot-previous-completion)
-  ;; (define-key copilot-completion-map (kbd "C-d") 'copilot-accept-completion-by-word)
-  ;; (define-key copilot-completion-map (kbd "C-c") 'copilot-accept-completion-by-line)
+  (define-key copilot-completion-map (kbd "M-n") 'copilot-next-completion)
+  (define-key copilot-completion-map (kbd "M-p") 'copilot-previous-completion)
+  (define-key copilot-completion-map (kbd "M-l") 'copilot-accept-completion-by-line)
+  (define-key copilot-completion-map (kbd "M-q") 'copilot-clear-overlay)
 )
 
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd ",ci") #'comment-line) ;; normal mode
-  (define-key evil-visual-state-map (kbd ",ci") #'comment-region) ;; visual mode
+  (define-key evil-visual-state-map (kbd ",ci") #'comment-or-uncomment-region) ;; visual mode
 
 ;; ctrl + p -> projectile-find-file
   (define-key evil-normal-state-map (kbd "C-p") 'projectile-find-file)

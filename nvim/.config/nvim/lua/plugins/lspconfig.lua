@@ -189,3 +189,26 @@ vim.lsp.config(
     }
   }
 )
+
+vim.lsp.config(
+  'ts_ls',
+  {
+    filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
+    settings = {
+      typescript = {
+        format = {
+          indentSize = 4,
+          tabSize = 4,
+          convertTabsToSpaces = true,
+        }
+      },
+      javascript = {
+        format = {
+          indentSize = 4,
+          tabSize = 4,
+          convertTabsToSpaces = true,
+        }
+      }
+    }
+  }
+)

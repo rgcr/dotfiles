@@ -16,3 +16,6 @@ emacs/.emacs.d/transient
 
 # mac
 .DS_Store
+
+*.md
+!README.md

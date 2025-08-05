@@ -78,6 +78,17 @@ local function zoom_status()
   return ''
 end
 
+local function copilot_status()
+  -- copilot status
+  -- if b:copilot_enabled is set, it means Copilot is enabled
+  local enabled = vim.g.copilot_enabled
+  if enabled == 1 or enabled == true then
+    return ' Copilot'
+  else
+    return ''
+  end
+end
+
 lualine.setup({
   global_status = true,
 	options = {
@@ -95,7 +106,7 @@ lualine.setup({
 		lualine_b = { mode },
 		lualine_c = { pastemode, filename },
 		-- lualine_x = { "encoding", "fileformat", "filetype" },
-		lualine_x = { zoom_status, diff, filetype },
+		lualine_x = { zoom_status, copilot_status, diff, filetype },
 		lualine_y = { location },
 		lualine_z = { },
 	},

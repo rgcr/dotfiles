@@ -166,12 +166,12 @@ lazy.setup({
           extensions = {
             undo = {},
           },
-          -- pickers = {
-          --   find_files = {
-          --     -- find_command = { "fd", "--type", "f", "--strip-cwd-prefix", "-L" }
-          --     find_command = { "rg", "--files", "--hidden","--ignore-vcs", "-L" }
-          --   },
-          -- }
+          pickers = {
+            find_files = {
+              -- find_command = { "fd", "--type", "f", "--strip-cwd-prefix", "-L" }
+              find_command = { "rg", "--files", "--hidden","--ignore-vcs", "-L" }
+            },
+          }
         })
       end
     },
@@ -291,6 +291,7 @@ lazy.setup({
     {
       'github/copilot.vim',
       event = 'InsertEnter',
+      cmd = { 'Copilot' },
       config = function()
         vim.g.copilot_no_tab_map = true
       end

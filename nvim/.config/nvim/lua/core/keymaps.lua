@@ -108,6 +108,11 @@ utils.tnoremap('<Esc>', '<C-\\><C-n>', { desc = "Exit Terminal Mode" })
 utils.tnoremap('<C-t>', utils.close_terminal, { desc = "Close Terminal" })
 utils.tnoremap('<C-x>', utils.close_terminal, { desc = "Close Terminal" })
 
+-- bufferline.nvim, move buffer positions
+-- utils.nnoremap('<A-<>', ':BufferLineMovePrev<CR>', { desc = "Move Buffer Left" })key
+-- utils.nnoremap('<A->>', ':BufferLineMoveNext<CR>', { desc = "Move Buffer Left" })
+-- utils.nnoremap('<A-.>', ':BufferLinePick<CR>', { desc = "Pick Buffer" }
+
 
 -- NvimTree
 utils.nnoremap('<space>n', ':Neotree toggle=true<CR>', { desc = "Toggle Neotree" })
@@ -172,7 +177,7 @@ end, { desc = "Open Oil" })
 -- utils.nnoremap('gpt', ':lua require("goto-preview").goto_preview_type_definition()<CR>') -- preview type goto_preview_definition
 -- utils.nnoremap('gpi', ':lua require("goto-preview").goto_preview_implementation()<CR>') -- preview goto_preview_implementation
 -- utils.nnoremap('gpD', ':lua require("goto-preview").goto_preview_declaration()<CR>') -- preview goto_preview_declaration
-utils.nnoremap('gQ', ':lua require("goto-preview").close_all_win()<CR>') -- close all preview winwdows
+-- utils.nnoremap('gQ', ':lua require("goto-preview").close_all_win()<CR>') -- close all preview winwdows
 -- utils.nnoremap('gpr', ':lua require("goto-preview").goto_preview_references()<CR>') -- preview goto_preview_references
 
 -- Fold / unfold with tab for norg files
@@ -186,10 +191,16 @@ vim.api.nvim_create_autocmd("FileType", {
 --  Copilot keymaps
 utils.inoremap("<M-p>", "<Plug>(copilot-previous)")
 utils.inoremap("<M-n>", "<Plug>(copilot-next)")
-utils.inoremap("<C-]>", "<Plug>(copilot-dismiss)")
+-- utils.inoremap("<C-]>", "<Plug>(copilot-dismiss)")
+utils.inoremap("<M-q>", "<Plug>(copilot-dismiss)")
+utils.inoremap("<M-l>", "<Plug>(copilot-accept-line)")
 utils.exprinoremap("<M-CR>", 'copilot#Accept("\\<CR>")', { replace_keycodes = false })
 
--- Hydras
+
+-----------------------------------------------------------
+-- HYDRAS
+-----------------------------------------------------------
+
 local ok, Hydra = pcall(require, 'hydra')
 if not ok then
   return
@@ -301,13 +312,12 @@ Hydra({
 -- Hydra for Copilot
 local hint_copilot = [[
   Copilot
-  --------
+  --------------------
   _e_: Enable
   _d_: Disable
   _s_: Status
-  _t_: Toggle
 
-  ---------
+  --------------------
   _<Esc>_ | _q_: Quit
 ]]
 
@@ -329,63 +339,87 @@ Hydra({
        },
      },
    mode = 'n',
-   body = '<space>c',
-   heads = {
-      { 'e', cmd 'Copilot enable', { desc = 'enable' } },
-      { 'd', cmd 'Copilot disable', { desc = 'disable' } },
-      { 't',
-        function()
-          if vim.g.copilot_enabled then
-            vim.g.copilot_enabled = false
-            vim.notify("Copilot disabled", "info", { title = "Copilot", timeout = 300 })
-          else
-            vim.g.copilot_enabled = true
-            vim.notify("Copilot enabled", "info", { title = "Copilot", timeout = 300 })
-          end
-        end,
-        { desc = 'toggle' }
-      },
-      { 's', cmd 'Copilot status', { desc = 'status' } },
-      { 'q', nil, { exit = true, nowait = true } },
-      { '<Esc>', nil, { exit = true, nowait = true } },
-   }
+  body = '<space>c',
+  heads = {
+    { 'e',
+      function()
+        require('lazy').load({plugins = {'copilot.vim'}})
+        vim.g.copilot_enabled = true
+        vim.cmd('Copilot enable')
+        vim.notify("Copilot enabled", "info", { title = "Copilot", timeout = 300 })
+      end,
+      { desc = 'enable' } },
+    { 'd', function()
+        require('lazy').load({plugins = {'copilot.vim'}})
+        vim.cmd('Copilot disable')
+        vim.notify("Copilot disabled for current buffer", "info", { title = "Copilot", timeout = 300 })
+      end, { desc = 'disable current buffer' } },
+    { 's',
+      function()
+        if vim.g.copilot_enabled then
+          vim.notify("Copilot enabled", "info", { title = "Copilot", timeout = 300 })
+        else
+          vim.notify("Copilot disabled", "info", { title = "Copilot", timeout = 300 })
+        end
+      end,
+      { desc = 'status' }
+    },
+    -- { 's', function() require('lazy').load({plugins = {'copilot.vim'}}); vim.cmd('Copilot status') end, { desc = 'status' } },
+    { 'q', nil, { exit = true, nowait = true } },
+    { '<Esc>', nil, { exit = true, nowait = true } },
+  }
 })
 
 -- -- hydra for lsp
--- local hint_lsp = [[
--- _d_: Definition     _h_: Hover
--- _D_: Declaration    _k_: Signature Help
--- _R_: Rename         _r_: References
--- _c_: Code Action    _f_: Format
---
--- _q_ | <ESC>: Quit
--- ^^^^
--- ]]
--- Hydra({
---   name = 'LSP',
---   hint = hint_lsp,
---   config = {
---     color = 'pink',
---     invoke_on_body = true,
---     on_key = function()
---       vim.lsp.buf.format { async = true }
---     end,
---   },
---   mode = 'n',
---   body = '<space>l',
---   heads = {
---     { 'd', vim.lsp.buf.definition, { desc = 'LSP Definition' } },
---     { 'D', vim.lsp.buf.declaration, { desc = 'LSP Declaration' } },
---     { 'h', vim.lsp.buf.hover, { desc = 'LSP Hover' } },
---     { 'k', vim.lsp.buf.signature_help, { desc = 'LSP Signature Help' } },
---     { 'R', vim.lsp.buf.rename, { desc = 'LSP Rename' } },
---     { 'r', vim.lsp.buf.references, { desc = 'LSP References' } },
---     { 'c', vim.lsp.buf.code_action, { desc = 'LSP Code Action' } },
---     { 'f', function() vim.lsp.buf.format { async = true } end, { desc = 'LSP Format' } },
---     { 'q', nil, { exit = true, nowait = true } },
---     { '<ESC>', nil, { exit = true, nowait = true } },
---   }
--- })
+local hint_lsp = [[
+                LSP
+-----------------------------------
+ _d_: Definition     _h_: Hover
+ _D_: Declaration    _k_: Signature Help
+ _R_: Rename         _r_: References
+ _c_: Code Action    _f_: Format
+  ^
+ _i_: LSP Info
+-----------------------------------
+  _q_ | _<ESC>_: Quit
+^^^^
+]]
+Hydra({
+  name = 'LSP',
+  hint = hint_lsp,
+  config = {
+    color = 'teal',
+    invoke_on_body = true,
+    on_key = function()
+      vim.lsp.buf.format { async = true }
+    end,
+    hint = {
+      position = 'bottom',
+      float_opts = {
+        -- overridden
+        style = "minimal",
+        focusable = false,
+        noautocmd = true,
+        border = 'rounded',
+      },
+    },
+  },
+  mode = 'n',
+  body = '<space>l',
+  heads = {
+    { 'd', vim.lsp.buf.definition, { desc = 'LSP Definition' } },
+    { 'D', vim.lsp.buf.declaration, { desc = 'LSP Declaration' } },
+    { 'h', vim.lsp.buf.hover, { desc = 'LSP Hover' } },
+    { 'i', '<cmd>LspInfo<CR>', { desc = 'LSP Info' } },
+    { 'k', vim.lsp.buf.signature_help, { desc = 'LSP Signature Help' } },
+    { 'R', vim.lsp.buf.rename, { desc = 'LSP Rename' } },
+    { 'r', vim.lsp.buf.references, { desc = 'LSP References' } },
+    { 'c', vim.lsp.buf.code_action, { desc = 'LSP Code Action' } },
+    { 'f', function() vim.lsp.buf.format { async = true } end, { desc = 'LSP Format' } },
+    { 'q', nil, { exit = true, nowait = true } },
+    { '<ESC>', nil, { exit = true, nowait = true } },
+  }
+})
 
 -- hydra for workspaces.nvim
 local hint_workspaces = [[
@@ -425,5 +459,45 @@ Hydra({
       { 's', cmd 'WorkspacesOpen', { desc = 'switch workspace' } },
       { 'q', nil, { exit = true, nowait = true } },
       { '<Esc>', nil, { exit = true, nowait = true } },
+   }
+})
+
+-- hydra for bufferline.nvim
+local hint_bufferline = [[
+  Bufferline (Buffer Actions)
+  ---------------------------
+  _p_: Pick Buffer  _c_: Close Others
+  ^
+  _<_: Move Left    _>_: Move Right
+  ^
+  ---------------------------
+  _<Esc>_ | _q_: Quit
+]]
+Hydra({
+   name = 'Bufferline',
+   hint = hint_bufferline,
+   config = {
+      color = 'red',
+      invoke_on_body = true,
+      hint = {
+         position = 'bottom',
+         float_opts = {
+           -- overridden
+           style = "minimal",
+           focusable = false,
+           noautocmd = true,
+           border = 'rounded',
+         },
+       },
+     },
+   mode = 'n',
+   body = '<space>b',
+   heads = {
+      { 'p', cmd('BufferLinePick'), { desc = "pick buffer",  exit = true, nowait = true } },
+      { 'c', cmd('BufferLineCloseOthers'), { desc = "close other buffers", exit = true, nowait = true} },
+      { '<', cmd('BufferLineMovePrev'), { desc = "move buffer left" } },
+      { '>', cmd('BufferLineMoveNext'), { desc = "move buffer right" } },
+      { '<Esc>', nil, { exit = true, nowait = true } },
+      { 'q', nil, { exit = true, nowait = true } },
    }
 })

@@ -74,11 +74,15 @@ autocmd('Filetype', {
 augroup('setIndent', { clear = true })
 autocmd('Filetype', {
     group = 'setIndent',
-    pattern = { 'xml', 'html', 'xhtml', 'css', 'scss', 'javascript', 'typescript',
-    'yaml', 'lua', 'vue'
-  },
+    pattern = { 'xml', 'html', 'xhtml', 'css', 'scss', 'yaml', 'lua'},
   command = 'set shiftwidth=2 tabstop=2 sts=2 expandtab'
 })
+-- Set indentation to 4 spaces
+-- autocmd('Filetype', {
+--   group = 'setIndent',
+--   pattern = { 'javascript', 'typescript', 'vue', 'json'},
+--   command = 'set shiftwidth=4 tabstop=4 sts=4 expandtab'
+-- })
 
 -- Enable spell checking for text filetypes
 augroup('setSpell', { clear = true })
@@ -264,6 +268,19 @@ usercmd(
     vim.cmd("bdelete " .. current_file)
   end,
   { nargs = 1, desc = "Rename the current file" }
+)
+
+-- Custom CMD LSP formatting
+usercmd(
+  'LspFormat',
+  function()
+    if vim.lsp.buf.format then
+      vim.lsp.buf.format({ async = true })
+    else
+      print("No LSP formatting available for this buffer.")
+    end
+  end,
+  { desc = "Format the current buffer using LSP" }
 )
 
 -- fold <tab> for norg

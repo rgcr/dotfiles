@@ -58,7 +58,6 @@ local app_bindings = {
     c = "Google Chrome",
     v = "VsCodium",
     -- v = "Visual Studio Code",
-
 }
 
 -- Focus on specific applications using hyper key | Cmd + Ctrl + Alt + Key
@@ -137,11 +136,19 @@ hs.hotkey.bind(hyper, "l", function()
   hs.caffeinate.lockScreen()
 end)
 
+-- App switching hydra
+local app_hydra = require("app_hydra").setup(app_bindings)
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, ".", function()
+  app_hydra.show()
+end)
+
+-- launch terminal process with cmd + option + t
+-- hs.hotkey.bind(cmd_alt, "t", function()
+--   hs.execute("~/.local/bin/snape", true)
+-- end)
 
 -- I have my custom engines in a custom file ~/.hammerspoon/search_engines.lua
 local searcher = require("searcher").setup()
 hs.hotkey.bind(hyper, "space", function()
   searcher.show()
 end)
-
-

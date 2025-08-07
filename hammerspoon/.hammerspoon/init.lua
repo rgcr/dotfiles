@@ -126,11 +126,6 @@ hs.hotkey.bind(hyper, "left", function()
 end)
 
 
--- Display keyboard shortcuts
--- Install:andUse("KSheet",
---   { hotkeys = { toggle = { hyper, "/" } } }
--- )
-
 -- Lock screen
 hs.hotkey.bind(hyper, "l", function()
   hs.caffeinate.lockScreen()
@@ -138,14 +133,11 @@ end)
 
 -- App switching hydra
 local app_hydra = require("app_hydra").setup(app_bindings)
-hs.hotkey.bind({"ctrl", "alt", "cmd"}, ".", function()
+hs.hotkey.bind({"ctrl"}, ".", function()
   app_hydra.show()
 end)
 
--- launch terminal process with cmd + option + t
--- hs.hotkey.bind(cmd_alt, "t", function()
---   hs.execute("~/.local/bin/snape", true)
--- end)
+-- Double Ctrl + character app switcher
 
 -- I have my custom engines in a custom file ~/.hammerspoon/search_engines.lua
 local searcher = require("searcher").setup()

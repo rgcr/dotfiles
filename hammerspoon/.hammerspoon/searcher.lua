@@ -59,7 +59,11 @@ end
 
 function M.setup(engines)
   search_engines = engines or load_default_engines()
-  print(hs.inspect(search_engines))
+  print("Search engines:")
+  for _, engine in ipairs(search_engines) do
+    print(engine.keyword .. " -> " .. engine.name)
+  end
+  -- print(hs.inspect(search_engines))
   return M
 end
 

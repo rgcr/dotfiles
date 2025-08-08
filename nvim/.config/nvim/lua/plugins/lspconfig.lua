@@ -93,7 +93,11 @@ end -- end of on_attach
 -- see: `:help vim.diagnostic.config`
 -- Customizing how diagnostics are displayed
 vim.diagnostic.config({
-  update_in_insert = true,
+  virtual_text = false,     -- Disable default virtual text (using diagflow instead)
+  signs = true,             -- Show signs in gutter
+  underline = true,         -- Underline diagnostic text
+  update_in_insert = false, -- Disable for performance
+  severity_sort = true,     -- Sort by severity
   float = {
     focusable = false,
     style = "minimal",
@@ -104,21 +108,21 @@ vim.diagnostic.config({
 	},
 })
 
--- Show line diagnostics automatically in hover window
-vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-  pattern = "*",
-  callback = function()
-    vim.diagnostic.open_float(nil, { focus = false })
-  end,
-})
+-- Show line diagnostics automatically in hover window (disabled for startup performance)
+-- vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+--   pattern = "*",
+--   callback = function()
+--     vim.diagnostic.open_float(nil, { focus = false })
+--   end,
+-- })
 
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 local opts = { noremap=true, silent=true }
-vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
-vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '<space>d', vim.diagnostic.setloclist, opts)
 
 --[[
 Language servers setup:
@@ -146,7 +150,7 @@ end
 -- map buffer local keybindings when the language server attaches.
 -- Add your language server below:
 -- local servers = { 'bashls', 'pylsp', 'clangd', 'html', 'cssls', 'tsserver' }
-local servers = { 'bashls', 'clangd', 'cssls', 'pyright','ts_ls', 'phpactor', 'gopls' }
+local servers = { 'bashls', 'clangd', 'cssls', 'pyright', 'pylsp', 'ts_ls', 'phpactor', 'gopls' }
 
 -- Call setup
 for _, k in ipairs(servers) do
@@ -161,54 +165,57 @@ for _, k in ipairs(servers) do
   }
 end
 
--- bashls special configuration
-vim.lsp.config('bashls', {
+-- bashls special configuration (override the basic setup)
+lspconfig.bashls.setup{
+  on_attach = on_attach,
+  root_dir = root_dir,
+  capabilities = capabilities,
   filetypes = { "bash", "sh", "zsh"},
   settings = {
     bashIde = {
       globPattern = "*@(.sh|.zsh|.bash|.inc|.bash|.command)"
     }
   },
-})
+}
 
 
--- pylsp special configuration
-vim.lsp.config(
-  'pyright',
-  {
-    filetypes = { "python" },
-    settings = {
-      python = {
-        analysis = {
-          typeCheckingMode = "basic", -- "off", "basic", "strict"
-          autoSearchPaths = true,
-          useLibraryCodeForTypes = true,
-        },
-
-      }
-    }
-  }
-)
-
-vim.lsp.config(
-  'ts_ls',
-  {
-    filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
-    settings = {
-      typescript = {
-        format = {
-          indentSize = 4,
-          tabSize = 4,
-          convertTabsToSpaces = true,
-        }
+-- pyright special configuration (override the basic setup)
+lspconfig.pyright.setup{
+  on_attach = on_attach,
+  root_dir = root_dir,
+  capabilities = capabilities,
+  filetypes = { "python" },
+  settings = {
+    python = {
+      analysis = {
+        typeCheckingMode = "basic", -- "off", "basic", "strict"
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
       },
-      javascript = {
-        format = {
-          indentSize = 4,
-          tabSize = 4,
-          convertTabsToSpaces = true,
-        }
+    }
+  }
+}
+
+-- ts_ls special configuration (override the basic setup)
+lspconfig.ts_ls.setup{
+  on_attach = on_attach,
+  root_dir = root_dir,
+  capabilities = capabilities,
+  filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
+  settings = {
+    typescript = {
+      format = {
+        indentSize = 4,
+        tabSize = 4,
+        convertTabsToSpaces = true,
+      }
+    },
+    javascript = {
+      format = {
+        indentSize = 4,
+        tabSize = 4,
+        convertTabsToSpaces = true,
       }
     }
   }
-)
+}

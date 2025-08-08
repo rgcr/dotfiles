@@ -91,8 +91,6 @@ utils.nnoremap('B', 'i<CR><esc>k$' , { desc = "Split Current Line" })
 -- show trilling spaces
 -- utils.nnoremap('<leader>ts', ':set list!<CR>') -- show trailing spaces
 
-
-
 -----------------------------------------------------------
 -- Applications and Plugins shortcuts
 -----------------------------------------------------------
@@ -373,14 +371,17 @@ Hydra({
 -- -- hydra for lsp
 local hint_lsp = [[
                 LSP
------------------------------------
- _d_: Definition     _h_: Hover
- _D_: Declaration    _k_: Signature Help
- _R_: Rename         _r_: References
- _c_: Code Action    _f_: Format
+----------------------------------------
+ _d_: Definition     _D_: Declaration
+ _h_: Hover          _k_: Signature Help
+ _r_: References
+ ^
+ _c_: Code Action
+ ^
+ _R_: Rename         _F_: Format
   ^
  _i_: LSP Info
------------------------------------
+---------------------------------------
   _q_ | _<ESC>_: Quit
 ^^^^
 ]]
@@ -415,7 +416,8 @@ Hydra({
     { 'R', vim.lsp.buf.rename, { desc = 'LSP Rename' } },
     { 'r', vim.lsp.buf.references, { desc = 'LSP References' } },
     { 'c', vim.lsp.buf.code_action, { desc = 'LSP Code Action' } },
-    { 'f', function() vim.lsp.buf.format { async = true } end, { desc = 'LSP Format' } },
+    -- { 'f', vim.lsp.buf. , { desc = 'LSP Fix (Code Action)' } },
+    { 'F', function() vim.lsp.buf.format { async = true } end, { desc = 'LSP Format' } },
     { 'q', nil, { exit = true, nowait = true } },
     { '<ESC>', nil, { exit = true, nowait = true } },
   }

@@ -238,6 +238,28 @@ lazy.setup({
       event = { 'BufReadPre', 'BufNewFile' },
     },
 
+    -- Better diagnostic display
+    {
+      'dgagn/diagflow.nvim',
+      event = { 'BufReadPost', 'BufNewFile' },
+      opts = {
+        enable = true,
+        max_width = 60,  -- The maximum width of the diagnostic messages
+        severity_colors = {
+          error = "DiagnosticFloatingError",
+          warning = "DiagnosticFloatingWarn",
+          info = "DiagnosticFloatingInfo",
+          hint = "DiagnosticFloatingHint",
+        },
+        gap_size = 1,
+        scope = 'cursor', -- 'cursor', 'line' - show only for cursor position
+        padding_top = 0,
+        padding_right = 0,
+        text_align = 'right', -- 'left', 'right'
+        placement = 'top', -- 'top', 'inline'
+      }
+    },
+
     -- Syntax highlighting
     {
       'nvim-treesitter/nvim-treesitter',
@@ -348,6 +370,7 @@ lazy.setup({
     -- Incremental renaming
     {
       'smjonas/inc-rename.nvim',
+      cmd = "IncRename",
       opts = {}
     },
 

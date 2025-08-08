@@ -73,7 +73,66 @@ cmp.setup {
     { name = 'emoji' },
   },
 }
--- Load snippets from my-snippets folder
+-- Load snippets lazily on first use
+vim.api.nvim_create_autocmd("InsertEnter", {
+  once = true,
+  callback = function()
+    require("luasnip.loaders.from_snipmate").load() -- vim-snippets collection
+    require("luasnip.loaders.from_snipmate").load({paths = "~/.config/nvim/snippets"}) -- custom snippets
+  end,
+})
 
--- require("luasnip.loaders.from_snipmate").load({paths = "./snippets"})
-require("luasnip.loaders.from_snipmate").load()
+-- Custom command to list available snippets
+vim.api.nvim_create_user_command('SnippetsList', function()
+  local luasnip = require('luasnip')
+  local ft = vim.bo.filetype
+
+  -- Get all snippets for current filetype + 'all' filetype
+  local snippets = {}
+  local filetypes = { ft, 'all' }
+
+  for _, filetype in ipairs(filetypes) do
+    local ft_snippets = luasnip.get_snippets(filetype)
+    if ft_snippets then
+      for _, snippet in pairs(ft_snippets) do
+        table.insert(snippets, {
+          trigger = snippet.trigger,
+          description = snippet.name or snippet.dscr or "No description",
+          filetype = filetype
+        })
+      end
+    end
+  end
+
+  if #snippets == 0 then
+    print("No snippets available for filetype: " .. ft)
+    return
+  end
+
+  -- Create a buffer to display snippets
+  local buf = vim.api.nvim_create_buf(false, true)
+  local lines = {}
+
+  table.insert(lines, "Available Snippets for " .. ft .. ":")
+  table.insert(lines, string.rep("=", 50))
+  table.insert(lines, "")
+
+  for _, snippet in ipairs(snippets) do
+    local line = string.format("%-15s | %-10s | %s",
+      snippet.trigger,
+      snippet.filetype,
+      snippet.description
+    )
+    table.insert(lines, line)
+  end
+
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+  vim.api.nvim_buf_set_option(buf, 'filetype', 'text')
+
+  -- Open in a split window
+  vim.cmd('split')
+  vim.api.nvim_win_set_buf(0, buf)
+  vim.api.nvim_buf_set_keymap(buf, 'n', 'q', ':q<CR>', { noremap = true, silent = true })
+
+end, { desc = "List available snippets for current filetype" })

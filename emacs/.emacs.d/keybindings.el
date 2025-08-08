@@ -297,31 +297,37 @@ _q_: Quit
   ("q" nil))
 
 
-;; lsp
+;; lsp hydra - works whether LSP is loaded or not
 (defhydra hydra-lsp (:exit t :hint nil)
   "
  Buffer^^              Symbol
 ------------------------------------------------------------------------------------
 _f_ format             _d_ declaration    _i_ implementationa    _h_ documentation
-_x_ execute action     _D_ definition     _t_ type               _n_ rename
-^^                     _r_ references     _s_ signature
+_c_ code action        _D_ definition     _t_ type               _n_ rename
+_e_ List errors        _r_ references     _s_ signature
+
+^^
+
 
 LSP Actions:
-    [_R_] Restart    [_S_] Shutdown     [_I_] Session info
+    [_S_] Start LSP  [_R_] Restart    [_X_] Shutdown     [_I_] Session info
 "
   ("f" lsp-format-buffer)
-  ("x" lsp-execute-code-action)
+  ("c" lsp-execute-code-action)
   ("d" lsp-find-declaration)
   ("D" lsp-ui-peek-find-definitions)
+  ("e" flycheck-list-errors)
   ("r" lsp-ui-peek-find-references)
   ("i" lsp-ui-peek-find-implementation)
   ("t" lsp-find-type-definition)
   ("s" lsp-signature-help)
   ("h" lsp-describe-thing-at-point)
   ("n" lsp-rename)
+  ("S" lsp) ;; START LSP
   ("I" lsp-describe-session)
-  ("R" lsp-workspace-restart)
-  ("S" lsp-workspace-shutdown))
+  ("R" lsp-restart-workspace)
+  ("X" lsp-workspace-shutdown)
+  )
 
 
 ;; projectile

@@ -1,6 +1,50 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; => FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Ruff fix functions
+(defun rgcr/ruff-check-buffer ()
+  "Run ruff check on current buffer and show results in a split buffer."
+  (interactive)
+  (if (not (buffer-file-name))
+      (message "Buffer is not visiting a file")
+    (save-buffer)
+    (message "Running ruff check on %s..." (buffer-file-name))
+    ;; Use shell-command which automatically shows output in a split buffer
+    (let ((exit-code (shell-command
+                      (format "ruff check %s 2>&1"
+                             (shell-quote-argument (buffer-file-name))))))
+      (if (= exit-code 0)
+          (message "Ruff: No issues found")
+        (progn
+          (message "Ruff: Issues found - see output buffer")
+          ;; Set up Evil keybindings in the shell command output buffer
+          (when (get-buffer "*Shell Command Output*")
+            (with-current-buffer "*Shell Command Output*"
+              (evil-local-set-key 'normal (kbd "<escape>")
+                                (lambda ()
+                                  (interactive)
+                                  (quit-window t)))
+              (evil-local-set-key 'normal (kbd "q")
+                                (lambda ()
+                                  (interactive)
+                                  (quit-window t))))))))))
+
+(defun rgcr/ruff-format-buffer ()
+  "Run ruff format on current buffer."
+  (interactive)
+  (when (buffer-file-name)
+    (save-buffer)
+    ;; Temporarily disable auto-save and LSP timers
+    (let ((auto-save-default nil)
+          (before-save-hook nil)
+          (after-save-hook nil))
+      (with-temp-message "Running ruff format..."
+        (let ((exit-code (call-process "ruff" nil nil nil "format" (buffer-file-name))))
+          (revert-buffer t t t)  ; quiet revert
+          (if (= exit-code 0)
+              (message "Ruff formatting applied")
+            (message "Ruff formatting failed")))))))
 
 ;; Startup performance measurement
 (defun rgcr/display-startup-time ()

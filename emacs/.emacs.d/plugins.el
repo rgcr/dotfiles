@@ -117,7 +117,6 @@
   (centaur-tabs-mode)
   ;; Show tabs immediately even with single buffer
   (setq centaur-tabs-show-new-tab-button nil)
-  (centaur-tabs-headline-match)
   ;; Force tabs to display on startup
   (add-hook 'after-init-hook 'centaur-tabs-local-mode)
   )
@@ -365,6 +364,11 @@
   :after yasnippet)
 
 
+;; Prevent ruff LSP from loading
+(with-eval-after-load 'lsp-mode
+  (delete 'ruff lsp-client-packages)
+  (delete 'ruff-lsp lsp-client-packages))
+
 ;; LSP
 (use-package lsp-mode
   :ensure t
@@ -373,10 +377,32 @@
   :defer t
   ;; Remove automatic hook - load only when explicitly needed
   ;; :hook (prog-mode . lsp)
+  :hook ((python-mode . lsp-deferred)
+         (prog-mode . lsp-deferred))
   :init
   (setq lsp-completion-provider :none ;;:capf
         lsp-enable-snippet t
-        lsp-enable-symbolic-highlighting t))
+        lsp-enable-symbolic-highlighting t
+        ;; Disable ruff LSP completely to avoid conflicts with pylsp
+        lsp-disabled-clients '(ruff-lsp ruff)
+        ;; Disable headerline breadcrumb to prevent filename showing under tabs
+        lsp-headerline-breadcrumb-enable nil
+        ;; Enable diagnostics but disable the mode that interferes with display
+        lsp-diagnostics-provider :auto
+        lsp-auto-configure t)
+  :config
+  ;; Explicitly disable lsp-diagnostics-mode to prevent interference
+  (add-hook 'lsp-mode-hook (lambda () (lsp-diagnostics-mode -1)))
+  ;; Force disable ruff client registration
+  (when (fboundp 'lsp-ruff-disable)
+    (lsp-ruff-disable))
+  ;; Enable basic pylsp diagnostics
+  (setq lsp-pylsp-plugins-pycodestyle-enabled t
+        lsp-pylsp-plugins-mccabe-enabled t
+        lsp-pylsp-plugins-pyflakes-enabled t
+        lsp-pylsp-plugins-flake8-enabled nil
+        lsp-pylsp-plugins-ruff-enabled nil)
+  )
 
 
 ;; lsp-ui for better visuals
@@ -395,6 +421,9 @@
         lsp-ui-peek-list-width 60
         lsp-ui-peek-peek-height 25
         lsp-ui-sideline-enable t
+        lsp-ui-sideline-show-diagnostics t
+        lsp-ui-sideline-show-hover t
+        lsp-ui-sideline-show-code-actions t
         )
   )
 

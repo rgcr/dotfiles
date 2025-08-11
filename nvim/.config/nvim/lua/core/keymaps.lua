@@ -30,6 +30,12 @@ end
 -- Neovim shortcuts
 -----------------------------------------------------------
 
+-- copy to Clipboard only with yank commands
+utils.nnoremap('y', '"+y', { desc = "Yank to System Clipboard" })
+utils.vnoremap('y', '"+y', { desc = "Yank to System Clipboard" })
+utils.nnoremap('Y', '"+Y', { desc = "Yank Line to System Clipboard" })
+utils.vnoremap('Y', '"+Y', { desc = "Yank Line to System Clipboard" })
+
 -- Esc to jk, jj, kk
 utils.inoremap('jk', '<Esc>', { desc = "Exit Insert Mode with jk" })
 utils.inoremap('jj', '<Esc>', { desc = "Exit Insert Mode with jj" })
@@ -502,4 +508,57 @@ Hydra({
       { '<Esc>', nil, { exit = true, nowait = true } },
       { 'q', nil, { exit = true, nowait = true } },
    }
+})
+
+-- Hydra for CodeCompanion
+local hint_codecompanion = [[
+       CodeCompanion
+----------------------------
+  _c_ : Open CodeCompanion Chat
+  _p_ : Action Palette
+  _a_ : Add current file to chat
+  _f_ : Quick chat with file context
+  _i_ : Inline assistant
+  ^
+  _e_ : Explain selected code
+  _r_ : Review selected code
+  _t_ : Generate unit tests
+  _u_ : Custom user prompt
+  ^
+  _x_ : Toggle CodeCompanion
+
+  _<Esc>_: Quit |  _q_ : Quit
+]]
+
+Hydra({
+  name = "CodeCompanion",
+  hint = hint_codecompanion,
+  config = {
+    color = "amaranth",
+    invoke_on_body = true,
+    hint = {
+      position = "middle",
+    },
+  },
+  mode = 'n',
+  body = "<space>A",
+  heads = {
+    { "<Esc>", nil, {exit = true, nowait = true}  },
+    { "q", nil, {exit = true, nowait = true}  },
+    { "c", function() vim.cmd("CodeCompanionChat") end, { desc = "Open CodeCompanion Chat" } },
+    { "p", function() vim.cmd("CodeCompanionActions") end, { desc = "Action Palette" } },
+    { "a", function() vim.cmd("CodeCompanionAdd") end, { desc = "Add file to chat" } },
+    { "f", function()
+        local input = vim.fn.input("Quick Chat: ")
+        if input ~= "" then
+          vim.cmd("CodeCompanionChat " .. vim.fn.shellescape(input))
+        end
+      end, { desc = "Quick chat with file context" } },
+    { "i", function() vim.cmd("CodeCompanion") end, { desc = "Inline assistant" } },
+    { "e", function() vim.cmd("'<,'>CodeCompanion /explain") end, { desc = "Explain code", mode = "v" } },
+    { "r", function() vim.cmd("'<,'>CodeCompanion /review") end, { desc = "Review code", mode = "v" } },
+    { "t", function() vim.cmd("'<,'>CodeCompanion /tests") end, { desc = "Generate tests", mode = "v" } },
+    { "u", function() vim.cmd("CodeCompanion /custom") end, { desc = "Custom prompt" } },
+    { "x", function() vim.cmd("CodeCompanionToggle") end, { desc = "Toggle CodeCompanion" } },
+  },
 })

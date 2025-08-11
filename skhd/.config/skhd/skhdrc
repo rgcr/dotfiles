@@ -46,3 +46,4 @@
 # # Focus on VSCode
 # ctrl + alt - v : osascript -e 'tell application "Visual Studio Code" to activate' -e 'set miniaturized of windows to false'
 
+cmd + alt - t : /opt/homebrew/bin/snape --width-size 350

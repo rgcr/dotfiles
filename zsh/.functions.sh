@@ -76,7 +76,8 @@ mux(){
                 2>&1 echo "Usage: mux rm <project_name>"
                 return 1
             fi
-            rm -iv ~/.config/tmuxp/${1}.yaml
+            rm -iv ~/.config/tmuxp/${1}.yaml 2>/dev/null
+            rm -iv ~/tmuxp/${1}.yaml 2>/dev/null
             return 0
             ;;
         *)

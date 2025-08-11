@@ -22,6 +22,22 @@ __tmux-sessions() {
 compdef __tmux-sessions t
 compdef __tmux-sessions tks
 
+# completion for mux function (tmuxp wrapper)
+__mux-sessions() {
+    local -a sessions
+    local session_files
+    
+    if [[ -d ~/.tmuxp ]]; then
+        session_files=(~/.tmuxp/*.yaml(N:t:r))
+        if (( ${#session_files} > 0 )); then
+            sessions=($session_files)
+            _describe -t sessions 'tmuxp sessions' sessions "$@"
+        fi
+    fi
+}
+
+compdef __mux-sessions mux
+
 # }}} -- end tmux
 
 # alias for conf function to edit config files

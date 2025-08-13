@@ -141,7 +141,8 @@ pmrsp() { PORT=${1:-8000}; python manage.py runserver_plus 0.0.0.0:${PORT}  }
 # fd - cd to selected directory
 fcd() {
   local dir
-  dir=$(find ${1:-.} -type d 2>/dev/null | fzf --prompt="Cd to > ")
+  # dir=$(find ${1:-.} -type d 2>/dev/null | fzf --prompt="Cd to > ")
+  dir=$(find ${1:-.} -type d ! \( -path '*/.venv*' -o -path '*/node_modules*' -o -path '*/.git*' \) | fzf --prompt="Cd to > ")
   [[ -n "$dir" ]] && cd "$dir"
 }
 alias ccd='fcd'

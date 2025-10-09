@@ -131,13 +131,11 @@ hs.hotkey.bind(hyper, "l", function()
   hs.caffeinate.lockScreen()
 end)
 
--- App switching hydra
+-- App switch - hydra mode: ctrl -> . -> key
 local app_hydra = require("app_hydra").setup(app_bindings)
 hs.hotkey.bind({"ctrl"}, ".", function()
   app_hydra.show()
 end)
-
--- Double Ctrl + character app switcher
 
 -- I have my custom engines in a custom file ~/.hammerspoon/search_engines.lua
 local searcher = require("searcher").setup()

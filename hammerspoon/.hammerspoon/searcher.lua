@@ -45,7 +45,7 @@
 ]]
 local M = {}
 
--- Try to load ~/.hammerspoon/searcher_engines.lua if it exists, otherwise use defaults
+-- Try to load ~/.hammerspoon/search_engines.lua if it exists, otherwise use defaults
 local function load_default_engines()
   local ok, engines = pcall(require, "search_engines")
   if ok and type(engines) == "table" then return engines end

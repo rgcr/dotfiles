@@ -15,6 +15,7 @@ alias ls='ls --color=always'
 alias ll='ls -l'
 alias lla='ls -la'
 alias week='date +%V'
+alias grep='grep --color=auto'
 # }}}
 
 # 'man' formmat for bat to pipe '--help' outputs

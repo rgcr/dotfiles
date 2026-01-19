@@ -56,7 +56,7 @@ local app_bindings = {
     n = "Microsoft OneNote",
     t = "Microsoft Teams",
     c = "Google Chrome",
-    v = "VsCodium",
+    -- v = "VsCodium",
     -- v = "Visual Studio Code",
 }
 

@@ -132,6 +132,106 @@ pmrsp() { PORT=${1:-8000}; python manage.py runserver_plus 0.0.0.0:${PORT}  }
 
 # }}} -- end python functions
 
+# Find and activate uv-created python virtual environments relative to cwd
+activate() {
+    setopt localoptions ksharrays
+
+    local requested=""
+    local show_help=0 show_list=0
+    local -a python_bins venvs unique_venvs
+    local -A seen
+    local python_bin venv_dir target activate_script
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_help=1
+                ;;
+            -l|--ls)
+                show_list=1
+                ;;
+            *)
+                requested="$1"
+                shift
+                break
+                ;;
+        esac
+        shift
+    done
+
+    if (( show_help )); then
+        echo "usage: activate [-l|--ls] [venv]"
+        return 0
+    fi
+
+    while IFS= read -r python_bin; do
+        [[ -z "$python_bin" ]] && continue
+        local bin_dir="${python_bin%/python}"
+        venv_dir="${bin_dir%/bin}"
+        [[ -d "$venv_dir" ]] && venvs+=("$venv_dir")
+    done < <(find . \( -type f -o -type l \) -path '*/bin/python' 2>/dev/null)
+
+    for venv_dir in "${venvs[@]}"; do
+        [[ -z "$venv_dir" ]] && continue
+        if [[ -z "${seen[$venv_dir]}" ]]; then
+            seen[$venv_dir]=1
+            unique_venvs+=("$venv_dir")
+        fi
+    done
+    venvs=("${unique_venvs[@]}")
+
+    if [[ ${#venvs[@]} -eq 0 ]]; then
+        _print_warning "No uv virtual environments found under $(pwd)"
+        return 1
+    fi
+
+    if (( show_list )); then
+        printf '%s\n' "${venvs[@]}"
+        return 0
+    fi
+
+    if [[ -n "$requested" ]]; then
+        if [[ -d "$requested" && -f "$requested/bin/activate" ]]; then
+            target="$requested"
+        else
+            for venv_dir in "${venvs[@]}"; do
+                if [[ "$venv_dir" == "$requested" || "$(basename "$venv_dir")" == "$requested" ]]; then
+                    target="$venv_dir"
+                    break
+                fi
+            done
+        fi
+
+        if [[ -z "$target" ]]; then
+            _print_warning "Virtual environment '$requested' not found under $(pwd)"
+            return 1
+        fi
+    else
+        if [[ ${#venvs[@]} -eq 1 ]]; then
+            target="${venvs[0]}"
+        else
+            if ! command -v fzf >/dev/null 2>&1; then
+                _print_warning "fzf is required to interactively pick a virtual environment"
+                _print_info "Use 'activate <venv>' to activate one of:"
+                printf '  %s\n' "${venvs[@]}"
+                return 1
+            fi
+
+            target=$(printf '%s\n' "${venvs[@]}" | fzf --prompt="Activate venv > " --height=40% --reverse)
+            [[ -z "$target" ]] && return 1
+        fi
+    fi
+
+    activate_script="$target/bin/activate"
+    if [[ ! -f "$activate_script" ]]; then
+        _print_error "Activate script not found at $activate_script"
+        return 1
+    fi
+
+    _print_info "Activating $target"
+    source "$activate_script"
+}
+
 
 #######################################
 # => fzf

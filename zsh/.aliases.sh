@@ -114,3 +114,7 @@ alias yz='yazi'
 # copilot
 alias gce='gh copilot explain'
 alias gcs='gh copilot suggest'
+
+# funny alias for claude
+alias claudio='command claude --verbose'
+alias claude='claude --verbose'

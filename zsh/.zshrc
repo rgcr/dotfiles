@@ -34,7 +34,11 @@ bindkey '\e[F'  end-of-line
 
 # source ~/.zsh/thzshrcemes/rho.zsh-theme
 
-[ -e "${HOME}/.local/bin/antidote.sh" ] && source "${HOME}/.local/bin/antidote.sh"
+if [ "$(uname)" = "Darwin" ]; then
+    [ -e "${HOME}/.local/bin/antidote.sh" ] && source "${HOME}/.local/bin/antidote.sh"
+else
+    [ -e "/usr/share/zsh-antidote/antidote.zsh" ] && source "/usr/share/zsh-antidote/antidote.zsh"
+fi
 antidote load ${ZDOTDIR:-$HOME}/.zsh_plugins.txt
 
 

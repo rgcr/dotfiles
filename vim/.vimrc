@@ -1,29 +1,17 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Leader 
+" => Leader
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let mapleader = ","
 let maplocalleader = "\<space>"
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Global flags 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" enable only one of the below variables
-" to use LSP (coc.nvim) or YCM
-let g:vim_use_lsp = 0
-let g:vim_use_ycm = 0
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Plugins
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Required to install plugins
 filetype off
-
-if has("nvim")
-  call plug#begin('~/.local/share/nvim/plugged')
-else
-  call plug#begin('~/.vim/plugged')
-endif
+call plug#begin('~/.vim/plugged')
 
 " Libraries for vim plugins
 ".......................................
@@ -39,7 +27,7 @@ Plug 'guns/xterm-color-table.vim'
 ".......................................
 
 
-" Utilities 
+" Utilities
 "......................................................
 
 "" File explorer
@@ -60,14 +48,14 @@ Plug 't9md/vim-choosewin'
 " Undo tree visualizer
 Plug 'mbbill/undotree'
 
-" A dynamic calendar in vim 
+" A dynamic calendar in vim
 Plug 'itchyny/calendar.vim'
 
 " fzf, like help or ivy in emacs
 Plug 'junegunn/fzf', { 'do': './install --no-bash' }
 Plug 'junegunn/fzf.vim'
 
-" Like General or Hydra for emacs 
+" Like General or Hydra for emacs
 "   it show a menu with the list of maps
 Plug 'liuchengxu/vim-which-key' " {{{
   " register dictionaries
@@ -83,18 +71,18 @@ Plug 'liuchengxu/vim-which-key' " {{{
 Plug 'editorconfig/editorconfig-vim'
 
 " Comment code faster
-Plug 'scrooloose/nerdcommenter'                 
+Plug 'scrooloose/nerdcommenter'
 
 " For brackets parens quoutes
 Plug 'jiangmiao/auto-pairs'
 
-"" Tagbar 
+"" Tagbar
 Plug 'majutsushi/tagbar'
 
 "" Show indent lines
 Plug 'yggdroot/indentLine'
 
-"" Auto generate tags 
+"" Auto generate tags
 " Plug 'ludovicchabant/vim-gutentags'
 
 "" snippets
@@ -124,25 +112,16 @@ Plug 'myhere/vim-nodejs-complete', {'for': 'javscript'}
 Plug 'posva/vim-vue'
 
 
-if g:vim_use_ycm && ( has('python') || has('python3') )
-  " Python
-  Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all'  }
-endif
+"" Asynchronous lint engine + LSP
+Plug 'dense-analysis/ale'
 
-if g:vim_use_lsp
-  " LSP - Intellisense engine for Vim8/Neovim
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
-else
-  "" Asynchronous lint engine
-  Plug 'w0rp/ale'
-  "" Python
-  Plug 'vim-python/python-syntax', {'for': 'python'}
-  Plug 'python-mode/python-mode', { 'branch': 'develop' }
-  if executable('black')
-    Plug 'psf/black', {'for': 'python'}
-  elseif executable('yapf')
-    Plug 'mindriot101/vim-yapf', {'for': 'python'}
-  endif
+"" Python
+Plug 'vim-python/python-syntax', {'for': 'python'}
+Plug 'python-mode/python-mode', { 'branch': 'develop' }
+if executable('black')
+  Plug 'psf/black', {'for': 'python'}
+elseif executable('yapf')
+  Plug 'mindriot101/vim-yapf', {'for': 'python'}
 endif
 
 " Add plugins to &runtimepath
@@ -251,7 +230,7 @@ try
     " highlight linenr
           " \ term=bold cterm=none ctermfg=darkgrey ctermbg=none
           " \ gui=none guifg=darkgrey guibg=none
-catch 
+catch
     colorscheme elflord
 endtry
 
@@ -272,14 +251,17 @@ endtry
 augroup vimrc
   autocmd!
 
+  " Close quickfix/location list with 'q'
+  autocmd FileType qf nnoremap <buffer> q :close<CR>
+
   " Custom task tags
   if v:version > 701
-    autocmd syntax * call matchadd('Todo', 
+    autocmd syntax * call matchadd('Todo',
           \ '\W\zs\(TODO\|FIXME\|CHANGED\|XXX\|BUG\|HACK\|NOTE\|INFO\|IDEA\)')
   endif
 
   " remember line position
-  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") 
+  autocmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$")
         \ | exe "normal! g`\"" | endif
 
   " remove all trailing whitespaces
@@ -294,7 +276,7 @@ augroup vimrc
   " autocmd BufWinEnter * let w:m1=matchadd('search', '\%<82v.\%>81v', -1)
   " autocmd BufWinEnter * let w:m2=matchadd('errormsg', '\%>81v.\+', -1)
 
-  " Unset paste on InsertLeave 
+  " Unset paste on InsertLeave
   autocmd InsertLeave * silent! set nopaste
 
   " hide cursor line in inactive windows
@@ -355,20 +337,6 @@ function! BufferZoomToggle() abort
     endif
 endfunction
 
-"coc.nvim {{{
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
-
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
-"}}}
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -493,7 +461,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   augroup NERDTree
     autocmd!
     " close vim if the only window is a NERDTree
-    autocmd BufEnter * if (winnr("$") == 1 && 
+    autocmd BufEnter * if (winnr("$") == 1 &&
           \ exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
   augroup end
 "}}}
@@ -535,7 +503,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   " open undotree in the right side
   let g:undotree_WindowLayout=3
   " short indicators for time (5 seconds ago) -> (5s)
-  let g:undotree_ShortIndicators=1 
+  let g:undotree_ShortIndicators=1
   " undotree windows size
   let g:undotree_SplitWidt=50
   " autofocus undotree window
@@ -561,30 +529,6 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   nnoremap <silent> <localleader><localleader> :<C-U>Commands<CR>
 "}}}
 
-"ctrlp.vim {{{
-"   let g:ctrlp_map = '<C-p>'
-"   let g:ctrlp_custom_ignore = {
-"         \ 'dir':  '\v[\/](node_modules)|(\.(swp|git|hg|svn))$',
-"         \ 'file': '\v\.(exe|so|dll|class|png|jpg|jpeg|pyc)$'
-"         \ }
-"   if executable('ripgrep')
-"     set grepprg=rg\ --color=never
-"     " listing files
-"     let g:ctrlp_user_command = 'rg %s --files --color=never --glob ""'
-"     " doesn't need cache
-"     let g:ctrlp_use_caching = 0
-"   elseif executable('ag')
-"     " use ag over grep
-"     set grepprg=ag\ --nogroup\ --nocolor
-"     " use ag in ctrlp for listing files and respects .gitignore
-"     let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-"     " doesn't need to cache
-"     let g:ctrlp_use_caching = 0
-"   else
-"     noremap <F5> :CtrlPClearCache<CR>
-"   endif
-" "}}}
-
 "vim-which-key {{{
   " by default timeoutlen is 1000 ms
   set timeoutlen=500
@@ -609,7 +553,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   let g:which_key_map_leader.8 = 'which_key_ignore'
   let g:which_key_map_leader.9 = 'which_key_ignore'
   let g:which_key_map_leader.0 = 'which_key_ignore'
-" }}} 
+" }}}
 
 "nerdcommenter {{{
   " add spaces after comment delimiters by default
@@ -642,14 +586,14 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
 "   let g:gutentags_modules = ['ctags']
 "   " config project root markers.
 "   let g:gutentags_project_root = ['.root']
-"   " generate datebases in my cache directory, 
+"   " generate datebases in my cache directory,
 "   " prevent gtags files polluting my project
 "   let g:gutentags_cache_dir = expand('~/.cache/tags')
 " " }}}
 
 "ultisnips | vim-snippets {{{
   set rtp+=$HOME/.config/.snippets.vim/
-  let g:UltiSnipsExpandTrigger="<TAB>"
+  let g:UltiSnipsExpandTrigger="<C-j>"
   let g:UltiSnipsJumpForwardTrigger="<c-j>"
   let g:UltiSnipsJumpBackwardTrigger="<c-k>"
   let g:UltiSnipsListSnippets = "<c-l>"
@@ -657,139 +601,136 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   " " let g:UltiSnipssnippetdirectories = ['~/.vim/ultisnips', 'ultisnips']
 "}}}
 
-"completor.vim {{{
-  " tab to trigger completion
-  " let g:completor_auto_trigger = 0
-  " inoremap <expr> <TAB> pumvisible() ?
-        " \ "<C-N>" : "<C-R>=completor#do('complete')<CR>"
-  " let g:completor_complete_options = 'menuone,noselect,preview'
-" }}}
+"ale (LSP + Linting) {{{
+  " LSP settings
+  let g:ale_completion_enabled = 1
+  let g:ale_completion_autoimport = 1
 
-if !g:vim_use_lsp
-  "ale {{{
+  " Completion popup with documentation
+  set completeopt=menu,menuone,popup,noselect,noinsert
+  set completepopup=highlight:Pmenu,border:off
+  set pumwidth=20
+  set pumheight=10
+
+  " Tab completion
+  inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+  inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+  inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+  let g:ale_hover_cursor = 1
+  let g:ale_floating_preview = 1
+  let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
+  let g:ale_detail_to_floating_preview = 1
+  let g:ale_hover_to_floating_preview = 1
+
+  " Linting settings
   let g:ale_fix_on_save = 0
-  let g:ale_lint_on_enter = 0
-  let g:ale_lint_on_text_changed = 'never'
+  let g:ale_lint_on_enter = 1
+  let g:ale_lint_on_text_changed = 'normal'
+  let g:ale_lint_on_insert_leave = 1
+  let g:ale_virtualtext_cursor = 'current'
+  let g:ale_set_loclist = 1
+
+  " Auto-detect virtualenv/pipenv/poetry
+  let g:ale_python_auto_virtualenv = 1
+  let g:ale_python_pylsp_auto_virtualenv = 1
+
+  " pylsp config: disable linting if no pyproject.toml, otherwise let it read config
+  if filereadable('pyproject.toml')
+    let g:ale_python_pylsp_config = {
+    \   'pylsp': {
+    \     'plugins': {
+    \       'jedi_completion': {'include_params': v:false}
+    \     }
+    \   }
+    \ }
+  else
+    let g:ale_python_pylsp_config = {
+    \   'pylsp': {
+    \     'plugins': {
+    \       'pyflakes': {'enabled': v:false},
+    \       'pycodestyle': {'enabled': v:false},
+    \       'mccabe': {'enabled': v:false},
+    \       'jedi_completion': {'include_params': v:false}
+    \     }
+    \   }
+    \ }
+  endif
+
+  " Use omnifunc for completion
+  set omnifunc=ale#completion#OmniFunc
+
+  " Linters per filetype
+  let g:ale_linters = {
+        \   'python': ['pylsp', 'flake8', 'mypy'],
+        \   'javascript': ['eslint', 'tsserver'],
+        \   'typescript': ['eslint', 'tsserver'],
+        \   'go': ['gopls', 'golint'],
+        \   'rust': ['analyzer'],
+        \   'c': ['clangd'],
+        \   'cpp': ['clangd'],
+        \   'sh': ['shellcheck', 'bashls'],
+        \   'php': ['phpactor'],
+        \   'lua': ['lua_ls'],
+        \ }
+
+  " Fixers per filetype
   let g:ale_fixers = {
         \   '*': ['remove_trailing_lines', 'trim_whitespace'],
-        \   'python': ['isort', 'black', 'yapf', 'autopep8']
+        \   'python': ['isort', 'black', 'yapf', 'autopep8'],
+        \   'javascript': ['prettier', 'eslint'],
+        \   'typescript': ['prettier', 'eslint'],
+        \   'go': ['gofmt', 'goimports'],
+        \   'rust': ['rustfmt'],
+        \   'c': ['clang-format'],
+        \   'cpp': ['clang-format'],
+        \   'json': ['prettier'],
+        \   'yaml': ['prettier'],
+        \   'html': ['prettier'],
+        \   'css': ['prettier'],
         \ }
+
+  " Linting keymaps
   nnoremap <localleader>al :ALELint<CR>
   nnoremap <localleader>af :ALEFix<CR>
   nnoremap <leader>= :ALEFix<CR>
-  " let g:ale_python_flake8_options =
-        " \ '--ignore=e129,e501,e302,e265,e241,e305,e402,w503'
-  "}}}
 
-  ""python-syntax {{{
-  let g:python_highlight_all = 1
-  "}}}
+  " LSP keymaps
+  nnoremap <silent> gd :ALEGoToDefinition<CR>
+  nnoremap <silent> gy :ALEGoToTypeDefinition<CR>
+  nnoremap <silent> gi :ALEGoToImplementation<CR>
+  nnoremap <silent> gr :ALEFindReferences<CR>
+  nnoremap <silent> gh :ALEHover<CR>
+  nnoremap <silent> H :ALEHover<CR>
+  nnoremap <silent> <localleader>lr :ALERename<CR>
+  nnoremap <silent> <localleader>la :ALECodeAction<CR>
+  nnoremap <silent> <localleader>ls :ALESymbolSearch<space>
 
-  if has('python3') && executable('black')
-    "black formatter {{{
-      let g:black_linelength = 80
-    "}}} 
-  elseif has('python') && executable('yapf')
-    "yapf formatter {{{
-      let g:yapf_style = "facebook"
-      nnoremap <C-Y> :call Yapf()<CR>
-    "}}}
-  endif
-endif
+  " Diagnostic navigation
+  nmap <silent> <localleader>j <Plug>(ale_next_wrap)
+  nmap <silent> <localleader>k <Plug>(ale_previous_wrap)
 
-"YouCompleteme (ycm) {{{
-if g:vim_use_ycm
-  " let g:ycm_auto_trigger = 0
-  let g:ycm_autoclose_preview_window_after_insertion = 1
-  let g:ycm_key_list_previous_completion  = ['<C-p>', '<Up>']
-  let g:ycm_key_list_select_completion    = ['<C-n>', '<Down>']
-  " let g:ycm_key_list_select_completion = ['<TAB>', '<Down>']
+  " Show diagnostics
+  nnoremap <silent> <localleader>lw :lopen<CR>
 
-  nnoremap gd :YcmCompleter goto<CR>
-  nnoremap gh :YcmCompleter getdoc<CR>
-
-  " point ycm to the pipenv created virtualenv
-  function! PipenvVenv()
-    let l:pipenv_venv_path = system('pipenv --venv')
-    if shell_error == 0
-      let l:venv_path = substitute(pipenv_venv_path, '\n', '', '')
-      let g:ycm_python_binary_path = l:venv_path . '/bin/python'
-      " else
-      " let g:ycm_python_binary_path = 'python'
-    endif
-  endfunction
-  command! PipenvVenv call PipenvVenv()
-  " nnoremap <silent> <leader>ve :PipenvVenv<CR>
-endif
 "}}}
 
-"coc.nvim (LSP) {{{
-if g:vim_use_lsp
-  " extensions to install when they aren't installed
-  let g:coc_global_extensions = [
-        \ 'coc-eslint', 'coc-prettier',
-        \ 'coc-tsserver', 'coc-tslint', 'coc-tslint-plugin',
-        \ 'coc-css', 'coc-json', 'coc-yaml', 'coc-python'
-        \ ]
+""python-syntax {{{
+let g:python_highlight_all = 1
+"}}}
 
-  " use tab for trigger completion with characters ahead and navigate.
-  " use command ':verbose imap <TAB>' to make sure
-  " tab is not mapped by other plugin.
-  inoremap <silent><expr> <TAB>
-        \ pumvisible() ? "\<C-n>" :
-        \ <SID>check_back_space() ? "\<TAB>" :
-        \ coc#refresh()
-  inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-  command! LspExtension   :CocList extensions
-  command! LspDiagnostics :CocList diagnostics
-  command! LspCommands    :CocList commands
-  command! LspInstall     :CocInstall
-  command! LspUninstall   :CocUninstall
-  command! LspConfig      :CocConfig
-  command! LspYankHistory :CocList yank
-  command! Format         :call CocAction('format')
-
-  nnoremap <silent> <leader>= :call CocAction('format')<CR>
-
-  " manage extensions
-  nnoremap <silent> <localleader>lI :<C-U>CocInstall<space>
-  nnoremap <silent> <localleader>lU :<C-U>CocUninstall<space>
-  " list extensions
-  nnoremap <silent> <localleader>le :<C-U>LspExtension<CR>
-  " show diagnostic
-  nnoremap <silent> <localleader>lw :<C-U>LspDiagnostics<CR>
-  " edit config
-  nnoremap <silent> <localleader>lC :<C-U>LspConfig<CR>
-  " show commands
-  nnoremap <silent> <localleader>lc :<C-U>LspCommands<CR>
-  " fix
-  nnoremap <silent> <localleader>lf :<C-U>Format<CR>
-  " fix current 
-  nnoremap <silent> <localleader>lF <Plug>(coc-fix-current)
-  " yank history
-  nnoremap <silent> <space>p  :<C-U>LspYankHistory<CR>
-
-  " use `[c` and `]c` to navigate diagnostics
-  nnoremap <silent> gd :call CocAction('jumpDefinition')<CR>
-  nnoremap <silent> gy :call CocAction('jumpTypeDefinition')<CR>
-  nnoremap <silent> gi <Plug>(coc-implementation)<CR>
-  nnoremap <silent> gr :call CocAction('jumpReferences')<CR>
-  nnoremap <silent> gh :call <SID>show_documentation()<CR>
-
-  " jump to next or prev diagnostic
-  nmap <silent> <localleader>j <Plug>(coc-diagnostic-next)
-  nmap <silent> <locallseaer>k <Plug>(coc-diagnostic-prev)
-
-  " " search workspace symbols
-  " nnoremap <silent> <localleader>s  :<C-U>CocList -i symbols<CR>
-
-  nnoremap <silent> H :call <SID>show_documentation()<CR>
-
-  " " remap for do codeaction of selected region, 
-  " " ex: `<leader>aap` for current paragraph
-  " xmap <leader>a  <Plug>(coc-codeaction-selected)
+if has('python3') && executable('black')
+  "black formatter {{{
+    let g:black_linelength = 80
+  "}}}
+elseif has('python') && executable('yapf')
+  "yapf formatter {{{
+    let g:yapf_style = "facebook"
+    nnoremap <C-Y> :call Yapf()<CR>
+  "}}}
 endif
+
+"python-mode {{{
+  let g:pymode_lint = 0
 "}}}
 
 
@@ -838,24 +779,55 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
      return get(l:mode_map, mode(), '')
    endfunction
 
-   hi StMode 
-         \ term=bold cterm=none ctermbg=7 ctermfg=255 
+   function! StatusLineLsp()
+     if !exists('*ale#linter#Get')
+       return ''
+     endif
+     let l:linters = ale#linter#Get(&filetype)
+     if empty(l:linters)
+       return ''
+     endif
+     " Get LSP-capable linters first
+     let l:lsp_names = []
+     let l:other_names = []
+     for l:linter in l:linters
+       if get(l:linter, 'lsp', '') !=# ''
+         call add(l:lsp_names, l:linter.name)
+       else
+         call add(l:other_names, l:linter.name)
+       endif
+     endfor
+     " Prefer LSP, fallback to first linter
+     if !empty(l:lsp_names)
+       return ' ' . l:lsp_names[0] . ' '
+     elseif !empty(l:other_names)
+       return ' ' . l:other_names[0] . ' '
+     endif
+     return ''
+   endfunction
+
+
+   hi StMode
+         \ term=bold cterm=none ctermbg=7 ctermfg=255
          \ guibg=#808080 guifg=#eeeeee
-   hi StPasteMode   
-         \ term=bold cterm=none ctermbg=202 ctermfg=255 
+   hi StPasteMode
+         \ term=bold cterm=none ctermbg=202 ctermfg=255
          \ guibg=#ff5f00 guifg=#eeeeee
-   hi StBranch 
-         \ term=bold cterm=none ctermbg=107 ctermfg=255 
+   hi StBranch
+         \ term=bold cterm=none ctermbg=107 ctermfg=255
          \ guibg=#87af5f guifg=#eeeeee
-   hi StFilename  
-         \ term=bold cterm=none ctermbg=109 ctermfg=0 
+   hi StFilename
+         \ term=bold cterm=none ctermbg=109 ctermfg=0
          \ guibg=#87afaf guifg=#000000
-   hi StSeparator    
-         \ term=bold cterm=none ctermbg=236 ctermfg=255 
+   hi StSeparator
+         \ term=bold cterm=none ctermbg=236 ctermfg=255
          \ guibg=#303030 guifg=#eeeeee
-   hi stposition  
-         \ term=bold cterm=none ctermbg=253 ctermfg=0 
+   hi stposition
+         \ term=bold cterm=none ctermbg=253 ctermfg=0
          \ guibg=#dadada guifg=#000000
+   hi StLsp
+         \ term=bold cterm=none ctermbg=61 ctermfg=255
+         \ guibg=#5f5faf guifg=#eeeeee
 
 
    set statusline=
@@ -872,17 +844,13 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
    " filename
    set statusline+=%#StFilename#
    set statusline+=\ %f\ %m
+   " LSP server
+   set statusline+=%#StLsp#
+   set statusline+=%{StatusLineLsp()}
    " blank space
    set statusline+=%#StSeparator#
    set statusline+=\ %=
 
-   " " coc.nvim {{{
-   " if g:vim_use_lsp
-   "   set statusline+=\ %{coc#status()}%{get(b:,'coc_current_function','')}
-   "   set statusline+=\ %{get(b:,'coc_current_function','')}\ \|
-   "   set statusline+=\ %{coc#status()}
-   " endif
-   " " }}}
 
    " file encoding and file format
    set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \| " .
@@ -901,6 +869,7 @@ hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
    " syntax clear statuslinenc
    " hi! statuslinenc term=none cterm=none ctermbg=white ctermfg=white
  endif
+ " }}}
  "-----------------------------------------------------------------------------
 
 " vim: ft=vim et ts=2 sts=2 sw=2:

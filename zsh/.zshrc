@@ -5,8 +5,8 @@ set -o vi
 
 # completion cache - optimized for performance
 autoload -Uz compinit
-# Check if completion dump is older than 24 hours
-if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+# Check if completion dump is older than 48 hours
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+48) ]]; then
     compinit
 else
     compinit -C

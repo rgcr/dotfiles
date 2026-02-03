@@ -31,7 +31,7 @@ alias ctl='sudo systemctl'
 #
 # vim / neovim {{{
 alias v='vim'
-alias vv='vim $(fzf)'
+# alias vv='vim $(fzf)'
 alias n='nvim'
 alias nn='nvim $(fzf)'
 # }}}
@@ -116,5 +116,8 @@ alias gce='gh copilot explain'
 alias gcs='gh copilot suggest'
 
 # funny alias for claude
-alias claudio='command claude --verbose'
 alias claude='claude --verbose'
+alias claudio='claude'
+
+# zoxide fzf query
+alias zz='zi'

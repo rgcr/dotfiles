@@ -395,25 +395,6 @@ noproxy() {
     printf "unset proxy!\n";
 }
 
-# init antibody plugins
-antibody-sync(){
-    _bundles="${HOME}/.zsh/bundles.txt"
-    _plugins_file="${HOME}/.zsh_plugins.sh"
-    case "$1" in
-        -f|--force)
-            antibody bundle < ${_bundles} > ${_plugins_file}
-            chmod 755 ${_plugins_file}
-            printf ">> ${_plugins_file} was modified\n\n"
-            printf "Remember to reload the terminal...\n  \$ exec zsh\n"
-            ;;
-        *)
-            2>&1 printf "Usage: antibody-sync [-h | --help | -f | --force]\n\n"
-            2>&1 printf "  Bundle file  --> ${_bundles}\n"
-            2>&1 printf "  Plugins file --> ${_plugins_file}\n"
-            ;;
-    esac
-}
-
 # youtube-dl, download mp3
 ymp3(){
     youtube-dl --extract-audio --audio-format mp3 \
@@ -452,4 +433,28 @@ scp-socks5(){
     }
     SOCKS_PORT=${SOCKS_PORT:-4000}
     scp -o ProxyCommand='nc -X 5 -x 127.0.0.1:'${SOCKS_PORT}' %h %p' $*
+}
+
+oil() {
+    local _left="${1:-.}"
+    local _right="${2:-..}"
+
+    nvim \
+        -c "topleft vsplit" \
+        -c "Oil ${_left}" -c "wincmd l" -c "Oil ${_right}"
+}
+
+# zoxide functions
+# zoxide interactive query, tmux split vertical and cd
+vv() {
+  local _dir
+  _dir=$(zoxide query -i) || return
+  tmux split-window -h -c "${_dir}"
+}
+
+# zoxide interactive query, tmux split horizontal and cd
+hh() {
+  local _dir
+  _dir=$(zoxide query -i) || return
+  tmux split-window -v -c "${_dir}"
 }

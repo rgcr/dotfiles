@@ -23,7 +23,7 @@ export WORKON_HOME=$HOME/.venvs
 export NVM_DIR=~/.nvm
 
 # FZF
-export FZF_DEFAULT_COMMAND="rg --files --hidden --ignore-vcs -L"
+export FZF_DEFAULT_COMMAND="rg --files --hidden --ignore-vcs -L -g \"!.git\""
 
 # PYTHON
 export PYTHONDONTWRITEBYTECODE=1

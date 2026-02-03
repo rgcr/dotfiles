@@ -24,14 +24,14 @@ _print_warning() {
 }
 
 # function to add paths to the PATH variable and avoid duplicates
-__add_to_path () {
+_add_to_path () {
     case ":$PATH:" in
         *":$1:"*) :;; # already there
         *) PATH="$1:$PATH";; # or PATH="$PATH:$1"
   esac
 }
 
-__remove_from_path(){
+_remove_from_path(){
     local filtered_path=$(echo $PATH | tr ':' '\n' | grep -wv "${1}" | tr '\n' ':' | sed 's/:$//')
     export PATH=${filtered_path}
 }
@@ -44,8 +44,8 @@ __remove_from_path(){
 path(){
     case "$1" in
         ls) _print_info $PATH | tr ':' '\n' ;;
-        add) [ ! -z "${2}" ] && __add_to_path "${2}" ;;
-        rm) [ ! -z "${2}" ] && __remove_from_path "${2}" ;;
+        add) [ ! -z "${2}" ] && _add_to_path "${2}" ;;
+        rm) [ ! -z "${2}" ] && _remove_from_path "${2}" ;;
         *) 2>&1 echo "usage: path [ls | add <path>| rm <path>]"
     esac
 
@@ -111,8 +111,13 @@ mux(){
 # }
 
 uv(){
-    command uv "$@"
-    if [ $? -eq 0 -a "${1}" = "init" -a "${2}" != "--help" ]; then
+    # Add --seed by default when calling 'uv venv' without extra args
+    if [[ "$1" == "venv" && $# -eq 1 ]]; then
+        command uv venv --seed
+    else
+        command uv "$@"
+    fi
+    if [[ $? -eq 0 && "$1" == "init" && "$2" != "--help" ]]; then
         cat <<__EOF__ > .pyrightconfig.json
 {
   "typeCheckingMode": "basic",
@@ -130,107 +135,115 @@ __EOF__
 pmrs() { PORT=${1:-8000}; python manage.py runserver 0.0.0.0:${PORT}    }
 pmrsp() { PORT=${1:-8000}; python manage.py runserver_plus 0.0.0.0:${PORT}  }
 
-# }}} -- end python functions
+
+# virtualenvwrapper like functions using 'uv' as backend
+export WORKON_HOME="${WORKON_HOME:-$HOME/.virtualenvs}"
+
+workon() {
+  if [ $# -eq 0 ]; then
+    lsvirtualenv
+    return 0
+  fi
+  local venv_name="$1"
+  local venv_path="$WORKON_HOME/$venv_name"
+  if [ ! -d "$venv_path" ]; then
+    _print_error "Virtualenv '$venv_name' not found in $WORKON_HOME"
+    return 1
+  fi
+  source "$venv_path/bin/activate"
+}
+
+mkvirtualenv() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: mkvirtualenv [uv_venv_args...] <name>" >&2
+    return 1
+  fi
+  mkdir -p "$WORKON_HOME"
+  local venv_name uv_args
+  if [ -n "$ZSH_VERSION" ]; then
+    venv_name="${@[-1]}"
+    uv_args=("${@[1,-2]}")
+  else
+    venv_name="${@: -1}"
+    uv_args=("${@:1:$#-1}")
+  fi
+  local venv_path="$WORKON_HOME/$venv_name"
+  if [ -d "$venv_path" ]; then
+    _print_error "Virtualenv '$venv_name' already exists"
+    return 1
+  fi
+  uv venv "${uv_args[@]}" --seed "$venv_path" && workon "$venv_name"
+}
+
+rmvirtualenv() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: rmvirtualenv <name>" >&2
+    return 1
+  fi
+  local venv_name="$1"
+  local venv_path="$WORKON_HOME/$venv_name"
+  if [ ! -d "$venv_path" ]; then
+    _print_error "Virtualenv '$venv_name' not found"
+    return 1
+  fi
+  rm -rf "$venv_path" && _print_info "Removed virtualenv '$venv_name'"
+}
+
+lsvirtualenv() {
+  find "$WORKON_HOME" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; 2>/dev/null
+}
+
+# Tab completion for workon/rmvirtualenv
+_virtualenvs() {
+  local -a venvs
+  venvs=($(lsvirtualenv))
+  _describe 'virtualenvs' venvs
+}
+compdef _virtualenvs workon rmvirtualenv
+
+
+# Private: find venvs under current directory
+_find_venvs() {
+    find . -path '*/bin/activate' -type f 2>/dev/null | sed 's|/bin/activate$||' | sort -u
+}
 
 # Find and activate uv-created python virtual environments relative to cwd
 activate() {
     setopt localoptions ksharrays
+    local -a venvs
+    local target v
 
-    local requested=""
-    local show_help=0 show_list=0
-    local -a python_bins venvs unique_venvs
-    local -A seen
-    local python_bin venv_dir target activate_script
+    case "$1" in
+        -h|--help) echo "usage: activate [-l|--ls] [venv]"; return 0 ;;
+        -l|--ls)   _find_venvs; return 0 ;;
+    esac
 
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -h|--help)
-                show_help=1
-                ;;
-            -l|--ls)
-                show_list=1
-                ;;
-            *)
-                requested="$1"
-                shift
-                break
-                ;;
-        esac
-        shift
-    done
+    venvs=("${(@f)$(_find_venvs)}")
 
-    if (( show_help )); then
-        echo "usage: activate [-l|--ls] [venv]"
-        return 0
-    fi
+    [[ ${#venvs[@]} -eq 0 ]] && { _print_warning "No venvs found under $(pwd)"; return 1; }
 
-    while IFS= read -r python_bin; do
-        [[ -z "$python_bin" ]] && continue
-        local bin_dir="${python_bin%/python}"
-        venv_dir="${bin_dir%/bin}"
-        [[ -d "$venv_dir" ]] && venvs+=("$venv_dir")
-    done < <(find . \( -type f -o -type l \) -path '*/bin/python' 2>/dev/null)
-
-    for venv_dir in "${venvs[@]}"; do
-        [[ -z "$venv_dir" ]] && continue
-        if [[ -z "${seen[$venv_dir]}" ]]; then
-            seen[$venv_dir]=1
-            unique_venvs+=("$venv_dir")
-        fi
-    done
-    venvs=("${unique_venvs[@]}")
-
-    if [[ ${#venvs[@]} -eq 0 ]]; then
-        _print_warning "No uv virtual environments found under $(pwd)"
-        return 1
-    fi
-
-    if (( show_list )); then
-        printf '%s\n' "${venvs[@]}"
-        return 0
-    fi
-
-    if [[ -n "$requested" ]]; then
-        if [[ -d "$requested" && -f "$requested/bin/activate" ]]; then
-            target="$requested"
-        else
-            for venv_dir in "${venvs[@]}"; do
-                if [[ "$venv_dir" == "$requested" || "$(basename "$venv_dir")" == "$requested" ]]; then
-                    target="$venv_dir"
-                    break
-                fi
-            done
-        fi
-
-        if [[ -z "$target" ]]; then
-            _print_warning "Virtual environment '$requested' not found under $(pwd)"
-            return 1
-        fi
+    if [[ -n "$1" ]]; then
+        [[ -f "$1/bin/activate" ]] && target="$1"
+        [[ -z "$target" ]] && for v in "${venvs[@]}"; do
+            [[ "$v" == "$1" || "${v##*/}" == "$1" ]] && { target="$v"; break; }
+        done
+        [[ -z "$target" ]] && { _print_warning "Venv '$1' not found"; return 1; }
+    elif [[ ${#venvs[@]} -eq 1 ]]; then
+        target="${venvs[0]}"
+    elif command -v fzf >/dev/null 2>&1; then
+        target=$(printf '%s\n' "${venvs[@]}" | fzf --prompt="Activate venv > " --height=40% --reverse)
+        [[ -z "$target" ]] && return 1
     else
-        if [[ ${#venvs[@]} -eq 1 ]]; then
-            target="${venvs[0]}"
-        else
-            if ! command -v fzf >/dev/null 2>&1; then
-                _print_warning "fzf is required to interactively pick a virtual environment"
-                _print_info "Use 'activate <venv>' to activate one of:"
-                printf '  %s\n' "${venvs[@]}"
-                return 1
-            fi
-
-            target=$(printf '%s\n' "${venvs[@]}" | fzf --prompt="Activate venv > " --height=40% --reverse)
-            [[ -z "$target" ]] && return 1
-        fi
-    fi
-
-    activate_script="$target/bin/activate"
-    if [[ ! -f "$activate_script" ]]; then
-        _print_error "Activate script not found at $activate_script"
+        _print_warning "Multiple venvs found. Install fzf or use 'activate <name>':"
+        printf '  %s\n' "${venvs[@]}"
         return 1
     fi
 
     _print_info "Activating $target"
-    source "$activate_script"
+    source "$target/bin/activate"
 }
+
+# }}} -- end python functions
 
 
 #######################################

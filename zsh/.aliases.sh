@@ -60,12 +60,6 @@ alias dps='docker ps -a'
 alias tks='tmux kill-session -t'
 # }}}
 
-# python {{{
-# alias py='python'
-# alias lsvirtualenv='lsvirtualenv -b'
-# alias pip='_pip'
-# }}}
-
 # Django {{{
 alias pm='python manage.py'
 alias pmmm='python manage.py makemigrations'

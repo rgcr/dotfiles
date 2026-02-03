@@ -41,7 +41,12 @@ utils.inoremap('jk', '<Esc>', { desc = "Exit Insert Mode with jk" })
 utils.inoremap('jj', '<Esc>', { desc = "Exit Insert Mode with jj" })
 utils.inoremap('kk', '<Esc>', { desc = "Exit Insert Mode with kk" })
 
-utils.nnoremap('<leader>rr', [[:%s/<C-r><C-w>//g<Left><Left>]], { desc = "Replace word under cursor" })
+-- Replace word under cursor
+utils.nnoremap('<leader>r', function()
+  local word = vim.fn.expand('<cword>')
+  local cmd = ':%s/' .. word .. '//g'
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(cmd .. '<Left><Left>', true, false, true), 'n', false)
+end, { desc = "Replace word under cursor" })
 
 -- Toggle auto-rndenting for code paste
 utils.nnoremap('<leader>p', ':silent! set invpaste paste?<CR>', { desc = "Toggle Paste Mode" })
@@ -165,9 +170,6 @@ utils.nnoremap('<leader>s', ':SignatureToggleSigns<CR>', { desc = "Toggle Signat
 
 -- neogen
 utils.nnoremap('<leader>cc', ":lua require('neogen').generate()<CR>", { desc = "Generate Documentation" })
-
--- inc-rename
-utils.nnoremap('<leader>rn', ":IncRename ", { desc = "Rename Symbol" })
 
 -- oil.nvim
 utils.nnoremap('<space>o', function()

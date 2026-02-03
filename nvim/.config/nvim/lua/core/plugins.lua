@@ -228,6 +228,18 @@ lazy.setup({
       cmd = { 'Git', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
     },
 
+    -- git diff
+    {
+      "echasnovski/mini.diff",
+      config = function()
+        local diff = require("mini.diff")
+        diff.setup({
+            source = diff.gen_source.none(),
+          source = diff.gen_source.none(),
+        })
+      end,
+    },
+
     -- ##################################################################
     -- LSP/LANGUAGE SUPPORT
     -- ##################################################################
@@ -278,6 +290,13 @@ lazy.setup({
       end
     },
 
+    -- Markdown preview
+    {
+      'MeanderingProgrammer/render-markdown.nvim',
+      event = 'VeryLazy',
+      ft = { "markdown", "codecompanion" },
+    },
+
     -- ##################################################################
     -- CODE COMPLETION/SNIPPETS
     -- ##################################################################
@@ -312,74 +331,12 @@ lazy.setup({
     -- GitHub Copilot
     {
       'github/copilot.vim',
-      event = 'InsertEnter',
+      event = 'VeryLazy',
       cmd = { 'Copilot' },
       config = function()
         vim.g.copilot_no_tab_map = true
       end
     },
-
-    -- codecompanion.nvim
-    {
-      'olimorris/codecompanion.nvim',
-      event = 'InsertEnter',
-      cmd = { 'CodeCompanion', 'CodeCompanionToggle' },
-      dependencies = {
-        'nvim-lua/plenary.nvim',
-        'nvim-telescope/telescope.nvim',
-      },
-      config = function()
-        require('codecompanion').setup({
-          strategies = {
-            chat = {
-              adapter = "copilot",
-            },
-            inline = {
-              adapter = "copilot",
-            },
-          },
-          adapters = {
-            copilot = function()
-              return require("codecompanion.adapters").extend("copilot", {
-                schema = {
-                  model = {
-                    default = "gpt-4",
-                  },
-                },
-              })
-            end,
-          },
-          opts = {
-            log_level = "ERROR",
-            send_code = true,
-          },
-        })
-        vim.api.nvim_create_autocmd('FileType', {
-          pattern = 'codecompanion',
-          callback = function()
-            vim.b.copilot_enabled = false
-          end,
-        })
-      end
-    },
-
-    {
-      'MeanderingProgrammer/render-markdown.nvim',
-      event = 'VeryLazy',
-      ft = { "markdown", "codecompanion" },
-    },
-
-    {
-      "echasnovski/mini.diff",
-      config = function()
-        local diff = require("mini.diff")
-        diff.setup({
-            source = diff.gen_source.none(),
-          source = diff.gen_source.none(),
-        })
-      end,
-    },
-
 
     -- ##################################################################
     -- CODE EDITING/MANIPULATION
@@ -430,11 +387,11 @@ lazy.setup({
     },
 
     -- Incremental renaming
-    {
-      'smjonas/inc-rename.nvim',
-      cmd = "IncRename",
-      opts = {}
-    },
+    -- {
+    --   'smjonas/inc-rename.nvim',
+    --   cmd = "IncRename",
+    --   opts = {}
+    -- },
 
     -- Highlight word under cursor
     {

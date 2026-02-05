@@ -37,9 +37,10 @@ lazy.setup({
 
     -- Colorscheme: The colorscheme should be available when starting Neovim
     -- { 'folke/tokyonight.nvim', lazy = false, priority = 1000, },
-    { 'NTBBloodbath/doom-one.nvim', lazy = false, priority = 1000, },
+    -- { 'NTBBloodbath/doom-one.nvim', lazy = false, priority = 1000, },
     -- { 'folke/tokyonight.nvim', lazy = false, priority = 1000, },
     -- { 'navarasu/onedark.nvim', lazy = false, priority = 1000, },
+    { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
 
     -- Dashboard (start screen)
     {
@@ -56,8 +57,23 @@ lazy.setup({
       config = function()
         require("bufferline").setup{
           options = {
-            numbers = "ordinal"
-          }
+            numbers = "ordinal",
+          },
+          -- highlights = {
+          --   fill = { bg = "#3a3a3a" },
+          --   background = { bg = "#3a3a3a" },
+          --   buffer_visible = { bg = "#3a3a3a" },
+          --   buffer_selected = { bg = "#4a4a4a", bold = true },
+          --   separator = { fg = "#3a3a3a", bg = "#3a3a3a" },
+          --   separator_visible = { fg = "#3a3a3a", bg = "#3a3a3a" },
+          --   separator_selected = { fg = "#3a3a3a", bg = "#4a4a4a" },
+          --   numbers = { bg = "#3a3a3a" },
+          --   numbers_visible = { bg = "#3a3a3a" },
+          --   numbers_selected = { bg = "#4a4a4a", bold = true },
+          --   close_button = { bg = "#3a3a3a" },
+          --   close_button_visible = { bg = "#3a3a3a" },
+          --   close_button_selected = { bg = "#4a4a4a" },
+          -- }
         }
       end
     },

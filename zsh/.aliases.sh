@@ -33,7 +33,7 @@ alias ctl='sudo systemctl'
 alias v='vim'
 # alias vv='vim $(fzf)'
 alias n='nvim'
-alias nn='nvim $(fzf)'
+# alias nn='nvim $(fzf)'
 # }}}
 
 # git {{{

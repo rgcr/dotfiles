@@ -91,6 +91,22 @@ mux(){
             ;;
     esac
 }
+
+# tmux & zoxide functions
+# zoxide interactive query, tmux split vertical and cd
+vv() {
+  local _dir
+  _dir=$(zoxide query -i) || return
+  tmux split-window -h -c "${_dir}"
+}
+
+# zoxide interactive query, tmux split horizontal and cd
+hh() {
+  local _dir
+  _dir=$(zoxide query -i) || return
+  tmux split-window -v -c "${_dir}"
+}
+
 # }}} --end tmux functions
 
 
@@ -334,6 +350,38 @@ gi() {
     curl -L -s https://www.gitignore.io/api/${@}
 }
 
+
+#######################################
+# => nvim
+#######################################
+nn(){
+    if [ -z "$1" ]; then
+    fzf --preview "bat --style=numbers --color=always {}" | \
+        xargs nvim '{}'
+        return
+    fi
+    fzf --preview "bat --style=numbers --color=always {}" --query ${*} | \
+        xargs nvim '{}'
+}
+
+# fzf nvim :oldfiles (recently opened files)
+nz(){
+    local _oldfiles
+    _oldfiles=$(nvim --headless \
+        -c 'lua for _, f in ipairs(vim.v.oldfiles) do if vim.fn.filereadable(f) == 1 then print(f) end end' \
+        +q 2>&1 | tr -d '\r' | grep '^/')
+    [[ -z "$_oldfiles" ]] && { _print_warning "No oldfiles found"; return 1; }
+
+    if [ -z "$1" ]; then
+        nvim "$(echo "$_oldfiles" | head -1)"
+        return
+    fi
+    echo "$_oldfiles" | \
+        fzf --preview "bat --style=numbers --color=always {}" --query "${*}" | xargs nvim
+}
+
+
+
 #######################################
 # => utils
 #######################################
@@ -455,19 +503,4 @@ oil() {
     nvim \
         -c "topleft vsplit" \
         -c "Oil ${_left}" -c "wincmd l" -c "Oil ${_right}"
-}
-
-# zoxide functions
-# zoxide interactive query, tmux split vertical and cd
-vv() {
-  local _dir
-  _dir=$(zoxide query -i) || return
-  tmux split-window -h -c "${_dir}"
-}
-
-# zoxide interactive query, tmux split horizontal and cd
-hh() {
-  local _dir
-  _dir=$(zoxide query -i) || return
-  tmux split-window -v -c "${_dir}"
 }

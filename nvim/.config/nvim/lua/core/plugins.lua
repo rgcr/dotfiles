@@ -216,6 +216,29 @@ lazy.setup({
     -- ##################################################################
     -- GIT INTEGRATION
     -- ##################################################################
+    -- Git like magit for emacs
+    {
+      'TimUntersberger/neogit',
+      cmd = 'Neogit',
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+      },
+      config = function()
+        require('neogit').setup({
+          kind = 'split',
+          integrations = { diffview = true },
+
+        })
+      end
+    },
+
+    -- Git diff viewer
+    {
+      'sindrets/diffview.nvim',
+      cmd = { 'DiffviewOpen', 'DiffviewClose', 'DiffviewToggleFiles', 'DiffviewFocusFiles' },
+      dependencies = { 'nvim-lua/plenary.nvim' },
+    },
+
 
     -- Git signs in gutter
     {
@@ -239,22 +262,22 @@ lazy.setup({
     },
 
     -- Git commands
-    {
-      'tpope/vim-fugitive',
-      cmd = { 'Git', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
-    },
+    -- {
+    --   'tpope/vim-fugitive',
+    --   cmd = { 'Git', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
+    -- },
 
     -- git diff
-    {
-      "echasnovski/mini.diff",
-      config = function()
-        local diff = require("mini.diff")
-        diff.setup({
-            source = diff.gen_source.none(),
-          source = diff.gen_source.none(),
-        })
-      end,
-    },
+    -- {
+    --   "echasnovski/mini.diff",
+    --   config = function()
+    --     local diff = require("mini.diff")
+    --     diff.setup({
+    --         source = diff.gen_source.none(),
+    --       source = diff.gen_source.none(),
+    --     })
+    --   end,
+    -- },
 
     -- ##################################################################
     -- LSP/LANGUAGE SUPPORT

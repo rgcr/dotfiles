@@ -18,25 +18,36 @@ __tmux-sessions() {
     _describe -t sessions 'sessions' sessions "$@"
 }
 
+__smug_projects() {
+    local -a _projects
+    if [[ -d ~/.config/smug/ ]]; then
+        _projects=(~/.config/smug/*.yml(N:t:r))
+        if (( ${#_projects} > 0 )); then
+            _describe -t projects 'smug projects' _projects "$@"
+        fi
+    fi
+}
+compdef __smug_projects s
+
 ## completion for tmux aliases
 compdef __tmux-sessions t
 compdef __tmux-sessions tks
 
 # completion for mux function (tmuxp wrapper)
-__mux-sessions() {
-    local -a sessions
-    local session_files
-    
-    if [[ -d ~/.tmuxp ]]; then
-        session_files=(~/.tmuxp/*.yaml(N:t:r))
-        if (( ${#session_files} > 0 )); then
-            sessions=($session_files)
-            _describe -t sessions 'tmuxp sessions' sessions "$@"
-        fi
-    fi
-}
+# __mux-sessions() {
+#     local -a sessions
+#     local session_files
+#
+#     if [[ -d ~/.tmuxp ]]; then
+#         session_files=(~/.tmuxp/*.yaml(N:t:r))
+#         if (( ${#session_files} > 0 )); then
+#             sessions=($session_files)
+#             _describe -t sessions 'tmuxp sessions' sessions "$@"
+#         fi
+#     fi
+# }
 
-compdef __mux-sessions mux
+# compdef __mux-sessions mux
 
 # }}} -- end tmux
 

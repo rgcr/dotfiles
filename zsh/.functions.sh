@@ -66,31 +66,15 @@ t() {
         { _print_info "Starting new session..." && tmux new -s "${_session}" "$@" }
 }
 
-# tmuxinator 'alias' funciton,
-# adds a 'show' argument to show a configuration without open the editor
-mux(){
-    case "$1" in
-        rm)
-            shift
-            if [ -z "$1" ]; then
-                2>&1 echo "Usage: mux rm <project_name>"
-                return 1
-            fi
-            rm -iv ~/.config/tmuxp/${1}.yaml 2>/dev/null
-            rm -iv ~/tmuxp/${1}.yaml 2>/dev/null
-            return 0
-            ;;
-        *)
-            # if first argument is a session name then attach to it
-            if [[ $# -eq 1 ]] && command tmuxp ls | grep -Fx $1 &>/dev/null; then
-                command tmuxp load "${1}"
-                return 0
-            else
-                command tmuxp "$@"
-            fi
-            ;;
+# lazy alias for smug
+s(){
+    [ -z "${1}" ] && command smug list && return
+    case "${1}" in
+        ls) shift; command smug list "${@}" ;;
+        *) command smug "${@}" ;;
     esac
 }
+
 
 # tmux & zoxide functions
 # zoxide interactive query, tmux split vertical and cd
@@ -218,7 +202,7 @@ _virtualenvs() {
 compdef _virtualenvs workon rmvirtualenv
 
 
-# Private: find venvs under current directory
+# find venvs under current directory
 _find_venvs() {
     find . -path '*/bin/activate' -type f 2>/dev/null | sed 's|/bin/activate$||' | sort -u
 }

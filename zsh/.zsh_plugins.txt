@@ -4,3 +4,4 @@ sharat87/zsh-vim-mode
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-history-substring-search
 zdharma-continuum/fast-syntax-highlighting
+Aloxaf/fzf-tab

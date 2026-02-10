@@ -58,6 +58,7 @@ path(){
 ## shortcut for creating/attaching named sessions
 t() {
     [ -z "$1" ] && {
+        _print_warning "tmux sessions:"
         tmux list-sessions 2>/dev/null || _print_warning "There are no sessions" ; return 1;
     }
 
@@ -67,12 +68,12 @@ t() {
 }
 
 # lazy alias for smug
-s(){
-    [ -z "${1}" ] && command smug list && return
-    case "${1}" in
-        ls) shift; command smug list "${@}" ;;
-        *) command smug "${@}" ;;
-    esac
+mug(){
+    [ -z "${1}" ] && {
+        _print_info "smug config files:"
+            command smug list && return
+    }
+    command smug "${@}"
 }
 
 

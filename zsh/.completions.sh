@@ -27,7 +27,8 @@ __smug_projects() {
         fi
     fi
 }
-compdef __smug_projects s
+compdef __smug_projects mug
+compdef __smug_projects smug
 
 ## completion for tmux aliases
 compdef __tmux-sessions t

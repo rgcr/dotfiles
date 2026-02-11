@@ -54,17 +54,35 @@ path(){
 #######################################
 # => tmux
 #######################################
+_tmux_has_session() {
+    tmux list-sessions -F '#{session_name}' 2>/dev/null | grep -Fxq "${1}"
+}
 
-## shortcut for creating/attaching named sessions
+## shortcut to create,attach or switch tmux sessions
 t() {
-    [ -z "$1" ] && {
-        _print_warning "tmux sessions:"
-        tmux list-sessions 2>/dev/null || _print_warning "There are no sessions" ; return 1;
-    }
+    local _session="${1}"
 
-    local _session="${1}"; shift
-    tmux attach -t "${_session}" "${@}" 2>/dev/null || \
-        { _print_info "Starting new session..." && tmux new -s "${_session}" "$@" }
+    if [ -z "${_session}" ]; then
+        _print_warning "tmux sessions:"
+        tmux list-sessions -F '#{?session_attached,●,} #{session_name}	#{session_windows} windows	(created #{t:session_created})' 2>/dev/null | \
+            column -t -s '	' || \
+            _print_warning "There are no sessions"
+        return
+    fi
+    shift
+    if [ -n "$TMUX" ]; then
+        if _tmux_has_session "${_session}"; then
+            # _print_info "Switching to ${_session} session..."; sleep 1
+            tmux switch-client -t "${_session}" "${@}"
+            return
+        else
+            # _print_info "Creating new session ${_session}..."; sleep 1
+            tmux new-session -d -s "${_session}" \; switch-client -t "${_session}" "${@}"
+            return
+        fi
+    fi
+    # _print_info "Creating or switching to ${_session} session..."; sleep 1
+    tmux new-session -A -s ${_session} "${@}"
 }
 
 # lazy alias for smug

@@ -293,3 +293,12 @@ autocmd("FileType", {
     vim.keymap.set("n", "<S-tab>", "zR", { buffer = true, silent = true, desc = "Open all folds" })
   end,
 })
+
+augroup("OilGroup", { clear = true })
+autocmd("FileType", {
+  group = "OilGroup",
+  pattern = "oil",
+  callback = function()
+    vim.keymap.set("n", "<Esc>", "<cmd>q<cr>", { buffer = true, silent = true, desc = "Quit oil" })
+  end,
+})

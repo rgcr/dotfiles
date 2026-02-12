@@ -406,7 +406,7 @@ man() {
 }
 
 # expac function to search packages
-yq(){
+pacq(){
     _yellow='\033[1;33m'
     _reset='\033[0m'
     _cyan='\033[1;36m'

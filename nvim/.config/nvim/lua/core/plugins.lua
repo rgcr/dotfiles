@@ -115,6 +115,20 @@ lazy.setup({
       end
     },
 
+    -- tint.nvim
+    {
+      'levouh/tint.nvim',
+      event = 'VeryLazy',
+      config = function()
+        require('tint').setup({
+          tint = -45, -- Darken colors, use a positive value to brighten
+          saturation = 0.6, -- Saturation to preserve
+          tint_background_colors = true, -- Tint background colors
+          highlight_ignore_patterns = { "WinSeparator", "Status.*" }, -- Highlight groups to ignore when applying tint
+        })
+      end
+    },
+
     -- ##################################################################
     -- FILE MANAGEMENT/NAVIGATION
     -- ##################################################################

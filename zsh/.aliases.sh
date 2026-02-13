@@ -84,7 +84,7 @@ alias agrep='alias 2>&1| grep '
 alias j="jobs -l"
 
 # better pgrep
-alias pgrep='pgrep -fl'
+alias pgrep='command pgrep -fl'
 
 # Arch yay package manager and fzf {{{
 # search and install package
@@ -115,3 +115,6 @@ alias claudio='claude'
 
 # zoxide fzf query
 alias zz='zi'
+
+# ripgrep
+alias rg-all='rg --hidden --no-ignore'

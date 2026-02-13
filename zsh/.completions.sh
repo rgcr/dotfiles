@@ -1,3 +1,4 @@
+
 ############################################
 #               compdefs
 #############################################
@@ -15,24 +16,27 @@ __tmux-sessions() {
     local expl
     local -a sessions
     sessions=( ${${(f)"$(command tmux list-sessions 2>/dev/null)"}/:[ $'\t']##/:} )
+
     _describe -t sessions 'sessions' sessions "$@"
 }
 
-__smug_projects() {
-    local -a _projects
-    if [[ -d ~/.config/smug/ ]]; then
-        _projects=(~/.config/smug/*.yml(N:t:r))
-        if (( ${#_projects} > 0 )); then
-            _describe -t projects 'smug projects' _projects "$@"
-        fi
-    fi
-}
-compdef __smug_projects mug
-compdef __smug_projects smug
-
 ## completion for tmux aliases
-compdef __tmux-sessions t
+# compdef __tmux-sessions t
 compdef __tmux-sessions tks
+
+# __smug_projects() {
+#     local -a _projects
+#     if [[ -d ~/.config/smug/ ]]; then
+#         _projects=(~/.config/smug/*.yml(N:t:r))
+#         if (( ${#_projects} > 0 )); then
+#             _describe -t projects 'smug projects' _projects "$@"
+#         fi
+#     fi
+# }
+
+# compdef __smug_projects mug
+# compdef __smug_projects smug
+
 
 # completion for mux function (tmuxp wrapper)
 # __mux-sessions() {
@@ -54,3 +58,5 @@ compdef __tmux-sessions tks
 
 # alias for conf function to edit config files
 compdef '_arguments -C "1:Select a config file to edit:(slate i3 tmux nvim vim zsh)"' conf
+
+# vim: set ft=zsh ts=4 sw=4 tw=0 et :

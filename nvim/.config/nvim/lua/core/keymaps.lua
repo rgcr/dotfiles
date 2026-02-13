@@ -55,8 +55,8 @@ utils.nnoremap('<leader>p', ':silent! set invpaste paste?<CR>', { desc = "Toggle
 utils.nnoremap('<leader>n', ':set rnu!<CR> | :set nu!<CR>', { desc = "Toggle Line Numbers" })
 
 -- Change split orientation
-utils.nnoremap('<leader>-', '<C-w>t<C-w>K', { desc = "Change vertical to horizontal" })
-utils.nnoremap('<leader>|', '<C-w>t<C-w>H', { desc = "Change horizontal to vertical" })
+-- utils.nnoremap('<leader>-', '<C-w>t<C-w>K', { desc = "Change vertical to horizontal" })
+-- utils.nnoremap('<leader>|', '<C-w>t<C-w>H', { desc = "Change horizontal to vertical" })
 
 -- Move around splits using Ctrl + hjkl
 utils.nnoremap('<C-h>', '<C-w>h', { desc = "Move to left split" })
@@ -134,6 +134,15 @@ utils.nnoremap('<space>T', ':Vista!!<CR>', { desc = "Toggle Tagbar" })
 
 -- nvim-window
 utils.nnoremap('-', ':lua require("nvim-window").pick()<CR>', { desc = "Pick Window" })
+-- switch quickly to other window or use 'nvim-window' if more there is more than two windows
+utils.nnoremap('<leader><leader>', function()
+  local wins = vim.api.nvim_tabpage_list_wins(0)
+  if #wins == 2 then
+    vim.cmd('wincmd w')
+  else
+    require("nvim-window").pick()
+  end
+end, { desc = "Switch Window" })
 
 -- Telescope / ripgrep
 utils.nnoremap('<C-P>', '<cmd>Telescope find_files<cr>', { desc = "Find Files" })
@@ -352,6 +361,7 @@ Hydra({
         require('lazy').load({plugins = {'copilot.vim'}})
         vim.g.copilot_enabled = true
         vim.cmd('Copilot enable')
+        vim.cmd('Copilot restart')
         vim.notify("Copilot enabled", "info", { title = "Copilot", timeout = 300 })
       end,
       { desc = 'enable' } },

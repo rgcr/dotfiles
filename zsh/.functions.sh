@@ -353,6 +353,12 @@ gi() {
     curl -L -s https://www.gitignore.io/api/${@}
 }
 
+# function to open nvim Diffview for a git file
+gitdiff() {
+    # [ $# -eq 0 ] && { _print_warning "usage: gitdiff <file>"; return 1; }
+    nvim +"DiffviewOpen ${*}"
+
+}
 
 #######################################
 # => nvim
@@ -382,7 +388,6 @@ nz(){
     echo "$_oldfiles" | \
         fzf --preview "bat --style=numbers --color=always {}" --query "${*}" | xargs nvim
 }
-
 
 
 #######################################

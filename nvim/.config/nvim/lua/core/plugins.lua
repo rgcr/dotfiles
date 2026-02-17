@@ -214,9 +214,9 @@ lazy.setup({
         require('nvim-window').setup({
           -- The characters available for hinting windows.
           chars = {
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-            'u', 'v', 'w', 'x', 'y', 'z'
+            'a', 's', 'd', 'f',
+            'q', 'w', 'e', 'r',
+            'z', 'x', 'c', 'v',
           },
           -- normal_hl = 'Substitute',
           normal_hl = 'PmenuSel',

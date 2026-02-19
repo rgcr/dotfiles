@@ -363,14 +363,14 @@ gitdiff() {
 #######################################
 # => nvim
 #######################################
-nn(){
+nn() {
+    local file
     if [ -z "$1" ]; then
-    fzf --preview "bat --style=numbers --color=always {}" | \
-        xargs nvim '{}'
-        return
+        file=$(fzf --preview "bat --style=numbers --color=always {}")
+    else
+        file=$(fzf --preview "bat --style=numbers --color=always {}" --query "$*")
     fi
-    fzf --preview "bat --style=numbers --color=always {}" --query ${*} | \
-        xargs nvim '{}'
+    [[ -n "$file" ]] && nvim "$file"
 }
 
 # fzf nvim :oldfiles (recently opened files)

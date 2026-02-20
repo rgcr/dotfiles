@@ -394,6 +394,16 @@ nz(){
 # => utils
 #######################################
 
+# lgrep : ls -l with grep
+lgrep() {
+    if [ $# -eq 0 ]; then
+        ls -lAh --color=auto
+    else
+        ls -lAh --color=auto | grep --color=always -i "$*"
+    fi
+}
+
+
 # man with colors
 man() {
     if command -v bat >/dev/null 2>&1; then

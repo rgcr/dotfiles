@@ -294,11 +294,11 @@ autocmd("FileType", {
   end,
 })
 
-augroup("OilGroup", { clear = true })
-autocmd("FileType", {
-  group = "OilGroup",
-  pattern = "oil",
-  callback = function()
-    vim.keymap.set("n", "<Esc>", "<cmd>q<cr>", { buffer = true, silent = true, desc = "Quit oil" })
-  end,
-})
+-- augroup("OilGroup", { clear = true })
+-- autocmd("FileType", {
+--   group = "OilGroup",
+--   pattern = "oil",
+--   callback = function()
+--     vim.keymap.set("n", "<Esc>", "<cmd>q<cr>", { buffer = true, silent = true, desc = "Quit oil" })
+--   end,
+-- })

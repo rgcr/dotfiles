@@ -10,6 +10,13 @@ local usercmd = vim.api.nvim_create_user_command -- Create user command
 
 -- General settings:
 --------------------
+
+-- Enable autoread
+autocmd(
+  { "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" },
+  { pattern = "*", command = "silent! checktime" }
+)
+
 -- go to last loc when opening a buffer
 augroup("ResumeCursorPosition", {clear = true})
 autocmd(

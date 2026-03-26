@@ -211,6 +211,8 @@ utils.inoremap("<M-q>", "<Plug>(copilot-dismiss)")
 utils.inoremap("<M-l>", "<Plug>(copilot-accept-line)")
 utils.exprinoremap("<M-CR>", 'copilot#Accept("\\<CR>")', { replace_keycodes = false })
 
+-- Neogit
+utils.nnoremap('<space>g', ':Neogit<CR>', { desc = "Open Neogit" })
 
 -----------------------------------------------------------
 -- HYDRAS
@@ -526,7 +528,8 @@ Hydra({
 local hint_diffview = [[
   Diffview
   --------------------
-  _t_: Toggle Diffview
+  _o_: Open Diffview
+  _c_: Close Diffview
   _h_: File History
   _r_: Refresh View
   _n_: Next Change
@@ -555,7 +558,8 @@ Hydra({
    mode = 'n',
    body = '<space>d',
     heads = {
-      { 't', cmd 'DiffviewOpen', { desc = 'toggle diffview' } },
+      { 'o', cmd 'DiffviewOpen', { desc = 'open diffview' } },
+      { 'c', cmd 'DiffviewClose', { desc = 'close diffview' } },
       { 'h', cmd 'DiffviewFileHistory', { desc = 'file history' } },
       { 'r', cmd 'DiffviewRefresh', { desc = 'refresh view' } },
       { 'n', cmd 'DiffviewNextChange', { desc = 'next change' } },

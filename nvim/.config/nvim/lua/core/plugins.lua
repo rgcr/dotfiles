@@ -241,7 +241,7 @@ lazy.setup({
         require('neogit').setup({
           kind = 'split',
           integrations = { diffview = true },
-
+          diff_viewer = 'diffview',
         })
       end
     },
@@ -276,22 +276,11 @@ lazy.setup({
     },
 
     -- Git commands
-    -- {
-    --   'tpope/vim-fugitive',
-    --   cmd = { 'Git', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
-    -- },
-
-    -- git diff
-    -- {
-    --   "echasnovski/mini.diff",
-    --   config = function()
-    --     local diff = require("mini.diff")
-    --     diff.setup({
-    --         source = diff.gen_source.none(),
-    --       source = diff.gen_source.none(),
-    --     })
-    --   end,
-    -- },
+    -- it's redundant with neogit but I use this when I open diffview.nvim
+    {
+      'tpope/vim-fugitive',
+      cmd = { 'Git', 'Gdiffsplit', 'Gread', 'Gwrite', 'Ggrep', 'GMove', 'GDelete', 'GBrowse' },
+    },
 
     -- ##################################################################
     -- LSP/LANGUAGE SUPPORT

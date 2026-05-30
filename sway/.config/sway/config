@@ -130,6 +130,8 @@ for_window [class="CopyQ"] floating enable, move position cursor, move down 30 p
 exec copyq --start-server
 bindsym $mod+Mod1+v exec copyq toggle
 
+# win + ctrl + space open nwg-drawer
+bindsym $mod+ctrl+space exec nwg-drawer
 
 # Arch supplies environment propagation for portals in this directory.
 include /etc/sway/config.d/*

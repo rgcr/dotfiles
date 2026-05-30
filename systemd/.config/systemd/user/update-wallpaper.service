@@ -1,0 +1,6 @@
+[Unit]
+Description=Download and set a random wallpaper
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/wallpaper update --quiet

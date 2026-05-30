@@ -1,0 +1,16 @@
+show=drun
+prompt=Search
+width=700
+height=300
+lines=5
+columns=1
+location=center
+term=kitty
+allow_images=true
+image_size=24
+insensitive=true
+gtk_dark=true
+matching=fuzzy
+sort_order=default
+hide_scroll=true
+no_actions=true

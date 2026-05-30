@@ -17,5 +17,10 @@ emacs/.emacs.d/transient
 # mac
 .DS_Store
 
+# local secrets
+*.env
+secrets/
+.config/secrets/
+
 *.md
 !README.md

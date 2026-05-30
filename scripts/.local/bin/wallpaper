@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+secrets="$HOME/.config/secrets/unsplash.env"
+wallpaper_dir="${WALLPAPER_DIR:-$HOME/Pictures/wallpapers}"
+width="${WALLPAPER_WIDTH:-1920}"
+height="${WALLPAPER_HEIGHT:-1080}"
+keep="${UNSPLASH_KEEP:-15}"
+default_query="landscape mountain beach city travel nature"
+downloaded_wallpaper=""
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  wallpaper download [--quiet] [query]
+  wallpaper set-random [--quiet]
+  wallpaper update [--quiet] [query]
+
+Commands:
+  download  Download one wallpaper from Unsplash and prune old downloads.
+  set-random
+            Set a random local wallpaper in Sway.
+  update    Download one wallpaper, then set that wallpaper in Sway.
+USAGE
+}
+
+load_secrets() {
+  if [ -f "$secrets" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$secrets"
+    set +a
+  fi
+}
+
+find_sway_socket() {
+  if [ -n "${SWAYSOCK:-}" ] && [ -S "$SWAYSOCK" ]; then
+    return
+  fi
+
+  local socket
+  socket="$(find "/run/user/$(id -u)" -maxdepth 1 -name "sway-ipc.$(id -u).*.sock" 2>/dev/null | sort | tail -n 1)"
+  if [ -n "$socket" ]; then
+    export SWAYSOCK="$socket"
+  fi
+}
+
+download_wallpaper() {
+  local quiet=false
+  if [ "${1:-}" = "--quiet" ]; then
+    quiet=true
+    shift
+  fi
+  local query="${1:-$default_query}"
+
+  load_secrets
+  if [ -z "${UNSPLASH_ACCESS_KEY:-}" ]; then
+    $quiet || echo "UNSPLASH_ACCESS_KEY is missing. Add it to $secrets." >&2
+    return 1
+  fi
+
+  mkdir -p "$wallpaper_dir"
+
+  local response image_url photo_id target
+  response="$(
+    curl -fsSG "https://api.unsplash.com/photos/random" \
+      -H "Authorization: Client-ID $UNSPLASH_ACCESS_KEY" \
+      --data-urlencode "query=$query" \
+      --data-urlencode "orientation=landscape" \
+      --data-urlencode "content_filter=high"
+  )"
+
+  image_url="$(
+    jq -r --arg width "$width" --arg height "$height" \
+      '.urls.raw + "&w=" + $width + "&h=" + $height + "&fit=crop&crop=entropy"' \
+      <<<"$response"
+  )"
+
+  photo_id="$(jq -r '.id' <<<"$response")"
+  target="$wallpaper_dir/unsplash-${photo_id}-${width}x${height}.jpg"
+
+  curl -fsSL "$image_url" -o "$target"
+
+  find "$wallpaper_dir" -maxdepth 1 -type f -name 'unsplash-*.jpg' -printf '%T@ %p\n' \
+    | sort -rn \
+    | awk -v keep="$keep" 'NR > keep { $1 = ""; sub(/^ /, ""); print }' \
+    | xargs -r rm -f
+
+  downloaded_wallpaper="$target"
+  $quiet || printf 'Downloaded -> %s\n' "$target"
+}
+
+set_wallpaper() {
+  local quiet=false
+  if [ "${1:-}" = "--quiet" ]; then
+    quiet=true
+    shift
+  fi
+
+  local selected="${1:-}"
+
+  if [ -z "$selected" ]; then
+    $quiet || echo "No wallpapers found in $wallpaper_dir" >&2
+    return 1
+  fi
+
+  find_sway_socket
+  if [ -z "${SWAYSOCK:-}" ]; then
+    $quiet || echo "SWAYSOCK is missing; cannot set wallpaper." >&2
+    return 1
+  fi
+
+  if $quiet; then
+    swaymsg output "*" bg "$selected" fill >/dev/null 2>&1
+  else
+    swaymsg output "*" bg "$selected" fill >/dev/null
+  fi
+  $quiet || printf 'Set -> %s\n' "$selected"
+}
+
+set_random_wallpaper() {
+  local quiet=false
+  if [ "${1:-}" = "--quiet" ]; then
+    quiet=true
+    shift
+  fi
+
+  local selected
+  selected="$(
+    find "$wallpaper_dir" -type f \
+      \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \
+      | shuf -n 1
+  )"
+
+  if $quiet; then
+    set_wallpaper --quiet "$selected"
+  else
+    set_wallpaper "$selected"
+  fi
+}
+
+command="${1:-}"
+if [ -n "$command" ]; then
+  shift
+fi
+
+case "$command" in
+  download)
+    download_wallpaper "$@"
+    ;;
+  set-random)
+    set_random_wallpaper "$@"
+    ;;
+  update)
+    quiet_arg=""
+    if [ "${1:-}" = "--quiet" ]; then
+      quiet_arg="--quiet"
+    fi
+    download_wallpaper "$@" || true
+    if [ -n "$downloaded_wallpaper" ]; then
+      set_wallpaper ${quiet_arg:+"$quiet_arg"} "$downloaded_wallpaper" || true
+    fi
+    ;;
+  -h|--help|help|"")
+    usage
+    ;;
+  *)
+    echo "Unknown command: $command" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

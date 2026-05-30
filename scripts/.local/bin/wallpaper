@@ -3,8 +3,8 @@ set -euo pipefail
 
 secrets="$HOME/.config/secrets/unsplash.env"
 wallpaper_dir="${WALLPAPER_DIR:-$HOME/Pictures/wallpapers}"
-width="${WALLPAPER_WIDTH:-1920}"
-height="${WALLPAPER_HEIGHT:-1080}"
+width="${WALLPAPER_WIDTH:-}"
+height="${WALLPAPER_HEIGHT:-}"
 keep="${UNSPLASH_KEEP:-15}"
 default_query="landscape mountain beach city travel nature"
 downloaded_wallpaper=""
@@ -45,6 +45,30 @@ find_sway_socket() {
   fi
 }
 
+detect_resolution() {
+  # Skip if user already set both via env
+  if [ -n "$width" ] && [ -n "$height" ]; then
+    return
+  fi
+
+  find_sway_socket
+  if [ -n "${SWAYSOCK:-}" ]; then
+    local dims
+    dims="$(swaymsg -t get_outputs 2>/dev/null \
+      | jq -r '[.[] | select(.active) | .current_mode]
+               | sort_by(.width * .height) | last
+               | "\(.width) \(.height)"' 2>/dev/null)"
+    if [ -n "$dims" ] && [ "$dims" != "null null" ]; then
+      : "${width:=${dims% *}}"
+      : "${height:=${dims#* }}"
+    fi
+  fi
+
+  # Fallback if sway isn't running
+  : "${width:=1920}"
+  : "${height:=1080}"
+}
+
 download_wallpaper() {
   local quiet=false
   if [ "${1:-}" = "--quiet" ]; then
@@ -58,6 +82,8 @@ download_wallpaper() {
     $quiet || echo "UNSPLASH_ACCESS_KEY is missing. Add it to $secrets." >&2
     return 1
   fi
+
+  detect_resolution
 
   mkdir -p "$wallpaper_dir"
 
@@ -111,9 +137,9 @@ set_wallpaper() {
   fi
 
   if $quiet; then
-    swaymsg output "*" bg "$selected" fill >/dev/null 2>&1
+    swaymsg output "*" bg "$selected" stretch >/dev/null 2>&1
   else
-    swaymsg output "*" bg "$selected" fill >/dev/null
+    swaymsg output "*" bg "$selected" stretch >/dev/null
   fi
   $quiet || printf 'Set -> %s\n' "$selected"
 }

@@ -8,6 +8,7 @@ set $right l
 set $term kitty
 set $menu wofi --show drun
 
+
 font pango:DejaVu Sans 10
 output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 
@@ -17,12 +18,15 @@ input type:touchpad {
     natural_scroll enabled
 }
 
+workspace_layout stacking
+
 # Session helpers.
 exec mako
 exec nm-applet --indicator
 exec /usr/lib/mate-polkit/polkit-mate-authentication-agent-1
 exec waybar
-exec ~/.local/bin/wallpaper download --quiet
+
+
 exec swayidle -w \
     timeout 300 'swaylock -f -c 1e1e2e' \
     timeout 600 'swaymsg "output * power off"' \
@@ -78,10 +82,10 @@ bindsym $mod+Shift+9 move container to workspace number 9
 bindsym $mod+Shift+0 move container to workspace number 10
 
 # Layout.
-bindsym $mod+b splith
-bindsym $mod+v splitv
+#bindsym $mod+b splith
+#bindsym $mod+v splitv
 bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
+bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
 bindsym $mod+f fullscreen
 bindsym $mod+Shift+space floating toggle
@@ -126,12 +130,18 @@ for_window [app_id="nm-connection-editor"] floating enable
 for_window [app_id="copyq"] floating enable, move position cursor, move down 30 px
 for_window [class="CopyQ"] floating enable, move position cursor, move down 30 px
 
+
+## External applications and utilities.
+
 # Clipboard manager.
 exec copyq --start-server
 bindsym $mod+Mod1+v exec copyq toggle
 
 # win + ctrl + space open nwg-drawer
 bindsym $mod+ctrl+space exec nwg-drawer
+
+# wallpaper
+exec ~/.local/bin/wallpaper update --quiet
 
 # Arch supplies environment propagation for portals in this directory.
 include /etc/sway/config.d/*

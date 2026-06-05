@@ -22,7 +22,10 @@ local Install=spoon.SpoonInstall
 local cmd_ctrl = { "cmd", "ctrl" }
 local cmd_alt = { "cmd", "alt" }
 local cmd_shift = { "cmd", "shift" }
+local ctrl = { "ctrl" }
+local ctrl_shift = { "ctrl", "shift" }
 local ctrl_alt = { "ctrl", "alt" }
+
 local hyper = { "cmd", "ctrl", "alt"}
 local hyper_shift = { "cmd", "ctrl", "alt", "shift" }
 
@@ -34,6 +37,8 @@ local hyper_shift = { "cmd", "ctrl", "alt", "shift" }
 hs.hotkey.bind(hyper, "R", "Reloading config", function()
   hs.reload()
 end)
+
+-- (Space indicator moved to end of file)
 
 -- Quit the frontmost app | Cmd + Shift + Q
 hs.hotkey.bind(cmd_shift, "q", function()
@@ -47,7 +52,7 @@ end)
 local app_bindings = {
     ["return"] = "iTerm",
     ["."] = "iTerm",
-    [","] = "iTerm",
+    -- [","] = "iTerm",
     f = "Firefox",
     e = "Microsoft Edge",
     x = "Microsoft Excel",
@@ -57,7 +62,7 @@ local app_bindings = {
     t = "Microsoft Teams",
     c = "Google Chrome",
     -- v = "VsCodium",
-    -- v = "Visual Studio Code",
+    v = "Code",
 }
 
 -- Focus on specific applications using hyper key | Cmd + Ctrl + Alt + Key
@@ -138,7 +143,71 @@ hs.hotkey.bind({"ctrl"}, ".", function()
 end)
 
 -- I have my custom engines in a custom file ~/.hammerspoon/search_engines.lua
-local searcher = require("searcher").setup()
-hs.hotkey.bind(hyper, "space", function()
-  searcher.show()
-end)
+-- local searcher = require("searcher").setup()
+-- hs.hotkey.bind(hyper, "space", function()
+--   searcher.show()
+-- end)
+
+-- Window switcher on Ctrl+Tab (current Space only, visible windows)
+do
+  local wf = hs.window.filter.new():setCurrentSpace(true)
+  -- Use default filter (visible, standard windows)
+  local switcher = hs.window.switcher.new(wf)
+
+  -- Next window
+  hs.hotkey.bind(ctrl, "tab",
+    function() switcher:next() end,
+    nil,
+    function() switcher:next() end)
+
+  -- Previous window
+  hs.hotkey.bind(ctrl_shift, "tab",
+    function() switcher:previous() end,
+    nil,
+    function() switcher:previous() end)
+end
+
+-- Menubar indicator for current Desktop Space (focused screen)
+-- Keep references globally to avoid Lua GC removing the item/watchers
+spaceIndicator = spaceIndicator or {}
+spaceIndicator.menu = spaceIndicator.menu or hs.menubar.new()
+
+local function spaceIndexForScreen(screen)
+  local focused = hs.spaces.focusedSpace()
+  if not (screen and focused) then return nil end
+  local ok, spaces = pcall(hs.spaces.spacesForScreen, screen)
+  spaces = (ok and spaces) or {}
+  local idx, count = nil, 0
+  for _, sid in ipairs(spaces) do
+    local t = hs.spaces.spaceType and hs.spaces.spaceType(sid) or "user"
+    if t == "user" then
+      count = count + 1
+      if sid == focused then idx = count end
+    end
+  end
+  return idx
+end
+
+local function updateSpaceIndicator()
+  if not spaceIndicator.menu then return end
+  local idx = spaceIndexForScreen(hs.screen.mainScreen())
+  local title = idx and ("[" .. tostring(idx) .. "]") or "[?]"
+  spaceIndicator.menu:setTitle(title)
+  spaceIndicator.menu:setTooltip("Current Space (focused screen)")
+end
+
+updateSpaceIndicator()
+
+if not spaceIndicator.spacesWatcher then
+  spaceIndicator.spacesWatcher = hs.spaces.watcher.new(function()
+    updateSpaceIndicator()
+  end)
+  spaceIndicator.spacesWatcher:start()
+end
+
+if not spaceIndicator.screenWatcher then
+  spaceIndicator.screenWatcher = hs.screen.watcher.new(function()
+    hs.timer.doAfter(0.2, updateSpaceIndicator)
+  end)
+  spaceIndicator.screenWatcher:start()
+end

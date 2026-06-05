@@ -1,0 +1,447 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+    pi-migrate-session
+    ~~~~~~~~~~~~~~~~~~
+
+    Migrate pi-coding-agent session history when a folder is renamed
+    (or copied) to a new path.
+
+    pi stores per-cwd session directories under ~/.pi/agent/sessions/
+    using an encoded form of the absolute path: every '/' is replaced
+    by '-', and the whole thing is wrapped in '--…--'. Inside, each
+    .jsonl file's first line is a session header carrying the original
+    cwd as a JSON field.
+
+    This tool finds matching sessions by reading the recorded cwd
+    (decoding the dir name is ambiguous), renames or copies the dir
+    to the encoding of the new path, and rewrites only the cwd field
+    on line 1 of each .jsonl. Conversation history on subsequent lines
+    is left untouched.
+
+"""
+
+import argparse
+import json
+import os
+import shutil
+import sys
+import tempfile
+
+
+SESSIONS_ROOT = os.path.join(os.path.expanduser("~"), ".pi", "agent", "sessions")
+
+
+def encode_path(path):
+    """
+    Apply pi's path → session-dir-name encoding
+
+    Args:
+        path (str): absolute filesystem path
+
+    Returns:
+        str: encoded session directory name (e.g. '--Users-foo-.dotfiles--')
+
+    Examples:
+
+        >>> encode_path('/Users/foo/.dotfiles')
+        '--Users-foo-.dotfiles--'
+
+    """
+    return "--" + path.lstrip("/").replace("/", "-") + "--"
+
+
+def read_header_cwd(jsonl_path):
+    """
+    Read the cwd field from line 1 of a session .jsonl file
+
+    Args:
+        jsonl_path (str): path to a .jsonl session file
+
+    Returns:
+        str: the cwd recorded in the session header, or None if
+             the file is unreadable, empty, not valid JSON, or has
+             no string cwd field
+
+    """
+    try:
+        with open(jsonl_path, "r", encoding="utf-8") as f:
+            first = f.readline()
+    except OSError:
+        return None
+
+    if not first.strip():
+        return None
+
+    try:
+        obj = json.loads(first)
+    except json.JSONDecodeError:
+        return None
+
+    cwd = obj.get("cwd")
+    if isinstance(cwd, str):
+        return cwd
+
+    return None
+
+
+def discover_sessions():
+    """
+    Walk the sessions root and gather session metadata
+
+    Returns:
+        list: list of dicts, one per session dir, each with keys
+              'dir' (str path), 'cwd' (str), 'header_files' (list of str).
+              Dirs without any usable cwd header are skipped. Dirs whose
+              .jsonl files disagree on cwd are warned about and skipped.
+
+    """
+    sessions = []
+    if not os.path.isdir(SESSIONS_ROOT):
+        return sessions
+
+    for name in sorted(os.listdir(SESSIONS_ROOT)):
+        d = os.path.join(SESSIONS_ROOT, name)
+        if not os.path.isdir(d):
+            continue
+
+        cwds = {}
+        for entry in sorted(os.listdir(d)):
+            if not entry.endswith(".jsonl"):
+                continue
+
+            f = os.path.join(d, entry)
+            cwd = read_header_cwd(f)
+            if cwd is None:
+                continue
+
+            cwds.setdefault(cwd, []).append(f)
+
+        if not cwds:
+            continue
+
+        if len(cwds) > 1:
+            print(
+                "warn: {} has conflicting cwds in headers, skipping: {}".format(
+                    name, list(cwds)
+                ),
+                file=sys.stderr,
+            )
+            continue
+
+        cwd, files = next(iter(cwds.items()))
+        sessions.append({"dir": d, "cwd": cwd, "header_files": files})
+
+    return sessions
+
+
+def match_sessions(sessions, old_path, exact):
+    """
+    Filter sessions whose recorded cwd matches old_path
+
+    Args:
+        sessions (list): output of discover_sessions()
+        old_path (str): original folder path to match
+        exact (bool): if True only match cwd == old_path,
+                      otherwise also match cwd starting with 'old_path/'
+
+    Returns:
+        list: matching session dicts in input order
+
+    """
+    if exact:
+        return [s for s in sessions if s["cwd"] == old_path]
+
+    old_slash = old_path.rstrip("/") + "/"
+    return [
+        s for s in sessions
+        if s["cwd"] == old_path or s["cwd"].startswith(old_slash)
+    ]
+
+
+def plan_new_cwd(old_cwd, old_root, new_root):
+    """
+    Map an old cwd to the new cwd by replacing the old_root prefix
+
+    Args:
+        old_cwd (str): cwd recorded in a session header
+        old_root (str): original root path the user is renaming
+        new_root (str): new root path
+
+    Returns:
+        str: rewritten cwd
+
+    Raises:
+        ValueError: if old_cwd is not equal to or under old_root
+
+    Examples:
+
+        >>> plan_new_cwd('/a/b/c', '/a/b', '/x/y')
+        '/x/y/c'
+
+    """
+    if old_cwd == old_root:
+        return new_root
+
+    old_slash = old_root.rstrip("/") + "/"
+    if not old_cwd.startswith(old_slash):
+        raise ValueError(
+            "cwd {!r} is not under root {!r}".format(old_cwd, old_root)
+        )
+
+    return new_root.rstrip("/") + "/" + old_cwd[len(old_slash):]
+
+
+def rewrite_cwd(jsonl_path, old_cwd, new_cwd, dry_run):
+    """
+    Rewrite the cwd field on line 1 of a .jsonl, atomically
+
+    Streams the remainder of the file unchanged. Uses a temp file
+    plus os.replace so a crash mid-write leaves either the old or
+    the new file in place, never a partial.
+
+    Args:
+        jsonl_path (str): path to the .jsonl file
+        old_cwd (str): expected current cwd value
+        new_cwd (str): replacement cwd value
+        dry_run (bool): if True compute but do not write
+
+    Returns:
+        bool: True if the file's header carried old_cwd and was
+              (or would have been) rewritten, False otherwise
+
+    """
+    with open(jsonl_path, "r", encoding="utf-8") as f:
+        first = f.readline()
+        rest_pos = f.tell()
+
+    try:
+        obj = json.loads(first)
+    except json.JSONDecodeError:
+        return False
+
+    if obj.get("cwd") != old_cwd:
+        return False
+
+    obj["cwd"] = new_cwd
+    new_first = json.dumps(obj, ensure_ascii=False) + "\n"
+
+    if dry_run is True:
+        return True
+
+    parent = os.path.dirname(jsonl_path)
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=os.path.basename(jsonl_path) + ".", dir=parent
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as out:
+            out.write(new_first)
+            with open(jsonl_path, "r", encoding="utf-8") as src:
+                src.seek(rest_pos)
+                shutil.copyfileobj(src, out)
+        os.replace(tmp_path, jsonl_path)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+    return True
+
+
+def migrate_one(session, new_cwd, copy, merge, dry_run):
+    """
+    Migrate a single session directory
+
+    Args:
+        session (dict): a session dict from discover_sessions()
+        new_cwd (str): new cwd for this session
+        copy (bool): if True copy instead of rename
+        merge (bool): if True allow merging into an existing target dir
+                      (filename collisions still abort)
+        dry_run (bool): if True print only
+
+    Returns:
+        int: number of .jsonl files whose header was rewritten
+
+    Raises:
+        SystemExit: if the target dir exists without --merge,
+                    or a filename collision is detected
+
+    """
+    src_dir = session["dir"]
+    target_name = encode_path(new_cwd)
+    target = os.path.join(SESSIONS_ROOT, target_name)
+    action = "copy" if copy is True else "rename"
+
+    print("{}: {}".format(action, os.path.basename(src_dir)))
+    print("     cwd: {}".format(session["cwd"]))
+    print("  -> cwd: {}".format(new_cwd))
+    print("  -> dir: {}".format(target_name))
+
+    if os.path.exists(target) and target != src_dir:
+        if merge is not True:
+            raise SystemExit(
+                "error: target dir already exists: {}\n"
+                "       pass --merge to move files into it "
+                "(collisions still abort)".format(target)
+            )
+
+        for entry in os.listdir(src_dir):
+            if os.path.exists(os.path.join(target, entry)):
+                raise SystemExit(
+                    "error: filename collision in merge: {}".format(
+                        os.path.join(target, entry)
+                    )
+                )
+
+    if dry_run is not True:
+        if copy is True:
+            if os.path.exists(target):
+                for entry in os.listdir(src_dir):
+                    shutil.copy2(
+                        os.path.join(src_dir, entry),
+                        os.path.join(target, entry),
+                    )
+
+            else:
+                shutil.copytree(src_dir, target)
+
+        else:
+            if os.path.exists(target) and target != src_dir:
+                for entry in os.listdir(src_dir):
+                    shutil.move(
+                        os.path.join(src_dir, entry),
+                        os.path.join(target, entry),
+                    )
+                os.rmdir(src_dir)
+
+            elif target != src_dir:
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                os.rename(src_dir, target)
+
+    rewritten = 0
+    work_dir = src_dir if dry_run is True else target
+    header_basenames = {os.path.basename(p) for p in session["header_files"]}
+
+    for entry in sorted(os.listdir(work_dir)):
+        if not entry.endswith(".jsonl"):
+            continue
+
+        if dry_run is True and entry not in header_basenames:
+            continue
+
+        f = os.path.join(work_dir, entry)
+        if rewrite_cwd(f, session["cwd"], new_cwd, dry_run) is True:
+            rewritten += 1
+
+    print("  headers rewritten: {}".format(rewritten))
+    return rewritten
+
+
+def parse_args(argv):
+    """
+    Build the argparse parser and parse argv
+
+    Args:
+        argv (list): argument vector excluding the program name
+
+    Returns:
+        argparse.Namespace: parsed arguments
+
+    """
+    parser = argparse.ArgumentParser(
+        prog="pi-migrate-session",
+        description=(
+            "Migrate pi session dirs when a folder is renamed or copied. "
+            "By default operates in prefix mode: every session whose cwd "
+            "is under OLD_PATH is migrated."
+        ),
+    )
+    parser.add_argument("old_path", help="original absolute folder path")
+    parser.add_argument("new_path", help="new absolute folder path")
+    parser.add_argument(
+        "--exact",
+        action="store_true",
+        help="only act on the session whose cwd == OLD_PATH",
+    )
+    parser.add_argument(
+        "--copy",
+        action="store_true",
+        help="copy instead of rename (originals are preserved)",
+    )
+    parser.add_argument(
+        "--merge",
+        action="store_true",
+        help=(
+            "if a target session dir already exists, merge files in "
+            "(filename collisions still abort)"
+        ),
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print planned actions, change nothing",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    """
+    Entry point
+
+    Args:
+        argv (list): argument vector excluding the program name,
+                     defaults to sys.argv[1:]
+
+    Returns:
+        int: process exit code
+
+    """
+    args = parse_args(sys.argv[1:] if argv is None else argv)
+
+    old = args.old_path
+    new = args.new_path
+    if not os.path.isabs(old) or not os.path.isabs(new):
+        print("error: OLD_PATH and NEW_PATH must be absolute", file=sys.stderr)
+        return 2
+
+    old = old.rstrip("/") or "/"
+    new = new.rstrip("/") or "/"
+    if old == new:
+        print("error: OLD_PATH and NEW_PATH are identical", file=sys.stderr)
+        return 2
+
+    sessions = discover_sessions()
+    matches = match_sessions(sessions, old, args.exact)
+    if not matches:
+        mode = "exact" if args.exact is True else "prefix"
+        print("no sessions match {!r} ({} mode)".format(old, mode))
+        return 0
+
+    suffix = " [DRY RUN]" if args.dry_run is True else ""
+    print("matched {} session(s){}".format(len(matches), suffix))
+    print()
+
+    total_files = 0
+    for s in matches:
+        new_cwd = plan_new_cwd(s["cwd"], old, new)
+        total_files += migrate_one(
+            s, new_cwd,
+            copy=args.copy,
+            merge=args.merge,
+            dry_run=args.dry_run,
+        )
+        print()
+
+    tail = " [DRY RUN — nothing changed]" if args.dry_run is True else ""
+    print("done: {} session(s), {} file(s) updated{}".format(
+        len(matches), total_files, tail
+    ))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

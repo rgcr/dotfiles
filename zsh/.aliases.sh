@@ -54,6 +54,7 @@ alias git-mail='git config user.email'
 # docker {{{
 alias d='docker'
 alias dps='docker ps -a'
+alias compose='docker compose'
 # }}}
 
 # tmux {{{

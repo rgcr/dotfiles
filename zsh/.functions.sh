@@ -23,17 +23,28 @@ _print_warning() {
     2>&1 echo -e "${_color_yellow}${@}${_color_reset}"
 }
 
-# function to add paths to the PATH variable and avoid duplicates
-_add_to_path () {
-    case ":$PATH:" in
-        *":$1:"*) :;; # already there
-        *) PATH="$1:$PATH";; # or PATH="$PATH:$1"
-  esac
+# functions to add paths to the PATH variable and avoid duplicates
+_remove_from_path(){
+    local dir="$1"
+    [ -n "$dir" ] || return
+    PATH="$(printf %s "$PATH" | tr ':' '\n' | grep -Fxv "$dir" | paste -sd: -)"
+    export PATH="$PATH"
 }
 
-_remove_from_path(){
-    local filtered_path=$(echo $PATH | tr ':' '\n' | grep -wv "${1}" | tr '\n' ':' | sed 's/:$//')
-    export PATH=${filtered_path}
+_add_to_path(){
+    local dir="$1"
+    [ -n "$dir" ] || return
+    _remove_from_path "$dir"
+    PATH="${PATH:+$PATH:}$dir"
+    export PATH="$PATH"
+}
+
+_push_to_path(){
+    local dir="$1"
+    [ -n "$dir" ] || return
+    _remove_from_path "$dir"
+    PATH="$dir${PATH:+:$PATH}"
+    export PATH="$PATH"
 }
 
 #######################################
@@ -43,12 +54,12 @@ _remove_from_path(){
 # wrapper function to manage the path env and avoid duplicates
 path(){
     case "$1" in
-        ls) _print_info $PATH | tr ':' '\n' ;;
-        add) [ ! -z "${2}" ] && _add_to_path "${2}" ;;
-        rm) [ ! -z "${2}" ] && _remove_from_path "${2}" ;;
-        *) 2>&1 echo "usage: path [ls | add <path>| rm <path>]"
+        ls)   printf '%s\n' "$PATH" | tr ':' '\n' ;;
+        add)  [ -n "$2" ] && _add_to_path "$2" ;;
+        push) [ -n "$2" ] && _push_to_path "$2" ;;
+        rm)   [ -n "$2" ] && _remove_from_path "$2" ;;
+        *)    1>&2 echo "usage: path [ls|add|push|rm] <dir>" ;;
     esac
-
 }
 
 #######################################
@@ -460,11 +471,10 @@ calc() { echo "${@}" | bc -l }
 # set proxy envs
 setproxy() {
     p=${1}; np=${2:-localhost}
-    no_proxy=$np; NO_PROXY=$np;
-    http_proxy=$p; HTTP_PROXY=$p; https_proxy=$p;
-    HTTPS_PROXY=$p; ftp_proxy=$p; FTP_PROXY=$p;
-    export http_proxy https_proxy HTTP_PROXY HTTPS_PROXY \
-        ftp_proxy FTP_PROXY no_proxy NO_PROXY;
+    NO_PROXY=$np; HTTP_PROXY=$p;
+    HTTPS_PROXY=$p; FTP_PROXY=$p;
+    export HTTP_PROXY HTTPS_PROXY \
+        FTP_PROXY NO_PROXY;
 }
 
 # unset proxy

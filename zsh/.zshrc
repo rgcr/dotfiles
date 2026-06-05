@@ -111,7 +111,7 @@ setopt share_history
 [ -e "${HOME}/.completions.sh" ] && source "${HOME}/.completions.sh"
 
 # Adding path with custom function to avoid duplicates
-[ -d "${HOME}/.local/bin" ] && path add ${HOME}/.local/bin
+[ -d "${HOME}/.local/bin" ] && path push ${HOME}/.local/bin
 [ -d "${HOME}/.yarn/bin" ] && path add ${HOME}/.yarn/bin
 [ -d "${HOME}/.cargo/bin" ] && path add ${HOME}/.cargo/bin
 

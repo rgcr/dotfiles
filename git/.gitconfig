@@ -5,6 +5,7 @@
     rebase = true
 [credential]
     helper = cache --timeout=999999
-# Aliases
+# Aliases and machine-local overrides
 [include]
-path = ~/.gitalias
+    path = ~/.gitalias
+    path = ~/.gitconfig.local

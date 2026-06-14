@@ -21,7 +21,7 @@ input type:touchpad {
 workspace_layout stacking
 
 # Session helpers.
-exec mako
+exec swaync
 exec nm-applet --indicator
 exec /usr/lib/mate-polkit/polkit-mate-authentication-agent-1
 exec waybar
@@ -31,6 +31,7 @@ exec swayidle -w \
     timeout 300 'swaylock -f -c 1e1e2e' \
     timeout 600 'swaymsg "output * power off"' \
         resume 'swaymsg "output * power on"' \
+    timeout 1800 'systemctl suspend-then-hibernate' \
     before-sleep 'swaylock -f -c 1e1e2e'
 
 # Common applications and session commands.
@@ -39,6 +40,9 @@ bindsym $mod+space exec $menu
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Exit Sway and return to the login screen?' -B 'Exit' 'swaymsg exit'
+bindsym --locked XF86PowerOff exec swaynag -t warning -m 'Suspend then hibernate?' -B 'Suspend' 'systemctl suspend-then-hibernate'
+bindsym $mod+n exec swaync-client -t
+bindsym $mod+Shift+n exec swaync-client -d
 floating_modifier $mod normal
 
 # Focus and move containers.

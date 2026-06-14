@@ -24,6 +24,10 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 - macOS: `brew install antidote`
 - Arch Linux: `pacman -S zsh-antidote`
 
+### SwayNotificationCenter for Sway
+
+- Arch Linux: `pacman -S swaync`
+
 
 ---
 
@@ -41,6 +45,12 @@ Example:
 stow --no-folding -d . -t ~ -vR zsh
 ```
 
+Or deploy all normal home dotfiles with:
+
+```bash
+./bootstrap.sh --stow
+```
+
 ### To remove a specific config
 
 ```bash
@@ -53,7 +63,7 @@ stow --no-folding -d . -t ~ -vD <config>
 stow --no-folding -d . -t ~ -vD *
 ```
 
-> ⚠️ **Do not use `bootstrap.sh`**, as it may break your current configuration.
+Run `./bootstrap.sh` with no parameters to show usage.
 
 ---
 
@@ -62,5 +72,23 @@ stow --no-folding -d . -t ~ -vD *
 ### `i3-hibernate` config requires `sudo` privileges
 
 ```bash
-sudo rsync -rvzh i3-hibernate/ /
+./bootstrap.sh --i3-hibernate
 ```
+
+### `sway-hibernate` system sleep config requires `sudo` privileges
+
+```bash
+./bootstrap.sh --sway-hibernate
+```
+
+This uses `suspend-then-hibernate`: the laptop suspends first, then writes RAM to
+disk after 30 minutes so the session can survive a drained battery. This requires
+working Linux hibernation support, including a swap partition or swap file
+configured as the kernel resume device.
+
+In Sway, the power button is handled by a `swaynag` confirmation prompt. Lid close
+still uses `suspend-then-hibernate` immediately.
+
+Reboot after deploying hibernate config so `systemd-logind` reads the new lid and
+power-key settings. Avoid restarting `systemd-logind` from inside the graphical
+session because it can disrupt the active desktop session.

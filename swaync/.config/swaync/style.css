@@ -1,0 +1,109 @@
+@define-color bg #1e1e2e;
+@define-color surface #313244;
+@define-color surface_alt #45475a;
+@define-color text #cdd6f4;
+@define-color muted #a6adc8;
+@define-color accent #89b4fa;
+@define-color urgent #f38ba8;
+
+* {
+  font-family: "DejaVu Sans", sans-serif;
+  font-size: 12px;
+  border: none;
+  border-radius: 0;
+}
+
+.control-center {
+  background: alpha(@bg, 0.98);
+  border: 1px solid @surface_alt;
+  border-radius: 8px;
+  color: @text;
+}
+
+.notification-row {
+  outline: none;
+}
+
+.notification {
+  background: @surface;
+  border: 1px solid @surface_alt;
+  border-radius: 8px;
+  margin: 6px 8px;
+  padding: 10px;
+  color: @text;
+}
+
+.notification.critical {
+  border-color: @urgent;
+}
+
+.notification-content {
+  margin: 0;
+}
+
+.summary {
+  color: @text;
+  font-weight: 700;
+}
+
+.time,
+.body {
+  color: @muted;
+}
+
+.close-button {
+  background: transparent;
+  color: @muted;
+  border-radius: 6px;
+}
+
+.close-button:hover {
+  background: @surface_alt;
+  color: @text;
+}
+
+.control-center .widget-title {
+  color: @text;
+  margin: 12px;
+}
+
+.control-center .widget-title button,
+.control-center .widget-dnd switch,
+.notification-action {
+  background: @surface;
+  border: 1px solid @surface_alt;
+  border-radius: 6px;
+  color: @text;
+}
+
+.control-center .widget-title button:hover,
+.notification-action:hover {
+  background: @surface_alt;
+}
+
+.control-center .widget-dnd {
+  color: @text;
+  margin: 0 12px 8px;
+}
+
+.control-center .widget-dnd switch:checked {
+  background: @accent;
+}
+
+.widget-mpris {
+  background: @surface;
+  border: 1px solid @surface_alt;
+  border-radius: 8px;
+  color: @text;
+  margin: 0 12px 8px;
+  padding: 10px;
+}
+
+.widget-mpris .widget-mpris-title {
+  color: @text;
+  font-weight: 700;
+}
+
+.widget-mpris .widget-mpris-subtitle {
+  color: @muted;
+}

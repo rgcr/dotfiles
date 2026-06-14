@@ -1,0 +1,59 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 32,
+    "spacing": 6,
+    "modules-left": ["sway/workspaces", "sway/mode"],
+    "modules-center": ["sway/window"],
+    "modules-right": ["tray", "network", "pulseaudio", "backlight", "battery", "clock", "custom/swaync"],
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true
+    },
+    "sway/window": {
+        "max-length": 60
+    },
+    "custom/swaync": {
+        "format": "Notifications",
+        "tooltip": true,
+        "tooltip-format": "Notifications",
+        "on-click": "swaync-client -t",
+        "on-click-right": "swaync-client -d"
+    },
+    "tray": {
+        "spacing": 8
+    },
+    "network": {
+        "format-wifi": "{essid} {signalStrength}%",
+        "format-ethernet": "LAN {ipaddr}",
+        "format-disconnected": "Offline",
+        "tooltip-format": "{ifname}: {ipaddr}"
+    },
+    "pulseaudio": {
+        "format": "Vol {volume}%",
+        "format-muted": "Muted",
+        "on-click": "pavucontrol"
+    },
+    "backlight": {
+        "format": "Light {percent}%"
+    },
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "Bat {capacity}%",
+        "format-charging": "Bat {capacity}% +",
+        "format-plugged": "Bat {capacity}% AC"
+    },
+    "clock": {
+        "format": "{:%a %d %b  %H:%M}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "on-click": "zenity --calendar",
+        "calendar": {
+            "format": {
+                "today": "<span color='#89b4fa'>{}</span>"
+            }
+        }
+    }
+}

@@ -86,9 +86,3 @@ disk after 30 minutes so the session can survive a drained battery. This require
 working Linux hibernation support, including a swap partition or swap file
 configured as the kernel resume device.
 
-In Sway, the power button is handled by a `swaynag` confirmation prompt. Lid close
-still uses `suspend-then-hibernate` immediately.
-
-Reboot after deploying hibernate config so `systemd-logind` reads the new lid and
-power-key settings. Avoid restarting `systemd-logind` from inside the graphical
-session because it can disrupt the active desktop session.

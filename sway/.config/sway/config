@@ -10,7 +10,9 @@ set $menu wofi --show drun
 
 
 font pango:DejaVu Sans 10
-output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+# output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+exec_always ~/.local/bin/wallpaper set-random --quiet
+
 
 input type:touchpad {
     tap enabled
@@ -18,7 +20,7 @@ input type:touchpad {
     natural_scroll enabled
 }
 
-workspace_layout stacking
+workspace_layout tabbed
 
 # Session helpers.
 exec swaync
@@ -139,13 +141,13 @@ for_window [class="CopyQ"] floating enable, move position cursor, move down 30 p
 
 # Clipboard manager.
 exec copyq --start-server
-bindsym $mod+Mod1+v exec copyq toggle
+bindsym ctrl+Mod1+v exec copyq toggle
 
 # win + ctrl + space open nwg-drawer
 bindsym $mod+ctrl+space exec nwg-drawer
 
 # wallpaper
-exec ~/.local/bin/wallpaper update --quiet
+# exec ~/.local/bin/wallpaper update --quiet
 
 # Arch supplies environment propagation for portals in this directory.
 include /etc/sway/config.d/*

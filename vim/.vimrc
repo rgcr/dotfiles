@@ -5,7 +5,6 @@ let mapleader = ","
 let maplocalleader = "\<space>"
 
 
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Plugins
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -22,8 +21,10 @@ Plug 'tpope/vim-repeat'
 
 " UI
 ".......................................
-Plug 'flazz/vim-colorschemes'
+" Plug 'flazz/vim-colorschemes'
+Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 Plug 'guns/xterm-color-table.vim'
+" Plugin dim inactive windows
 ".......................................
 
 
@@ -111,6 +112,8 @@ Plug 'myhere/vim-nodejs-complete', {'for': 'javscript'}
 "" vuejs
 Plug 'posva/vim-vue'
 
+"" Github Copilot
+Plug 'github/copilot.vim'
 
 "" Asynchronous lint engine + LSP
 Plug 'dense-analysis/ale'
@@ -140,18 +143,10 @@ set nocompatible              " be improbed
 set enc=utf-8                 " default encoding
 set termencoding=utf8
 
-if exists('g:gui_oni')
-    set mouse=a
-    set noshowmode
-    set noruler
-    set laststatus=0
-    set noshowcmd
-else
-    set ruler                 " cursorline and column
-    set showmode              " message on status line to show current mode
-    set laststatus=2          " when last window has status lines
-    set showcmd               " show (partial) command in status line
-endif
+set ruler                 " cursorline and column
+set showmode              " message on status line to show current mode
+set laststatus=2          " when last window has status lines
+set showcmd               " show (partial) command in status line
 
 
 set novb
@@ -207,9 +202,13 @@ set wildignore+=*.dylib
 
 set tags+=.tags,./.git/tags
 
-set undodir=~/.config/undodir.vim
+let cacheUndoDir=expand("~/.cache/undodir.vm")
+let &undodir=cacheUndoDir
 set undofile
 
+if !isdirectory(cacheUndoDir)
+  call mkdir(cacheUndoDir, 'p', 0700)
+endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Colors and Colorschemes
@@ -226,23 +225,13 @@ set t_ut=
 set t_Co=256
 
 try
-    colorscheme Monokai
+  colorscheme catppuccin_mocha
     " highlight linenr
           " \ term=bold cterm=none ctermfg=darkgrey ctermbg=none
           " \ gui=none guifg=darkgrey guibg=none
 catch
     colorscheme elflord
 endtry
-
-" if !has("gui_running") && !has('nvim')
-    " set term=xterm
-    " set t_Co=256
-    " let &t_AB="\e[48;5;%dm"
-    " let &t_AF="\e[38;5;%dm"
-    " inoremap <Char-0x07F> <BS>
-    " nnoremap <Char-0x07F> <BS>
-" endif
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => FileType-specific configurations
@@ -399,30 +388,100 @@ command! JSONFormat %!python -m json.tool
 nnoremap Q @q
 
 " clipboard, copy & paste {{{
-" Windows
-if executable("clip.exe")
-    func! SelectedText()
-        normal gv"xy
-        let result = getreg("x")
-        return result
-    endfunc
-    """ copy visual selection to clipboard
-    vnoremap <C-c> :call system('clip.exe', SelectedText())<CR>
-    """ cut
-    noremap <C-x> :call system('clip.exe', SelectedText())<CR>gvx
-" Linux
-else
-    """ copy line to clipboard
-    map <C-c> <ESC>"+yy
-    """ copy in visual mode
-    vmap <C-c> "+yi
-    """ cut in visual mode
-    vmap <C-x> "+c
-    """ replace in visual mode
-    vmap <C-v> c<ESC>"+p
-    """ paste in insert mode
-    imap <C-v> <ESC>"+pa
+function! ClipboardText(type, lines) abort
+    let l:text = join(a:lines, "\n")
+    if a:type ==# 'V'
+        let l:text .= "\n"
+    endif
+    return l:text
+endfunction
+
+function! ClipExeAvailable() abort
+    return executable('clip.exe')
+endfunction
+
+function! ClipExeCopy(reg, type, lines) abort
+    call system('clip.exe', ClipboardText(a:type, a:lines))
+endfunction
+
+function! ClipExePaste(reg) abort
+    return ['', []]
+endfunction
+
+function! WlClipboardAvailable() abort
+    return executable('wl-copy') && executable('wl-paste')
+endfunction
+
+function! WlClipboardCopy(reg, type, lines) abort
+    let l:cmd = ['wl-copy']
+    if a:reg ==# '*'
+        call add(l:cmd, '--primary')
+    endif
+    let l:job = job_start(l:cmd, {
+        \ 'in_mode': 'raw',
+        \ 'out_io': 'null',
+        \ 'err_io': 'null',
+        \ 'stoponexit': ''
+        \ })
+    if job_status(l:job) ==# 'fail'
+        return
+    endif
+    let l:channel = job_getchannel(l:job)
+    call ch_sendraw(l:channel, ClipboardText(a:type, a:lines))
+    call ch_close_in(l:channel)
+endfunction
+
+function! WlClipboardPaste(reg) abort
+    let l:cmd = 'wl-paste --type ' . shellescape('text/plain;charset=utf-8')
+    if a:reg ==# '*'
+        let l:cmd .= ' --primary'
+    endif
+    return ['', systemlist(l:cmd)]
+endfunction
+
+if has('clipboard_provider') && executable('clip.exe')
+    let v:clipproviders['dotfiles_clip_exe'] = {
+        \ 'available': function('ClipExeAvailable'),
+        \ 'copy': {
+        \     '+': function('ClipExeCopy'),
+        \     '*': function('ClipExeCopy')
+        \ },
+        \ 'paste': {
+        \     '+': function('ClipExePaste'),
+        \     '*': function('ClipExePaste')
+        \ }
+        \ }
+    set clipmethod^=dotfiles_clip_exe
+elseif has('clipboard_provider') && executable('wl-copy') && executable('wl-paste')
+    let v:clipproviders['dotfiles_wl_clipboard'] = {
+        \ 'available': function('WlClipboardAvailable'),
+        \ 'copy': {
+        \     '+': function('WlClipboardCopy'),
+        \     '*': function('WlClipboardCopy')
+        \ },
+        \ 'paste': {
+        \     '+': function('WlClipboardPaste'),
+        \     '*': function('WlClipboardPaste')
+        \ }
+        \ }
+    set clipmethod^=dotfiles_wl_clipboard
 endif
+
+nnoremap y "+y
+xnoremap y "+y
+nnoremap Y "+Y
+xnoremap Y "+Y
+
+""" copy line to clipboard
+" map <C-c> <ESC>"+yy
+""" copy in visual mode
+" vmap <C-c> "+yi
+""" cut in visual mode
+" vmap <C-x> "+c
+""" replace in visual mode
+" vmap <C-v> c<ESC>"+p
+""" paste in insert mode
+" imap <C-v> <ESC>"+pa
 "}}}
 
 " Toggle paste mode
@@ -534,14 +593,14 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   set timeoutlen=500
   " register dictionaries
   try
-    call which_key#register(',', "g:which_key_map_leader")
-    call which_key#register('<space>', "g:which_key_map_localleader")
+    call which_key#register(',', g:which_key_map_leader)
+    call which_key#register('<space>', g:which_key_map_localleader)
   catch
     let g:Dummy = 1
   endtry
   " maps
   nnoremap <silent> <leader> :WhichKey ','<CR>
-  noremap <silent> <localleader> :WhichKey '<space>'<CR>
+  nnoremap <silent> <localleader> :WhichKey '<Space>'<CR>
   " hide windows swapping mappings
   let g:which_key_map_leader.1 = 'which_key_ignore'
   let g:which_key_map_leader.2 = 'which_key_ignore'
@@ -593,10 +652,8 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
 
 "ultisnips | vim-snippets {{{
   set rtp+=$HOME/.config/.snippets.vim/
-  let g:UltiSnipsExpandTrigger="<C-j>"
-  let g:UltiSnipsJumpForwardTrigger="<c-j>"
-  let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-  let g:UltiSnipsListSnippets = "<c-l>"
+  " ultisnip triggers with space + s
+  " let g:UltiSnipsExpandTrigger="<space>s"
   let g:ultisnips_python_style = "google"
   " " let g:UltiSnipssnippetdirectories = ['~/.vim/ultisnips', 'ultisnips']
 "}}}
@@ -692,7 +749,7 @@ nnoremap <leader>fw :execute "vimgrep ".expand("<cword>")." %"<cr>:copen<cr>
   " Linting keymaps
   nnoremap <localleader>al :ALELint<CR>
   nnoremap <localleader>af :ALEFix<CR>
-  nnoremap <leader>= :ALEFix<CR>
+  nnoremap <localleader>a= :ALEFix<CR>
 
   " LSP keymaps
   nnoremap <silent> gd :ALEGoToDefinition<CR>
@@ -733,6 +790,19 @@ endif
   let g:pymode_lint = 0
 "}}}
 
+""Copilot {{{
+" accepts the suggestion
+imap <silent><script><expr> <C-l> copilot#Accept("\<CR>")
+" cycles to the next suggestion
+imap <silent><expr> <C-j> copilot#Next()
+" cycles to the previous suggestion
+imap <silent><expr> <C-k> copilot#Previous()
+" dismisses the suggestion
+imap <silent><expr> <C-h> copilot#Dismiss()
+" triggers suggestion
+imap <silent><expr> <C-space> copilot#Suggest()
+""}}}
+
 
 "------------------------------------------------------------------------------
 " Colors & Statusline
@@ -742,133 +812,130 @@ hi Search cterm=NONE ctermfg=White ctermbg=DarkYellow
 " vertical split color
 hi VertSplit guibg=white guifg=white ctermbg=white ctermfg=white
 
- " XXX: lightline supports truecolors
+" XXX: lightline supports truecolors
 
- " STATUSLINE {{{{
- if !exists('g:gui_oni')
-
-   function! GitBranch()
-     if exists('*fugitive#head')
-       return fugitive#head()
-     endif
-     return ''
-     " XXX: too slow
-     " return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
-   endfunction
+" STATUSLINE {{{{
+function! GitBranch()
+  if exists('*fugitive#head')
+    return fugitive#head()
+  endif
+  return ''
+  " XXX: too slow
+  " return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
+endfunction
 
 
-   function! StatusLineGit()
-     let l:branchname = GitBranch()
-     return strlen(l:branchname) > 0?' '.l:branchname.' ':''
-   endfunction
+function! StatusLineGit()
+  let l:branchname = GitBranch()
+  return strlen(l:branchname) > 0?' '.l:branchname.' ':''
+endfunction
 
-   function! StatusLineMode()
-     let l:mode_map = {
-           \ "n": 'NORMAL',
-           \ "i": 'INSERT',
-           \ 'R': 'REPLACE',
-           \ 'v': 'VISUAL',
-           \ 'V': 'V-LINE',
-           \ "\<C-v>": 'V-BLOCK',
-           \ 'c': 'COMMAND',
-           \ 's': 'SELECT',
-           \ 'S': 'S-LINE',
-           \ "\<C-s>": 'S-BLOCK',
-           \ 't': 'TERMINAL'
-           \ }
-     return get(l:mode_map, mode(), '')
-   endfunction
+function! StatusLineMode()
+  let l:mode_map = {
+        \ "n": 'NORMAL',
+        \ "i": 'INSERT',
+        \ 'R': 'REPLACE',
+        \ 'v': 'VISUAL',
+        \ 'V': 'V-LINE',
+        \ "\<C-v>": 'V-BLOCK',
+        \ 'c': 'COMMAND',
+        \ 's': 'SELECT',
+        \ 'S': 'S-LINE',
+        \ "\<C-s>": 'S-BLOCK',
+        \ 't': 'TERMINAL'
+        \ }
+  return get(l:mode_map, mode(), '')
+endfunction
 
-   function! StatusLineLsp()
-     if !exists('*ale#linter#Get')
-       return ''
-     endif
-     let l:linters = ale#linter#Get(&filetype)
-     if empty(l:linters)
-       return ''
-     endif
-     " Get LSP-capable linters first
-     let l:lsp_names = []
-     let l:other_names = []
-     for l:linter in l:linters
-       if get(l:linter, 'lsp', '') !=# ''
-         call add(l:lsp_names, l:linter.name)
-       else
-         call add(l:other_names, l:linter.name)
-       endif
-     endfor
-     " Prefer LSP, fallback to first linter
-     if !empty(l:lsp_names)
-       return ' ' . l:lsp_names[0] . ' '
-     elseif !empty(l:other_names)
-       return ' ' . l:other_names[0] . ' '
-     endif
-     return ''
-   endfunction
-
-
-   hi StMode
-         \ term=bold cterm=none ctermbg=7 ctermfg=255
-         \ guibg=#808080 guifg=#eeeeee
-   hi StPasteMode
-         \ term=bold cterm=none ctermbg=202 ctermfg=255
-         \ guibg=#ff5f00 guifg=#eeeeee
-   hi StBranch
-         \ term=bold cterm=none ctermbg=107 ctermfg=255
-         \ guibg=#87af5f guifg=#eeeeee
-   hi StFilename
-         \ term=bold cterm=none ctermbg=109 ctermfg=0
-         \ guibg=#87afaf guifg=#000000
-   hi StSeparator
-         \ term=bold cterm=none ctermbg=236 ctermfg=255
-         \ guibg=#303030 guifg=#eeeeee
-   hi stposition
-         \ term=bold cterm=none ctermbg=253 ctermfg=0
-         \ guibg=#dadada guifg=#000000
-   hi StLsp
-         \ term=bold cterm=none ctermbg=61 ctermfg=255
-         \ guibg=#5f5faf guifg=#eeeeee
+function! StatusLineLsp()
+  if !exists('*ale#linter#Get')
+    return ''
+  endif
+  let l:linters = ale#linter#Get(&filetype)
+  if empty(l:linters)
+    return ''
+  endif
+  " Get LSP-capable linters first
+  let l:lsp_names = []
+  let l:other_names = []
+  for l:linter in l:linters
+    if get(l:linter, 'lsp', '') !=# ''
+      call add(l:lsp_names, l:linter.name)
+    else
+      call add(l:other_names, l:linter.name)
+    endif
+  endfor
+  " Prefer LSP, fallback to first linter
+  if !empty(l:lsp_names)
+    return ' ' . l:lsp_names[0] . ' '
+  elseif !empty(l:other_names)
+    return ' ' . l:other_names[0] . ' '
+  endif
+  return ''
+endfunction
 
 
-   set statusline=
-   " paste mode
-   set statusline+=%#StPasteMode#
-   set statusline+=%{&paste?\"\ \ paste\ \":\"\"}
-   " vim mode
-   " set statusline+=%#pmenusel#
-   set statusline+=%#StMode#
-   set statusline+=\ %{StatusLineMode()}\  " .
-   " git
-   set statusline+=%#StBranch#
-   set statusline+=%.90{StatusLineGit()}
-   " filename
-   set statusline+=%#StFilename#
-   set statusline+=\ %f\ %m
-   " LSP server
-   set statusline+=%#StLsp#
-   set statusline+=%{StatusLineLsp()}
-   " blank space
-   set statusline+=%#StSeparator#
-   set statusline+=\ %=
+hi StMode
+      \ term=bold cterm=none ctermbg=7 ctermfg=255
+      \ guibg=#808080 guifg=#eeeeee
+hi StPasteMode
+      \ term=bold cterm=none ctermbg=202 ctermfg=255
+      \ guibg=#ff5f00 guifg=#eeeeee
+hi StBranch
+      \ term=bold cterm=none ctermbg=107 ctermfg=255
+      \ guibg=#87af5f guifg=#eeeeee
+hi StFilename
+      \ term=bold cterm=none ctermbg=109 ctermfg=0
+      \ guibg=#87afaf guifg=#000000
+hi StSeparator
+      \ term=bold cterm=none ctermbg=236 ctermfg=255
+      \ guibg=#303030 guifg=#eeeeee
+hi stposition
+      \ term=bold cterm=none ctermbg=253 ctermfg=0
+      \ guibg=#dadada guifg=#000000
+hi StLsp
+      \ term=bold cterm=none ctermbg=61 ctermfg=255
+      \ guibg=#5f5faf guifg=#eeeeee
 
 
-   " file encoding and file format
-   set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \| " .
-   set statusline+=\ %{&fileformat}
-   " FileType
-   set statusline+=\ %y
-   " set statusline+=%#position#
-   " percentage
-   set statusline+=\ \[%p%%\]  " .
-   " set statusline+=%#pmenusel#
-   " line and column
-   set statusline+=\ %l:%c\  " .
-   " end of statusline
-   set statusline+=%0*
+set statusline=
+" paste mode
+set statusline+=%#StPasteMode#
+set statusline+=%{&paste?\"\ \ paste\ \":\"\"}
+" vim mode
+" set statusline+=%#pmenusel#
+set statusline+=%#StMode#
+set statusline+=\ %{StatusLineMode()}\  " .
+" git
+set statusline+=%#StBranch#
+set statusline+=%.90{StatusLineGit()}
+" filename
+set statusline+=%#StFilename#
+set statusline+=\ %f\ %m
+" LSP server
+set statusline+=%#StLsp#
+set statusline+=%{StatusLineLsp()}
+" blank space
+set statusline+=%#StSeparator#
+set statusline+=\ %=
 
-   " syntax clear statuslinenc
-   " hi! statuslinenc term=none cterm=none ctermbg=white ctermfg=white
- endif
+
+" file encoding and file format
+set statusline+=\ %{&fileencoding?&fileencoding:&encoding}\ \| " .
+set statusline+=\ %{&fileformat}
+" FileType
+set statusline+=\ %y
+" set statusline+=%#position#
+" percentage
+set statusline+=\ \[%p%%\]  " .
+" set statusline+=%#pmenusel#
+" line and column
+set statusline+=\ %l:%c\  " .
+" end of statusline
+set statusline+=%0*
+
+" syntax clear statuslinenc
+" hi! statuslinenc term=none cterm=none ctermbg=white ctermfg=white
  " }}}
  "-----------------------------------------------------------------------------
 

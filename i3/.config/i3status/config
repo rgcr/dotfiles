@@ -16,22 +16,23 @@ order += "volume master"
 # order += "cpu_usage"
 # order += "disk /"
 # order += "disk /home"
-order += "wireless wlp2s0"
-order += "ethernet eth0"
+order += "wireless wlan0"
+#order += "ethernet eth0"
 order += "battery 0"
 # order += "load"
 order += "cpu_usage"
-order += "tztime local"
+# order += "tztime local"
 
 volume master {
-    format = "%volume ♪ "
-    format_muted = " "
+# insert volume icon
+    format = " %volume"
+    format_muted = " %volume"
     device = "default"
     mixer = "Master"
     mixer_idx = 0
 }
 
-wireless wlp2s0 {
+wireless wlan0 {
     format_up = "%quality  %essid %ip"
     format_down = ""
 }

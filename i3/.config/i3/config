@@ -13,8 +13,9 @@ hide_edge_borders none
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:monospace 8
+#font pango:monospace 8
 # font xft:URWGothic-Book 11
+font pango:FiraCode Nerd Font Mono, Symbols Nerd Font, FontAwesome, Material Icons 10
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -81,6 +82,7 @@ bindsym $mod+f fullscreen toggle
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
+bindsym $mod+t layout tabbed
 bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
@@ -250,6 +252,7 @@ mode "$mode_gaps_inner" {
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
+    font pango:FiraCode Nerd Font Mono, Symbols Nerd Font, FontAwesome, Material Icons 12
     status_command i3status
     position bottom
 
@@ -268,41 +271,41 @@ bar {
 }
 
 # multimedia keys {{{
-bindsym XF86AudioRaiseVolume exec --no-startup-id amixer set Master 4%+ # && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)"
-bindsym XF86AudioLowerVolume exec --no-startup-id amixer set Master 3%- # && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)"
-bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "(on|off)" | tail -1)" --icon=audio-volume-medium
+# bindsym XF86AudioRaiseVolume exec --no-startup-id amixer set Master 4%+ # && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)"
+# bindsym XF86AudioLowerVolume exec --no-startup-id amixer set Master 3%- # && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "[0-9]+(?=%)" | tail -1)"
+# bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle && notify-send -t 800 "Volume: $(amixer get Master | grep -Po "(on|off)" | tail -1)" --icon=audio-volume-medium
 # bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 15
 # bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 7
 # }}}
 
 # sleep
-bindsym XF86Sleep exec --no-startup-id systemctl suspend
+# bindsym XF86Sleep exec --no-startup-id systemctl suspend
 
 # {{{
 # Screenshots based on the "Print" key. Requires the "scrot" tool.
 # With $mod:  Interactively select window or rectangle.
 # With Shift: JPEG instead of PNG.
 # With Ctrl:  Sleep 5 seconds before doing the screenshot.
-bindsym           Print                    exec --no-startup-id            scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot taken"
-bindsym           Shift+Print              exec --no-startup-id            scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot taken"
-bindsym --release $mod+Print               exec --no-startup-id            scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot of window taken"
-bindsym --release $mod+Shift+Print         exec --no-startup-id            scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot of window taken"
-bindsym           Control+Print            exec --no-startup-id sleep 5 && scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot in 5s"
-bindsym           Control+Shift+Print      exec --no-startup-id sleep 5 && scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot in 5s"
-bindsym --release $mod+Control+Print       exec --no-startup-id sleep 5 && scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot of window in 5s"
-bindsym --release $mod+Control+Shift+Print exec --no-startup-id sleep 5 && scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot of window in 5s"
+#bindsym           Print                    exec --no-startup-id            scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot taken"
+#bindsym           Shift+Print              exec --no-startup-id            scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot taken"
+#bindsym --release $mod+Print               exec --no-startup-id            scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot of window taken"
+#bindsym --release $mod+Shift+Print         exec --no-startup-id            scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot of window taken"
+#bindsym           Control+Print            exec --no-startup-id sleep 5 && scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot in 5s"
+#bindsym           Control+Shift+Print      exec --no-startup-id sleep 5 && scrot    "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot in 5s"
+#bindsym --release $mod+Control+Print       exec --no-startup-id sleep 5 && scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.png" && notify-send "PNG screenshot of window in 5s"
+#bindsym --release $mod+Control+Shift+Print exec --no-startup-id sleep 5 && scrot -s "$HOME/Pictures/screenshot_%Y-%m-$d_%H-%M-%S_%z.jpg" && notify-send "JPG screenshot of window in 5s"
 # }}}
 
 # spotify {{
-bindsym XF86AudioNext exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
-bindsym XF86AudioPrev exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
-bindsym XF86AudioStop exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop"
-bindsym XF86AudioPlay exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
+# bindsym XF86AudioNext exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next"
+# bindsym XF86AudioPrev exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous"
+# bindsym XF86AudioStop exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Stop"
+# bindsym XF86AudioPlay exec --no-startup-id "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause"
 # }}}
 
 
 # lock
-bindsym $mod+Escape exec dm-tool lock
+#bindsym $mod+Escape exec dm-tool lock
 
 # j4 dmenu
 # bindsym $mod+space exec j4-dmenu-desktop

@@ -1,4 +1,0 @@
-/* rofi.width: 60 */
-/* rofi.columns: 2 */
-rofi.lines: 10
-rofi.theme: slate

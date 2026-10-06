@@ -1,0 +1,14 @@
+[[mgr.prepend_keymap]]
+on = "q"
+run = "quit"
+desc = "Quit"
+
+[[mgr.prepend_keymap]]
+on = "h"
+run = "leave"
+desc = "Go up"
+
+[[mgr.prepend_keymap]]
+on = "l"
+run = "enter"
+desc = "Enter"

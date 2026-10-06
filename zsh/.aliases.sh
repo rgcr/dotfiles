@@ -96,6 +96,7 @@ alias yr='fyay_rm'
 
 # MacOS
 alias b='brew'
+alias brewq='brew list | grep -iE '
 
 # emacs
 alias em='emacs -nw'

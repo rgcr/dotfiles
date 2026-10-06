@@ -301,11 +301,68 @@ autocmd("FileType", {
   end,
 })
 
--- augroup("OilGroup", { clear = true })
--- autocmd("FileType", {
---   group = "OilGroup",
---   pattern = "oil",
---   callback = function()
---     vim.keymap.set("n", "<Esc>", "<cmd>q<cr>", { buffer = true, silent = true, desc = "Quit oil" })
---   end,
--- })
+augroup("OilGroup", { clear = true })
+vim.api.nvim_set_hl(0, "OilWinbar", { fg = "#1d1f21", bg = "#56b6c2", bold = true })
+autocmd("FileType", {
+  group = "OilGroup",
+  pattern = "oil",
+  callback = function()
+    vim.keymap.set("n", "Q", "<cmd>qa<cr>", { buffer = true, silent = true, desc = "Quit all" })
+    vim.opt_local.winbar = "%#OilWinbar# %{v:lua.require'oil'.get_current_dir()}%="
+    vim.keymap.set("n", "<BS>", function() require("oil").open("..") end, { buffer = true, silent = true, desc = "Parent dir" })
+    vim.keymap.set("n", "<Space>", function()
+      local entry = require("oil").get_cursor_entry()
+      local dir = require("oil").get_current_dir()
+      if not (entry and dir) then return end
+      local path = dir .. entry.name
+      local cmd = vim.fn.has("mac") == 1
+        and { "qlmanage", "-p", path }
+        or { "xdg-open", path }
+      vim.fn.jobstart(cmd, { detach = true })
+    end, { buffer = true, silent = true, desc = "Preview/open file" })
+    -- :cd /path  ->  open that path in oil
+    vim.api.nvim_buf_create_user_command(0, "Cd", function(o)
+      local arg = o.args
+      if not vim.startswith(arg, "/") and not vim.startswith(arg, "~") then
+        arg = require("oil").get_current_dir() .. arg
+      end
+      require("oil").open(arg)
+    end, {
+      nargs = 1,
+      complete = function(arglead)
+        local base = require("oil").get_current_dir()
+        local prefix = arglead:match("^(.*/)") or ""
+        local search
+        if arglead:sub(1,1) == "/" or arglead:sub(1,1) == "~" then
+          search = vim.fn.expand(arglead)
+        else
+          search = base .. arglead
+        end
+        local dir = vim.fn.fnamemodify(search, ":h")
+        local tail = vim.fn.fnamemodify(search, ":t")
+        local out = {}
+        for name, t in vim.fs.dir(dir) do
+          if t == "directory" and (tail == "" or vim.startswith(name, tail)) then
+            table.insert(out, prefix .. name .. "/")
+          end
+        end
+        return out
+      end,
+    })
+    vim.cmd("cnoreabbrev <buffer> cd Cd")
+
+    vim.keymap.set("n", "<Tab>", function() require("oil.actions").select_vsplit.callback() end, { buffer = true, desc = "Open in vsplit" })
+  end,
+})
+
+-- Archive preview (read-only listing) for 7z/rar/xz
+autocmd("BufReadCmd", {
+  pattern = {"*.7z", "*.rar", "*.xz"},
+  callback = function()
+    local exe = vim.fn.executable("7zz") == 1 and "7zz" or "7z"
+    vim.cmd("read !" .. exe .. " l " .. vim.fn.shellescape(vim.fn.expand("%")))
+    vim.bo.modified = false
+    vim.bo.readonly = true
+    vim.bo.modifiable = false
+  end,
+})

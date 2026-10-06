@@ -167,20 +167,33 @@ lazy.setup({
     -- File explorer
     {
       'stevearc/oil.nvim',
-      cmd = { 'Oil' },
+      lazy = false,
       dependencies = {
         'nvim-tree/nvim-web-devicons',
       },
       opts = {
         default_file_explorer = true,
+        delete_to_trash = true,
+        -- columns = { "size", "mtime", "icon" },
+        win_options = {
+          signcolumn = "yes:2",
+        },
         view_options = {
-          show_hidden = true,
+          show_hidden = false,
         },
       },
       config = function(_, opts)
         require('oil').setup(opts)
       end,
     },
+
+    -- Git status column for oil
+    {
+      'refractalize/oil-git-status.nvim',
+      dependencies = { 'stevearc/oil.nvim' },
+      config = true,
+    },
+
 
     -- Fuzzy finder
     {

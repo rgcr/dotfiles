@@ -48,6 +48,12 @@ hs.hotkey.bind(cmd_shift, "q", function()
     end
 end)
 
+-- Close focused window | Cmd + Q (overrides macOS default Quit)
+hs.hotkey.bind({"cmd"}, "q", function()
+    local win = hs.window.focusedWindow()
+    if win then win:close() end
+end)
+
 -- Focus on spceficic apps
 local app_bindings = {
     ["return"] = "iTerm",
@@ -79,33 +85,33 @@ for key, appName in pairs(app_bindings) do
   end)
 end
 
--- Window management
-local window_management_bindings = {
-   left_half   = { {"ctrl", "alt"}, "Left" },
-   right_half  = { {"ctrl", "alt"}, "Right" },
-   top_half    = { {"ctrl", "alt"}, "Up" },
-   bottom_half = { {"ctrl", "alt"}, "Down" },
-   top_left    = { {"ctrl", "alt"}, "1" },
-   top_right   = { {"ctrl", "alt"}, "2" },
-   bottom_left = { {"ctrl", "alt"}, "3" },
-   bottom_right= { {"ctrl", "alt"}, "4" },
+-- -- Window management
+-- local window_management_bindings = {
+--    left_half   = { {"ctrl", "alt"}, "Left" },
+--    right_half  = { {"ctrl", "alt"}, "Right" },
+--    top_half    = { {"ctrl", "alt"}, "Up" },
+--    bottom_half = { {"ctrl", "alt"}, "Down" },
+--    top_left    = { {"ctrl", "alt"}, "1" },
+--    top_right   = { {"ctrl", "alt"}, "2" },
+--    bottom_left = { {"ctrl", "alt"}, "3" },
+--    bottom_right= { {"ctrl", "alt"}, "4" },
+--
+--    third_left  = { {"ctrl", "alt", "shift"}, "h" },
+--    third_right = { {"ctrl", "alt", "shift"}, "l" },
+--    third_up    = { {"ctrl", "alt", "shift"}, "k" },
+--    third_down  = { {"ctrl", "alt", "shift"}, "j" },
+--
+--    max_toggle  = { {"ctrl", "alt"}, "f" },
+--    max         = { {"ctrl", "alt", "shift"}, "Up" },
+--    undo        = { {"ctrl", "alt"}, "z" },
+--    center      = { {"ctrl", "alt"}, "c" },
+--    larger      = { {"ctrl", "alt", "shift"}, "Right" },
+--    smaller     = { {"ctrl", "alt", "shift"}, "Left" },
+-- }
 
-   third_left  = { {"ctrl", "alt", "shift"}, "h" },
-   third_right = { {"ctrl", "alt", "shift"}, "l" },
-   third_up    = { {"ctrl", "alt", "shift"}, "k" },
-   third_down  = { {"ctrl", "alt", "shift"}, "j" },
-
-   max_toggle  = { {"ctrl", "alt"}, "f" },
-   max         = { {"ctrl", "alt", "shift"}, "Up" },
-   undo        = { {"ctrl", "alt"}, "z" },
-   center      = { {"ctrl", "alt"}, "c" },
-   larger      = { {"ctrl", "alt", "shift"}, "Right" },
-   smaller     = { {"ctrl", "alt", "shift"}, "Left" },
-}
-
-Install:andUse("WindowHalfsAndThirds", {
-    hotkeys = window_management_bindings,
-})
+-- Install:andUse("WindowHalfsAndThirds", {
+--     hotkeys = window_management_bindings,
+-- })
 
 
 -- move window to next screen

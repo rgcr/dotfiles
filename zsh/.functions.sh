@@ -376,12 +376,24 @@ gitdiff() {
 #######################################
 nn() {
     local file
-    if [ -z "$1" ]; then
-        file=$(fzf --preview "bat --style=numbers --color=always {}")
-    else
-        file=$(fzf --preview "bat --style=numbers --color=always {}" --query "$*")
-    fi
-    [[ -n "$file" ]] && nvim "$file"
+    local _noignore
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -a|--all)
+                _noignore="true"
+                shift ;;
+            *)
+                break ;;
+        esac
+    done
+
+    FZF_DEFAULT_COMMAND="rg --files --hidden -L -g '!.git'"
+    [[ -n "$_noignore" ]] && FZF_DEFAULT_COMMAND+=" --no-ignore"
+    fzf --preview "bat --style=numbers --color=always {}" \
+        --height=40% --layout=reverse --border \
+        --prompt="Open file > "  \
+        --query "$*" | xargs -r nvim
 }
 
 # fzf nvim :oldfiles (recently opened files)
@@ -526,9 +538,11 @@ scp-socks5(){
 
 oil() {
     local _left="${1:-.}"
-    local _right="${2:-..}"
+    local _right="${2}"
 
-    nvim \
-        -c "topleft vsplit" \
-        -c "Oil ${_left}" -c "wincmd l" -c "Oil ${_right}"
+    if [ -n "$_right" ]; then
+        nvim -c "Oil $_left" -c "botright vsplit" -c "Oil $_right"
+    else
+        nvim -c "Oil $_left"
+    fi
 }

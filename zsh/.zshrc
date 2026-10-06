@@ -114,6 +114,7 @@ setopt share_history
 [ -d "${HOME}/.local/bin" ] && path push ${HOME}/.local/bin
 [ -d "${HOME}/.yarn/bin" ] && path add ${HOME}/.yarn/bin
 [ -d "${HOME}/.cargo/bin" ] && path add ${HOME}/.cargo/bin
+[ -d "${GOPATH}/bin" ] && path add "${GOPATH}/bin"
 
 # local config
 [ -e "${HOME}/.profile.local" ] && source "${HOME}/.profile.local"

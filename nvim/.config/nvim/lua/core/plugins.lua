@@ -99,6 +99,19 @@ lazy.setup({
     {
       'HiPhish/rainbow-delimiters.nvim',
       event = { 'BufReadPost', 'BufNewFile' },
+      init = function()
+        vim.g.rainbow_delimiters = {
+          condition = function(bufnr)
+            local lang = vim.treesitter.language.get_lang(vim.bo[bufnr].filetype)
+            if not lang then
+              return false
+            end
+
+            local ok, parser = pcall(vim.treesitter.get_parser, bufnr, lang)
+            return ok and parser ~= nil
+          end,
+        }
+      end,
     },
 
     -- Notifications
@@ -330,24 +343,32 @@ lazy.setup({
     -- Syntax highlighting
     {
       'nvim-treesitter/nvim-treesitter',
-      event = { 'BufReadPost', 'BufNewFile' },
+      lazy = false,
+      branch = 'main',
+      cmd = { 'TSInstall', 'TSUpdate', 'TSUninstall', 'TSInstallFromGrammar', 'TSLog' },
       build = ':TSUpdate',
       config = function()
-        require'nvim-treesitter.configs'.setup {
-          ensure_installed = {
-            'lua', 'vim', 'vimdoc', -- Essential for nvim config
-          },
-          auto_install = true, -- Install parsers when opening files
-          sync_install = false,
-          highlight = { enable = true },
-          indent = { enable = true },
-        }
+        local ok, treesitter = pcall(require, 'nvim-treesitter')
+        if not ok then
+          return
+        end
+
+        if treesitter.setup then
+          treesitter.setup {
+            install_dir = vim.fn.stdpath('data') .. '/site',
+          }
+        end
+
+        if treesitter.install then
+          treesitter.install({ 'lua', 'vim', 'vimdoc' }):wait(300000)
+        end
       end
     },
 
     -- Markdown preview
     {
       'MeanderingProgrammer/render-markdown.nvim',
+      enabled = true,
       event = 'VeryLazy',
       ft = { "markdown", "codecompanion" },
     },

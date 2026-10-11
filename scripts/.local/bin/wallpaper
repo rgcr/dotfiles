@@ -107,10 +107,10 @@ download_wallpaper() {
 
   curl -fsSL "$image_url" -o "$target"
 
-  find "$wallpaper_dir" -maxdepth 1 -type f -name 'unsplash-*.jpg' -printf '%T@ %p\n' \
-    | sort -rn \
-    | awk -v keep="$keep" 'NR > keep { $1 = ""; sub(/^ /, ""); print }' \
-    | xargs -r rm -f
+  # find "$wallpaper_dir" -maxdepth 1 -type f -name 'unsplash-*.jpg' -printf '%T@ %p\n' \
+  #   | sort -rn \
+  #   | awk -v keep="$keep" 'NR > keep { $1 = ""; sub(/^ /, ""); print }' \
+  #   | xargs -r rm -f
 
   downloaded_wallpaper="$target"
   $quiet || printf 'Downloaded -> %s\n' "$target"

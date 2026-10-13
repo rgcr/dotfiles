@@ -9,6 +9,11 @@ compdef _git gd=git-diff
 compdef _git ga=git-add
 # }}} -- end git
 
+# herdr {{{
+autoload -Uz _herdr
+compdef _herdr h=herdr
+# }}} -- end herdr
+
 # tmux {{{
 
 ## stolen from _tmux completion function

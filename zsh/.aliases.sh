@@ -120,3 +120,6 @@ alias zz='zi'
 
 # ripgrep
 alias rg-all='rg --hidden --no-ignore'
+
+# herdr
+alias h='herdr'

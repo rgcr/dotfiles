@@ -1,0 +1,37 @@
+onboarding = false
+
+[ui]
+prompt_new_tab_name = false
+
+[ui.sound]
+enabled = true
+
+[ui.toast]
+delivery = "system"
+
+[theme]
+name = "dracula"
+auto_switch = false
+
+[theme.custom]
+accent = "#d6b3ff"
+overlay0 = "#72788a"
+surface_dim = "#9d7cd8"
+
+[keys]
+prefix = "ctrl+a"
+detach = "prefix+d"
+rename_tab = "prefix+comma"
+rename_workspace = "prefix+$"
+next_tab = "prefix+enter"
+previous_tab = "prefix+backspace"
+next_workspace = "prefix+tab"
+previous_workspace = "prefix+shift+tab"
+cycle_pane_next = ""
+cycle_pane_previous = ""
+split_vertical = "prefix+|"
+split_horizontal = "prefix+minus"
+focus_pane_left = ["prefix+h", "prefix+left"]
+focus_pane_down = ["prefix+j", "prefix+down"]
+focus_pane_up = ["prefix+k", "prefix+up"]
+focus_pane_right = ["prefix+l", "prefix+right"]

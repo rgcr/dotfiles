@@ -3,6 +3,16 @@ onboarding = false
 [ui]
 prompt_new_tab_name = false
 
+[ui.sidebar.spaces]
+row_gap = 0
+rows = [
+  ["state_icon", { token = "workspace", fg = "#d6b3ff", bold = true }],
+  ["branch", "git_status"],
+]
+
+[ui.sidebar.agents]
+row_gap = 1
+
 [ui.sound]
 enabled = true
 
@@ -21,6 +31,8 @@ surface_dim = "#9d7cd8"
 [keys]
 prefix = "ctrl+a"
 detach = "prefix+d"
+close_workspace = "prefix+shift+x"
+close_tab = ""
 rename_tab = "prefix+comma"
 rename_workspace = "prefix+$"
 next_tab = "prefix+enter"

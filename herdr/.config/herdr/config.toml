@@ -11,7 +11,11 @@ rows = [
 ]
 
 [ui.sidebar.agents]
-row_gap = 1
+row_gap = 0
+rows = [
+  ["state_icon", "machine", { token = "workspace", fg = "#d6b3ff", bold = true }, "tab"],
+  ["agent"],
+]
 
 [ui.sound]
 enabled = true

@@ -33,6 +33,7 @@ overlay0 = "#72788a"
 surface_dim = "#9d7cd8"
 
 [keys]
+goto = ["prefix+g", "prefix+space"]
 prefix = "ctrl+a"
 edit_scrollback = "prefix+shift+e"
 detach = "prefix+d"

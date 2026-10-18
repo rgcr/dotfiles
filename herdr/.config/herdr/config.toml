@@ -6,14 +6,14 @@ prompt_new_tab_name = false
 [ui.sidebar.spaces]
 row_gap = 0
 rows = [
-  ["state_icon", { token = "workspace", fg = "#d6b3ff", bold = true }],
+  ["state_icon", "workspace"],
   ["branch", "git_status"],
 ]
 
 [ui.sidebar.agents]
 row_gap = 0
 rows = [
-  ["state_icon", "machine", { token = "workspace", fg = "#d6b3ff", bold = true }, "tab"],
+  ["state_icon", "machine", "workspace", "tab"],
   ["agent"],
 ]
 
@@ -34,6 +34,7 @@ surface_dim = "#9d7cd8"
 
 [keys]
 prefix = "ctrl+a"
+edit_scrollback = "prefix+shift+e"
 detach = "prefix+d"
 close_workspace = "prefix+shift+x"
 close_tab = ""
@@ -51,3 +52,8 @@ focus_pane_left = ["prefix+h", "prefix+left"]
 focus_pane_down = ["prefix+j", "prefix+down"]
 focus_pane_up = ["prefix+k", "prefix+up"]
 focus_pane_right = ["prefix+l", "prefix+right"]
+
+[[keys.command]]
+key = "prefix+e"
+type = "shell"
+command = "herdr plugin action invoke herdr-sidebar.open-sidebar"

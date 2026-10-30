@@ -1,7 +1,10 @@
 onboarding = false
 
 [ui]
+status_indicators = "symbols"
 prompt_new_tab_name = false
+tab_bar_position = "top"
+hide_tab_bar_when_single_tab = false
 
 [ui.sidebar.spaces]
 row_gap = 0
@@ -13,8 +16,8 @@ rows = [
 [ui.sidebar.agents]
 row_gap = 0
 rows = [
-  ["state_icon", "machine", "workspace", "tab"],
-  ["agent"],
+  ["state_icon", "workspace", "tab"],
+  ["agent", "pane", "state_text"],
 ]
 
 [ui.sound]
@@ -28,6 +31,8 @@ name = "dracula"
 auto_switch = false
 
 [theme.custom]
+active_row_bg = "#343746"
+selection_bg = "#48405e"
 accent = "#d6b3ff"
 overlay0 = "#72788a"
 surface_dim = "#9d7cd8"
@@ -43,6 +48,8 @@ rename_tab = "prefix+comma"
 rename_workspace = "prefix+$"
 next_tab = "prefix+enter"
 previous_tab = "prefix+backspace"
+move_tab_previous = "prefix+<"
+move_tab_next = "prefix+>"
 next_workspace = "prefix+tab"
 previous_workspace = "prefix+shift+tab"
 cycle_pane_next = ""

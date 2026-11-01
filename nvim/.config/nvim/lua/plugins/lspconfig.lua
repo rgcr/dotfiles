@@ -100,7 +100,7 @@ Bash          -> bashls
 Python        -> pyright, pylsp
 C-C++         -> clangd
 CSS           -> cssls
-JavaScript/TypeScript -> ts_ls
+JavaScript/TypeScript -> tsc (TypeScript 7+)
 PHP           -> phpactor
 Go            -> gopls
 --]]
@@ -134,25 +134,7 @@ vim.lsp.config('pyright', {
   },
 })
 
-vim.lsp.config('ts_ls', {
-  filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
-  settings = {
-    typescript = {
-      format = {
-        indentSize = 4,
-        tabSize = 4,
-        convertTabsToSpaces = true,
-      }
-    },
-    javascript = {
-      format = {
-        indentSize = 4,
-        tabSize = 4,
-        convertTabsToSpaces = true,
-      }
-    }
-  },
-})
+-- Native TypeScript 7+ LSP uses nvim-lspconfig's tsc defaults.
 
 -- Enable all language servers
 vim.lsp.enable({
@@ -161,7 +143,7 @@ vim.lsp.enable({
   'cssls',
   'pyright',
   'pylsp',
-  'ts_ls',
+  'tsc',
   'phpactor',
   'gopls',
 })

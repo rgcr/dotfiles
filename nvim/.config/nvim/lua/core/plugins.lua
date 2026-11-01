@@ -556,6 +556,7 @@ lazy.setup({
     -- Neorg
     {
       'nvim-neorg/neorg',
+      enabled = false,
       ft = { 'norg' },
       version = "*",
       dependencies = { 'nvim-lua/plenary.nvim' },

@@ -112,7 +112,7 @@ alias gce='gh copilot explain'
 alias gcs='gh copilot suggest'
 
 # funny alias for claude
-alias claude='claude --verbose'
+# alias claude='claude --verbose'
 alias claudio='claude'
 
 # zoxide fzf query

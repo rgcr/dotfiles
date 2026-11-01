@@ -35,7 +35,9 @@ bindkey '\e[F'  end-of-line
 # source ~/.zsh/thzshrcemes/rho.zsh-theme
 
 if [ "$(uname)" = "Darwin" ]; then
-    [ -e "${HOME}/.local/bin/antidote.sh" ] && source "${HOME}/.local/bin/antidote.sh"
+    # Homebrew ships a functions/ dir; autoload (sourcing antidote.zsh runs `antidote "$@"` and errors)
+    fpath=(/opt/homebrew/opt/antidote/share/antidote/functions $fpath)
+    autoload -Uz antidote
 else
     [ -e "/usr/share/zsh-antidote/antidote.zsh" ] && source "/usr/share/zsh-antidote/antidote.zsh"
 fi

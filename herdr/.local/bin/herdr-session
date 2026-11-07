@@ -1,0 +1,357 @@
+#!/usr/bin/env python3
+"""Manual Herdr Core snapshots. Stores references, never conversation contents."""
+import argparse
+import copy
+import datetime as dt
+import fcntl
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+import uuid
+
+HOME = Path.home()
+STATE = Path(os.environ.get('HERDR_SESSION_DIR', HOME / '.local/state/herdr-app-sessions'))
+UUID = re.compile(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$')
+SHELLS = {'zsh', 'bash', 'fish', 'sh', 'nu', 'dash'}
+
+class SessionError(Exception): pass
+
+def command(args):
+    p = subprocess.run(args, capture_output=True, text=True, timeout=20)
+    if p.returncode: raise SessionError(p.stderr.strip() or 'Command failed: ' + args[0])
+    return p.stdout
+
+def rpc(method, params=None):
+    request = {'jsonrpc': '2.0', 'id': 1, 'method': method, 'params': params or {}}
+    p = subprocess.run([os.environ.get('HERDR_CORE_BIN', 'herdr-core'), 'connect'],
+                       input=json.dumps(request)+'\n', capture_output=True, text=True, timeout=30)
+    for line in p.stdout.splitlines():
+        try: response = json.loads(line)
+        except ValueError: continue
+        if response.get('id') == 1:
+            if 'error' in response: raise SessionError(str(response['error']))
+            return response.get('result')
+    raise SessionError(p.stderr.strip() or 'Core did not answer ' + method)
+
+def atomic_json(path, data):
+    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    fd, temp = tempfile.mkstemp(dir=path.parent, prefix='.saving-')
+    try:
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, 'w') as f:
+            json.dump(data, f, indent=2); f.write('\n'); f.flush(); os.fsync(f.fileno())
+        os.replace(temp, path)
+    finally:
+        if os.path.exists(temp): os.unlink(temp)
+
+def read_json(path, fallback=None):
+    try: return json.loads(Path(path).read_text())
+    except FileNotFoundError: return fallback
+
+def prune_snapshots():
+    # Save filenames start with an ISO timestamp, so lexical order is chronological.
+    archives = sorted((STATE / 'snapshots').glob('*.json'), key=lambda p: p.name, reverse=True)
+    for archive in archives[3:]:
+        archive.unlink()
+
+def saved_snapshots():
+    snapshots = [read_json(p) for p in sorted((STATE/'snapshots').glob('*.json'), reverse=True)]
+    latest = read_json(STATE/'latest.json')
+    # A restored snapshot's active copy tracks its new terminal addresses.
+    if latest:
+        snapshots = [latest if s['id'] == latest['id'] else s for s in snapshots]
+        if not any(s['id'] == latest['id'] for s in snapshots): snapshots.append(latest)
+    return sorted(snapshots, key=lambda s: s['saved_at'], reverse=True)
+
+def selected_snapshot(snapshot_id=None):
+    if snapshot_id is None: return read_json(STATE/'latest.json')
+    for s in saved_snapshots():
+        if s['id'] == snapshot_id: return s
+    raise SessionError('That snapshot is no longer available. Reopen the session selector.')
+
+def boot_id():
+    if sys.platform == 'darwin': return command(['/usr/sbin/sysctl', '-n', 'kern.boottime']).strip()
+    return Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+
+def process_birth(pid):
+    if not pid: return None
+    try:
+        p = subprocess.run(['ps', '-p', str(pid), '-o', 'lstart='], capture_output=True, text=True,
+                           env={**os.environ, 'TZ': 'UTC', 'LC_ALL': 'C'}, timeout=5)
+        return p.stdout.strip() if p.returncode == 0 else None
+    except SessionError: return None
+
+def leaves(document):
+    def walk(node, space, tab):
+        content = node.get('content') or {}
+        if content.get('terminal'): yield space, tab, node, content['terminal']
+        for child in node.get('children', []): yield from walk(child, space, tab)
+    for space in document.get('spaces', []):
+        for tab in space.get('tabs', []): yield from walk(tab.get('root', {}), space, tab)
+
+def agent_kind(t):
+    app = (t.get('status') or {}).get('app', '')
+    fg = t.get('foreground') or {}
+    first = Path((fg.get('argv') or t.get('argv') or [''])[0]).name
+    for name, hints in [('codex', ('codex',)), ('claude', ('claude',)), ('pi', ('pi',))]:
+        if app in hints or app == 'claude-code' and name == 'claude' or first in hints: return name
+    return 'unknown' if app else None
+
+def validate_ref(agent, ref):
+    if agent in ('codex', 'claude'):
+        if not UUID.fullmatch(ref): raise SessionError('Expected an exact session UUID')
+    elif agent == 'pi':
+        p = Path(ref).expanduser()
+        if not p.is_absolute() or not p.is_file() or p.suffix != '.jsonl':
+            raise SessionError('Pi needs an existing absolute .jsonl session path')
+        with p.open() as f:
+            header = json.loads(f.readline())
+        if header.get('type') != 'session': raise SessionError('Not a Pi session file')
+        return str(p)
+    else: raise SessionError('Unsupported agent: ' + str(agent))
+    return ref
+
+def resolve_ref(t, bindings):
+    agent = agent_kind(t)
+    if not agent: return None, None, None
+    fg = t.get('foreground') or {}; pid = fg.get('pid'); birth = process_birth(pid)
+    # Process-scoped hooks and manual bindings win over original launch args:
+    # a user may have switched conversations inside an already-running agent.
+    bound = bindings.get(t['address'])
+    registry = read_json(STATE / 'agents' / (str(pid)+'.json'), {})
+    for entry in [registry, bound]:
+        if entry and entry.get('agent') == agent and entry.get('pid') == pid and birth and entry.get('birth') == birth:
+            try: return agent, validate_ref(agent, entry['ref']), entry.get('source', 'registered')
+            except (SessionError, ValueError, KeyError): pass
+    if agent == 'claude':
+        entry = read_json(HOME / '.claude/sessions' / (str(pid)+'.json'), {})
+        if entry.get('pid') == pid and entry.get('procStart') == birth and entry.get('cwd') == fg.get('cwd') and entry.get('sessionId'):
+            return agent, validate_ref(agent, entry['sessionId']), 'Claude process registry'
+    # Open writer files establish current ownership without guessing by date/cwd.
+    if pid and shutil.which('lsof'):
+        result = subprocess.run(['lsof', '-nP', '-p', str(pid), '-Fn'], capture_output=True, text=True, timeout=10)
+        refs = set()
+        for line in result.stdout.splitlines():
+            if not line.startswith('n'): continue
+            path = Path(line[1:])
+            if agent == 'codex' and path.parent.name == 'thread-writer-locks' and UUID.fullmatch(path.stem): refs.add(path.stem)
+            if agent == 'pi' and path.suffix == '.jsonl' and 'sessions' in path.parts: refs.add(str(path))
+        if len(refs) == 1: return agent, validate_ref(agent, refs.pop()), 'open session file'
+    # Do not trust a launch-time --resume: in-app switching can make it stale.
+    return agent, None, None
+
+def get_terminal(address):
+    return rpc('terminal.get', {'terminal': address})
+
+def agent_launch(argv, cwd):
+    """Resolve in the login shell when a GUI launch lacks mise's PATH."""
+    path = os.environ.get('PATH', '')
+    executable = shutil.which(argv[0], path=path)
+    if not executable:
+        shell = os.environ.get('SHELL') or ('/bin/zsh' if sys.platform == 'darwin' else '/bin/bash')
+        result = subprocess.run([shell, '-lic', 'printf "\\n__HERDR_SESSION_PATH__%s\\n" "$PATH"'],
+            cwd=cwd, capture_output=True, text=True, timeout=20)
+        paths = [line.removeprefix('__HERDR_SESSION_PATH__') for line in result.stdout.splitlines()
+                 if line.startswith('__HERDR_SESSION_PATH__')]
+        if result.returncode == 0 and paths:
+            path = paths[-1]
+            executable = shutil.which(argv[0], path=path)
+    if not executable:
+        raise SessionError('Agent executable not found in PATH or login shell: ' + argv[0])
+    # Pass PATH to Core too: Pi's /usr/bin/env node shebang needs mise's Node.
+    return ['/usr/bin/env', 'PATH=' + path, executable, *argv[1:]]
+
+def snapshot():
+    state = rpc('doc.get', {'name': 'herdr-app'}); doc = state.get('value') or {'spaces': []}
+    bindings = read_json(STATE/'bindings.json', {})
+    records = {}; warnings = []
+    for space, tab, node, address in leaves(doc):
+        if address in records: continue
+        if '/' in address or space.get('machine'):
+            raise SessionError('Remote terminals need a separate snapshot on their own machine')
+        t = get_terminal(address); fg = t.get('foreground') or {}
+        agent, ref, source = resolve_ref(t, bindings)
+        cwd = fg.get('cwd') or t.get('cwd') or space.get('folder')
+        fg_program = Path((fg.get('argv') or [''])[0]).name
+        if not agent and fg_program and fg_program not in SHELLS:
+            warnings.append(address + ': ' + fg_program + ' will return as a shell, not restart automatically')
+        records[address] = {'address': address, 'pane': node['id'], 'space': space['id'], 'tab': tab['id'],
+            'cwd': cwd, 'agent': agent, 'ref': ref, 'source': source,
+            'created_ms': t.get('created_ms'), 'pid': t.get('pid'), 'foreground_pid': fg.get('pid'),
+            'foreground_birth': process_birth(fg.get('pid'))}
+    # Refuse to mix two layout versions if the user rearranged tabs during save.
+    if rpc('doc.get', {'name': 'herdr-app'}).get('version') != state.get('version'):
+        raise SessionError('Layout changed while saving. Please save again.')
+    return {'schema': 1, 'id': str(uuid.uuid4()), 'saved_at': dt.datetime.now(dt.timezone.utc).isoformat(),
+        'boot_id': boot_id(), 'document': doc, 'terminals': records, 'warnings': warnings}
+
+def summary(s):
+    records = list(s['terminals'].values()); missing = [r for r in records if r['agent'] and not r['ref']]
+    return {'id': s['id'], 'saved_at': s['saved_at'], 'spaces': len(s['document'].get('spaces', [])),
+        'tabs': sum(len(w.get('tabs', [])) for w in s['document'].get('spaces', [])),
+        'panes': len(records), 'ready_agents': sum(bool(r['agent'] and r['ref']) for r in records),
+        'unresolved': [{'terminal': r['address'], 'agent': r['agent']} for r in missing], 'warnings': s['warnings']}
+
+def plan_restore(s, current_doc, live, current_boot):
+    if s.get('schema') != 1: raise SessionError('Unsupported snapshot schema')
+    actions=[]
+    for address, r in s['terminals'].items():
+        t=live.get(address)
+        # Any original instance still alive is left entirely alone.
+        if t and t.get('state')=='live' and current_boot==s['boot_id'] and t.get('created_ms')==r['created_ms'] and t.get('pid')==r['pid']:
+            actions.append({'terminal':address,'action':'keep-live'});continue
+        if t and t.get('state')=='live':
+            fg=t.get('foreground') or {};argv=fg.get('argv') or t.get('argv') or []
+            if agent_kind(t) or not argv or Path(argv[0]).name not in SHELLS:
+                raise SessionError(address+': a different program is running; refusing to replace it')
+        if r['agent'] and not r['ref']:
+            raise SessionError(address+': missing exact '+r['agent']+' session reference; bind it and save again before reboot')
+        if not r['cwd'] or not Path(r['cwd']).is_dir():raise SessionError(address+': saved directory is unavailable')
+        if r['agent']: validate_ref(r['agent'],r['ref'])
+        actions.append({'terminal':address,'action':'resume' if r['agent'] else 'shell','agent':r['agent']})
+    # Do not erase workspaces/tabs opened since the saved session.
+    old_spaces={w['id'] for w in s['document'].get('spaces',[])}
+    for w in current_doc.get('spaces',[]):
+        if w['id'] not in old_spaces:continue
+        old=next(x for x in s['document']['spaces'] if x['id']==w['id'])
+        old_tabs={t['id'] for t in old['tabs']}
+        for tab in w.get('tabs',[]):
+            if tab['id'] not in old_tabs:continue
+            saved=next(t for t in old['tabs'] if t['id']==tab['id'])
+            if tab.get('root')!=saved.get('root'):
+                raise SessionError('A saved tab layout changed; save again or restore to a separate Core session')
+    return actions
+
+def merge_document(saved, current, mapping):
+    out=copy.deepcopy(saved)
+    for _,_,node,address in leaves(out):
+        node['content']['terminal']=mapping.get(address,address)
+    by_id={w['id']:w for w in out['spaces']}
+    for w in current.get('spaces',[]):
+        if w['id'] not in by_id:out['spaces'].append(copy.deepcopy(w));continue
+        existing=by_id[w['id']];ids={t['id'] for t in existing['tabs']}
+        existing['tabs'].extend(copy.deepcopy(t) for t in w.get('tabs',[]) if t['id'] not in ids)
+    return out
+
+def restore(s, apply=False, automatic=False):
+    checkpoint=read_json(STATE/'restored.json',{})
+    if not automatic and checkpoint.get('snapshot')==s['id'] and checkpoint.get('boot_id')==boot_id():
+        return {'message':'This snapshot has already been restored on this boot','actions':[]}
+    state=rpc('doc.get',{'name':'herdr-app'});current=state.get('value') or {'spaces':[]}
+    live={}
+    for a in s['terminals']:
+        try:live[a]=get_terminal(a)
+        except SessionError:pass
+    if automatic:
+        # Only recover terminals still belonging to this snapshot. Never resurrect
+        # deliberately closed tabs or replace a different terminal reusing an ID.
+        for address, record in s['terminals'].items():
+            t = live.get(address)
+            if not t or t.get('state') != 'live' or t.get('created_ms') != record['created_ms']:
+                return {'message': 'Waiting for saved terminals to recover', 'actions': []}
+        if all(boot_id() == s['boot_id'] and live[a].get('pid') == r['pid']
+               for a, r in s['terminals'].items()):
+            return {'message': 'Saved terminals are still running', 'actions': []}
+    actions=plan_restore(s,current,live,boot_id())
+    if not apply:return {'message':'Preview only; no terminals changed','actions':actions}
+    pending=[a for a in actions if a['action']!='keep-live']
+    if not pending:return {'message':'All saved terminals are still running; nothing changed','actions':actions}
+    launches = {}
+    # Resolve every executable before starting any agent.
+    for action in pending:
+        r = s['terminals'][action['terminal']]; agent = r['agent']
+        argv = ([agent, 'resume', r['ref']] if agent == 'codex' else
+                ['claude', '--resume', r['ref']] if agent == 'claude' else
+                ['pi', '--session', r['ref']] if agent == 'pi' else [])
+        launches[r['address']] = agent_launch(argv, r['cwd']) if agent else []
+    atomic_json(STATE/'before-restore.json',state)
+    mapping={};created=[];parked={};spawned={}
+    try:
+        for action in pending:
+            r=s['terminals'][action['terminal']];agent=r['agent']
+            argv=launches[r['address']]
+            # No space/tab labels until commit: prevents premature auto-adoption.
+            result=rpc('terminal.run',{'argv':argv,'cwd':r['cwd'],'keep':True,'no_parent':True,
+                'no_notify':True,'labels':{'session.snapshot':s['id']}})
+            terminal=result.get('terminal',result)
+            address=terminal.get('address') if isinstance(terminal,dict) else terminal
+            if not address:raise SessionError('Core did not return a new terminal address')
+            created.append(address);mapping[r['address']]=address;spawned[address]=terminal
+        # Remove adoption labels from verified recovery shells before replacing
+        # their references. They remain alive and can be recovered on failure.
+        for old in mapping:
+            if old in live and live[old].get('state')=='live':
+                now=get_terminal(old)
+                if now.get('pid') != live[old].get('pid') or now.get('foreground') != live[old].get('foreground') or agent_kind(now):
+                    raise SessionError(old+': changed while preparing restore')
+                parked[old]=now
+                rpc('terminal.label',{'terminal':old,'labels':{'herdr.space':'','herdr.tab':''}})
+                rpc('terminal.keep',{'terminal':old,'keep':False})
+        doc=merge_document(s['document'],current,mapping)
+        rpc('doc.set',{'name':'herdr-app','value':doc,'version':state['version']})
+    except Exception:
+        for address,t in parked.items():
+            try:
+                rpc('terminal.label',{'terminal':address,'labels':t.get('labels',{})})
+                rpc('terminal.keep',{'terminal':address,'keep':t.get('keep',True)})
+            except SessionError:pass
+        # Only processes started by this restore are eligible for rollback.
+        for address in created:
+            try:rpc('terminal.kill',{'terminal':address})
+            except SessionError:pass
+        raise
+    atomic_json(STATE/'restored.json',{'snapshot':s['id'],'boot_id':boot_id(),'mapping':mapping})
+    warnings=[]
+    for old,new in mapping.items():
+        r=s['terminals'][old]
+        try:rpc('terminal.label',{'terminal':new,'labels':{'herdr.space':r['space'],'herdr.tab':r['tab']}})
+        except SessionError as e:warnings.append(str(e))
+    # Retain the new addresses for the next reboot; archive snapshots remain untouched.
+    continuation=copy.deepcopy(s)
+    continuation['boot_id']=boot_id()
+    continuation['document']=merge_document(s['document'],{'spaces':[]},mapping)
+    continuation['terminals']={}
+    for old,r in s['terminals'].items():
+        new=mapping.get(old,old);record=copy.deepcopy(r);record['address']=new
+        if new in spawned:
+            record['pid']=spawned[new].get('pid');record['created_ms']=spawned[new].get('created_ms')
+        continuation['terminals'][new]=record
+    atomic_json(STATE/'latest.json',continuation)
+    return {'message':'Session restored','actions':actions,'warnings':warnings}
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__)
+    sub=parser.add_subparsers(dest='action',required=True)
+    sub.add_parser('save');sub.add_parser('status');sub.add_parser('auto-restore')
+    p=sub.add_parser('restore');p.add_argument('--apply',action='store_true');p.add_argument('--snapshot')
+    p=sub.add_parser('bind');p.add_argument('terminal');p.add_argument('--agent',choices=['codex','claude','pi'],required=True);p.add_argument('--session',required=True)
+    args=parser.parse_args();os.umask(0o077);STATE.mkdir(parents=True,exist_ok=True,mode=0o700)
+    with (STATE/'.lock').open('a') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX)
+        if args.action=='save':
+            s=snapshot();atomic_json(STATE/'snapshots'/(s['saved_at'].replace(':','-')+'.json'),s);atomic_json(STATE/'latest.json',s);prune_snapshots();out=summary(s)
+        elif args.action=='bind':
+            t=get_terminal(args.terminal);fg=t.get('foreground') or {};pid=fg.get('pid');birth=process_birth(pid)
+            if agent_kind(t)!=args.agent or not birth:raise SessionError('Terminal is not running that agent')
+            ref=validate_ref(args.agent,args.session);d=read_json(STATE/'bindings.json',{})
+            d[t['address']]={'agent':args.agent,'ref':ref,'pid':pid,'birth':birth,'source':'manual binding'}
+            atomic_json(STATE/'bindings.json',d);out={'message':'Bound exact session. Save again to include it.'}
+        else:
+            s=selected_snapshot(args.snapshot if args.action=='restore' else None)
+            if not s:out={'message':'No saved session yet'}
+            elif args.action=='status':out=summary(s)
+            else:out=restore(s, True, automatic=True) if args.action=='auto-restore' else restore(s,args.apply)
+        if args.action in ('save', 'status'):
+            out['snapshots'] = [summary(item) for item in saved_snapshots()]
+        print(json.dumps(out))
+
+if __name__=='__main__':
+    try:main()
+    except (SessionError,ValueError,OSError,subprocess.TimeoutExpired) as e:
+        print(json.dumps({'error':str(e)}));sys.exit(1)

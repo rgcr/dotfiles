@@ -305,6 +305,19 @@ export default class Spaces extends View {
   // The rows, under a header per machine once one isn't this computer.
   grouped(t, collapsed) {
     const rows = this.ordered();
+    // Assign before folding so hiding a space never renumbers the remaining tabs.
+    const keys = "1234567890bfimnopqrtuvyz";
+    const shortcuts = {};
+    this.tabKeys = {};
+    let index = 0;
+    for (const { w } of rows) for (const tab of w.tabs) {
+      const key = keys[index++];
+      if (!key) continue;
+      shortcuts[key] = { space: w.id, tab: tab.id };
+      this.tabKeys[tab.id] = key;
+    }
+    if (JSON.stringify(shared("navigation.tabShortcuts")) !== JSON.stringify(shortcuts))
+      setShared("navigation.tabShortcuts", shortcuts);
     const draw = (r) => v_flex().flex_none()
       .child(collapsed ? this.compact(r, t) : this.row(r, t))
       .children(this.foldedSpaces.has(r.w.id) ? [] : this.agentRows(r, t, collapsed));
@@ -377,14 +390,14 @@ export default class Spaces extends View {
   }
 
   spaceFold(w, t, compact = false) {
-    const count = this.agentList.filter(a => a.space === w.id).length;
+    const count = w.tabs.length;
     if (!count) return div();
     const folded = this.foldedSpaces.has(w.id);
     return h_flex().id(`space-fold-${w.id}`).h(22).px(2).gap(3).flex_none()
       .items_center().rounded(4).cursor_pointer()
       .text_color(folded ? tone(t, w.status) : t.dim)
       .hover(el => el.bg(t.hover).text_color(t.foreground))
-      .tooltip(`${folded ? "Show" : "Hide"} ${count} agent${count === 1 ? "" : "s"}`)
+      .tooltip(`${folded ? "Show" : "Hide"} ${count} tab${count === 1 ? "" : "s"}`)
       .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
       .on_mouse_up("left", (_e, cx) => cx.stop_propagation())
       .on_click((_e, cx) => {
@@ -495,17 +508,38 @@ export default class Spaces extends View {
         .hover(el => el.bg(t.hover))
         .tooltip(`${name} · ${status || "unknown"}${a.title ? ` · ${a.title}` : ""}`)
         .on_click(() => run(child ? "terminal.peek" : "agent.focus", { terminal: a.address }))
+        .when(!child, el => el.child(this.tabBadge(a.tab, t)))
         .child(pic)
         .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate().text_size(12)
           .text_color(a.focused ? t.foreground : t.muted).child(name))
-          .when(!child && !tab?.named && w.tabs.length > 1, el => el.child(div().text_size(10).text_color(t.dim).child(String(a.tab_index))))
           .when(a.pinned, el => el.child(svg("mods/workspace-chrome/pin.svg").size(11).text_color(t.dim))))
         .child(state));
       for (const sub of this.liveTerminals.filter(k => k.parent === a.address && !this.agentList.some(top => top.address === k.address)))
         append(sub, depth + 1, true);
     };
-    members.forEach(a => append(a));
+    for (const tab of w.tabs) {
+      const tabAgents = members.filter(a => a.tab === tab.id);
+      if (tabAgents.length) { tabAgents.forEach(a => append(a)); continue; }
+      const pane = panes().find(p => p.tab === tab.id);
+      const name = tab.named ? tab.name : pane?.program?.name || "Terminal";
+      rows.push(h_flex().id(`nested-tab-${tab.id}`).h(28).flex_none()
+        .ml(collapsed ? 6 : 26 + (tree ? 22 : 0)).px(7).gap(7)
+        .rounded(6).items_center().cursor_pointer()
+        .when(w.active && tab.active, el => el.bg(t.selected)).hover(el => el.bg(t.hover))
+        .tooltip(name).on_click(() => run("tab.select", { id: tab.id }))
+        .child(this.tabBadge(tab.id, t))
+        .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate()
+          .text_size(12).text_color(t.muted).child(name))));
+    }
     return rows;
+  }
+
+  tabBadge(id, t) {
+    const key = this.tabKeys[id];
+    return div().w(18).h(18).flex_none().flex().items_center().justify_center()
+      .text_size(10).text_color(t.dim).opacity(0.75)
+      .tooltip(key ? `Ctrl+A → ${key}` : "Open Go To: Ctrl+A → g")
+      .child(key || "·");
   }
 
   render() {
@@ -524,7 +558,7 @@ export default class Spaces extends View {
     }
     if (changed) setShared("space.colors", kept);
     this.agentList = agents();
-    const otherSpaces = sp.filter(s => !s.active && this.agentList.some(a => a.space === s.id));
+    const otherSpaces = sp.filter(s => !s.active && s.tabs.length);
     const expandOthers = otherSpaces.length > 0 && otherSpaces.every(s => this.foldedSpaces.has(s.id));
     this.liveTerminals = terminals().filter(a => a.state === "live");
     this.agentOrder = [];

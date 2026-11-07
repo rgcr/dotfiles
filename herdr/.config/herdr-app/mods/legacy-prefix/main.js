@@ -1,9 +1,9 @@
 import { View, div } from "gpui-kit";
 import { v_flex, EditorState, Editor } from "gpui-base";
-import { focused, spaces, run, theme, props, closeOverlay, hc, notify } from "herdr";
+import { focused, spaces, run, theme, props, closeOverlay, hc, notify, shared } from "herdr";
 
 // Compatibility with the Ctrl+A bindings in ../herdr/config.toml.
-export function actionFor(event) {
+export function actionFor(event, shortcuts = {}) {
   const k = event.keystroke;
   const plain = !event.modifiers.control && !event.modifiers.alt && !event.modifiers.platform;
   if (!plain) return null;
@@ -16,6 +16,9 @@ export function actionFor(event) {
   if (k === "shift-e" || character === "E") return ["scrollback"];
   if (k === "shift-tab") return ["space.prev"];
   if (event.modifiers.shift) return null;
+  // Only unused keys can select tabs; existing prefix commands always win.
+  if ("1234567890bfimnopqrtuvyz".includes(k) && k.length === 1 && shortcuts[k])
+    return ["quick-tab", shortcuts[k]];
   return {
     c: ["tab.new"],
     w: ["space.new"],
@@ -46,6 +49,7 @@ export function actionFor(event) {
 export default class LegacyPrefix extends View {
   init(initial, cx) {
     this.context = focused();
+    this.shortcuts = shared("navigation.tabShortcuts") ?? {};
     this.handle = cx.focus_handle();
     this.scrollback = initial?.scrollback || props()?.scrollback;
     if (this.scrollback) {
@@ -68,7 +72,7 @@ export default class LegacyPrefix extends View {
   dispatch(event, cx) {
     cx.stop_propagation();
     if (event.is_held || this.busy) return;
-    const action = actionFor(event);
+    const action = actionFor(event, this.shortcuts);
     if (!action) return;
     const [command, args] = action;
     if (command === "send-prefix") {
@@ -86,6 +90,12 @@ export default class LegacyPrefix extends View {
     }
     closeOverlay(props().overlay);
     if (command === "cancel") return;
+    if (command === "quick-tab") {
+      // Use the displayed ID, never a position that could have shifted meanwhile.
+      if (spaces().some(s => s.id === args.space && s.tabs.some(t => t.id === args.tab)))
+        run("tab.select", { id: args.tab });
+      return;
+    }
     if (command === "move") {
       const space = spaces().find(s => s.id === this.context?.space);
       const index = space?.tabs.findIndex(t => t.id === this.context?.tab) ?? -1;

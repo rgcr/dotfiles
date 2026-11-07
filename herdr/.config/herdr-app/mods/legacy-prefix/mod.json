@@ -1,0 +1,5 @@
+{
+  "place": "none",
+  "title": "Ctrl+A shortcuts",
+  "overlay": { "kind": "popup", "frame": "none", "at": "top", "offset": 0, "width": 2, "height": 2 }
+}

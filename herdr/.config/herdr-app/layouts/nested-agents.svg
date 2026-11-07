@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
+  <rect width="640" height="400" rx="12" fill="#181b20"/>
+  <path d="M185 0V400M185 38H640" stroke="#363b44"/>
+  <g font-family="sans-serif" font-size="13" fill="#cbd2dc">
+    <text x="16" y="28">Herdr</text><text x="16" y="65" fill="#87909d">Spaces</text>
+    <text x="30" y="99">Project</text><text x="52" y="127">Codex</text>
+    <text x="52" y="155">Pi</text><text x="30" y="203">Operations</text>
+    <text x="52" y="231">Claude</text><text x="70" y="259">Sub-agent</text>
+    <text x="204" y="26">1     2</text>
+  </g>
+  <g fill="#78b69b"><circle cx="162" cy="123" r="4"/><circle cx="162" cy="227" r="4"/></g>
+  <g fill="none" stroke="#87909d"><circle cx="162" cy="151" r="4"/><circle cx="162" cy="255" r="4"/></g>
+  <rect x="198" y="50" width="429" height="336" rx="8" fill="#22262d" stroke="#424d5d"/>
+  <text x="215" y="78" font-family="monospace" font-size="14" fill="#78b69b">❯</text>
+</svg>

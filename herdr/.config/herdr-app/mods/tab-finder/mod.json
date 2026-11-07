@@ -1,0 +1,15 @@
+{
+  "place": "none",
+  "title": "Go to tabs",
+  "overlay": {
+    "kind": "popup",
+    "at": "top",
+    "offset": 40,
+    "width": 680,
+    "height": 0.8
+  },
+  "cloned_from": {
+    "name": "picker",
+    "version": "0.1.12"
+  }
+}

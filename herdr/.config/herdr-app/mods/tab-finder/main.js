@@ -7,8 +7,6 @@ import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input } from "gpui-base";
 import { agents, panes, spaces, terminals, run, hc, theme, settings, props, closeOverlay, openOverlay, shared, setShared } from "herdr";
 
-const MARK = { ansi6: "#22a99a", ansi3: "#e3814f", ansi4: "#5b8def", ansi5: "#8b7cf6", ansi2: "#3fae6a", ansi1: "#d9649a" };
-
 // Space colors, kept by space id in shared "space.colors": a theme
 // color name ("ansi6") or a picked #rrggbb. A space seen without one gets
 // the theme color fewest spaces use, once; every mod does the same in the
@@ -30,7 +28,7 @@ function spaceColors() {
 function spaceColor(t, p) {
   if (p.name === "~") return t.dim;
   const c = spaceColors()[p.id] ?? PROJECT_COLORS[0];
-  return c.startsWith("#") ? c : (MARK[c] ?? t[c]);
+  return c.startsWith("#") ? c : t[c];
 }
 
 // Derive labels from live metadata; no terminal contents are read.
@@ -141,7 +139,7 @@ export default class Picker extends View {
     // One continuous strip: each row (and the group title before it) at a fixed
     // y. Scrolling moves the strip only as far as it takes to keep the selected
     // row in view, so the arrows can't run the selection off the list.
-    const H = { head: 29, new: 36, ctx: 40, space: 32 };
+    const H = { head: 24, new: 30, ctx: 30, space: 28 };
     const tops = [];
     let y = 0;
     rows.forEach((r) => { tops.push(y); y += H[r.kind] ?? 32; });
@@ -165,14 +163,14 @@ export default class Picker extends View {
       if (r.kind === "head") {
         return h_flex()
           .px(10)
-          .pt(10)
-          .pb(3)
-          .gap(8)
+          .pt(5)
+          .pb(2)
+          .gap(7)
           .items_center()
           .text_size(11)
           .font_semibold()
-          .text_color(t.dim)
-          .child(h_flex().size(18).rounded(5).bg(spaceColor(t, r.w)).items_center().justify_center().text_size(10.5).font_bold().text_color("#ffffff").child([...r.w.name][0]?.toUpperCase() ?? "?"))
+          .text_color(t.muted)
+          .child(div().w(3).h(16).rounded(2).flex_none().bg(spaceColor(t, r.w)))
           .child(r.w.name);
       }
       const on = r === sel;
@@ -181,9 +179,9 @@ export default class Picker extends View {
         return h_flex()
           .id(r.kind === "new" ? "pk-new" : `pk-space-${r.machine ?? "here"}`)
           .mx(4)
-          .when(r.kind === "new", (el) => el.mt(4))
+          .when(r.kind === "new", (el) => el.mt(2))
           .px(10)
-          .h(32)
+          .h(28)
           .items_center()
           .rounded(7)
           .gap(8)
@@ -197,7 +195,7 @@ export default class Picker extends View {
       }
       const here = r.w.active && r.ctx.active;
       return h_flex()
-        .id(`pk-${r.ctx.id}`).mx(4).px(10).h(40).rounded(8).gap(10).items_center()
+        .id(`pk-${r.ctx.id}`).ml(32).mr(4).px(10).h(30).rounded(6).gap(7).items_center()
         .cursor_pointer().when(on, el => el.bg(t.hover)).hover(el => el.bg(t.hover))
         .tooltip(`${r.detail}${r.team ? ` · ${r.team} sub-agents` : ""}`)
         .on_click(() => this.go(r))
@@ -214,8 +212,8 @@ export default class Picker extends View {
       .track_focus(this.handle)
       .w_full()
       .min_h(0)
-      .p(18)
-      .gap(10)
+      .p(14)
+      .gap(8)
       .bg(t.popover)
       .text_size(13)
       .on_key_down((e, cx) => {

@@ -1,8 +1,6 @@
 # vi mode
 set -o vi
 
-# ZSH_UNAME=$(uname)
-
 # completion cache - optimized for performance
 autoload -Uz compinit
 # Check if completion dump is older than 48 hours
@@ -18,7 +16,7 @@ fi
 
 # UP and DOWN arrow keys
 zmodload zsh/terminfo
-if [ "$(uname)" = "Darwin" ]; then
+if [[ "$OSTYPE" == darwin* ]]; then
     #bindkey "$terminfo[cuu1]" history-substring-search-up
     #bindkey "$terminfo[cud1]" history-substring-search-down
     bindkey '^[[A' history-substring-search-up
@@ -34,7 +32,7 @@ bindkey '\e[F'  end-of-line
 
 # source ~/.zsh/thzshrcemes/rho.zsh-theme
 
-if [ "$(uname)" = "Darwin" ]; then
+if [[ "$OSTYPE" == darwin* ]]; then
     # Homebrew ships a functions/ dir; autoload (sourcing antidote.zsh runs `antidote "$@"` and errors)
     fpath=(/opt/homebrew/opt/antidote/share/antidote/functions $fpath)
     autoload -Uz antidote
@@ -88,7 +86,7 @@ zstyle ':completion:*' menu select
 
 # enable colors {{{
 export CLICOLOR=1
-if [ "$(uname)" = "Darwin" ]; then
+if [[ "$OSTYPE" == darwin* ]]; then
     #export LSCOLORS="exfxcxdxbxegedabagacad"
     export LSCOLORS="ExGxFxDxCxDxDxhbhdacEc"
     LS_COLORS="${LSCOLORS}"

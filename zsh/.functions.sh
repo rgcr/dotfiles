@@ -27,6 +27,18 @@ _print_warning() {
 _remove_from_path(){
     local dir="$1"
     [ -n "$dir" ] || return
+    if [ -n "${ZSH_VERSION:-}" ]; then
+        # zsh's path array is tied to PATH. Compare literally, including wildcards.
+        local entry
+        local -a kept
+        kept=()
+        for entry in "${path[@]}"; do
+            [[ "$entry" == "$dir" ]] || kept+=("$entry")
+        done
+        path=("${kept[@]}")
+        export PATH
+        return
+    fi
     PATH="$(printf %s "$PATH" | tr ':' '\n' | grep -Fxv "$dir" | paste -sd: -)"
     export PATH="$PATH"
 }

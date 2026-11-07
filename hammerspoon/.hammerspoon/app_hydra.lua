@@ -105,6 +105,12 @@ function M.setup(app_bindings)
   create_app_hydra(app_bindings)
 
   return {
+    bind = function(key, action)
+      app_hydra:bind({}, key, function()
+        app_hydra:exit()
+        action()
+      end)
+    end,
     show = function()
       app_hydra:enter()
     end

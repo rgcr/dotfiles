@@ -60,6 +60,7 @@ local app_bindings = {
     ["."] = "iTerm",
     -- [","] = "iTerm",
     f = "Firefox",
+    h = "Herdr",
     e = "Microsoft Edge",
     x = "Microsoft Excel",
     m = "Microsoft Outlook",
@@ -143,10 +144,36 @@ hs.hotkey.bind(hyper, "l", function()
 end)
 
 -- App switch - hydra mode: ctrl -> . -> key
-local app_hydra = require("app_hydra").setup(app_bindings)
+local prefix_apps = {}
+for key, app in pairs(app_bindings) do
+  if key ~= "." then prefix_apps[key] = app end
+end
+local app_hydra = require("app_hydra").setup(prefix_apps)
 hs.hotkey.bind({"ctrl"}, ".", function()
   app_hydra.show()
 end)
+
+-- Ctrl+., then . toggles the two most recently focused real windows.
+do
+  local recent = hs.window.filter.new(true):setOverrideFilter({
+    allowRoles = "AXStandardWindow",
+  }):setAppFilter("Hammerspoon", false)
+  -- Keep focus history live, including changes made outside this shortcut.
+  recent:subscribe(hs.window.filter.windowFocused, function() end)
+  app_hydra.bind(".", function()
+    local current = hs.window.focusedWindow()
+    local currentID = current and current:id()
+    for _, win in ipairs(recent:getWindows(hs.window.filter.sortByFocusedLast)) do
+      if win:id() ~= currentID then
+        local app = win:application()
+        if app then app:unhide(); app:activate() end
+        if win:isMinimized() then win:unminimize() end
+        win:raise():focus()
+        return
+      end
+    end
+  end)
+end
 
 -- I have my custom engines in a custom file ~/.hammerspoon/search_engines.lua
 -- local searcher = require("searcher").setup()
@@ -154,23 +181,68 @@ end)
 --   searcher.show()
 -- end)
 
--- Window switcher on Ctrl+Tab (current Space only, visible windows)
+-- Search all windows with Ctrl+., then Space, prioritizing the current desktop.
 do
-  local wf = hs.window.filter.new():setCurrentSpace(true)
-  -- Use default filter (visible, standard windows)
-  local switcher = hs.window.switcher.new(wf)
+  local windows = hs.window.filter.new(true):setOverrideFilter({
+    allowRoles = "AXStandardWindow",
+  })
+  local currentDesktop = hs.window.filter.new():setOverrideFilter({
+    currentSpace = true,
+    visible = true,
+    allowRoles = "AXStandardWindow",
+  })
+  local chooser = require("window_picker").new(function(choice)
+    if not choice then return end
+    -- Keep the actual window: hs.window.get() may not find other Spaces.
+    -- Let the webview finish hiding before activating another application.
+    hs.timer.doAfter(0.1, function()
+      local win = choice.window
+      if win and win:id() == choice.windowID then
+        local app = win:application()
+        if app then app:unhide(); app:activate() end
+        if win:isMinimized() then win:unminimize() end
+        win:raise():focus()
+      else
+        hs.alert.show("That window has closed")
+      end
+    end)
+  end)
 
-  -- Next window
-  hs.hotkey.bind(ctrl, "tab",
-    function() switcher:next() end,
-    nil,
-    function() switcher:next() end)
+  local function showWindowSearch()
+    if chooser:isVisible() then chooser:hide(true); return end
+    local currentIDs = {}
+    for _, win in ipairs(currentDesktop:getWindows()) do
+      currentIDs[win:id()] = true
+    end
+    local choices, others = {}, {}
+    for _, win in ipairs(windows:getWindows(hs.window.filter.sortByFocusedLast)) do
+      -- A window may close while we build the list; skip stale/helper entries.
+      local ok, choice = pcall(function()
+        local app = win:application()
+        local bundle = app and app:bundleID()
+        local icon = bundle and hs.image.imageFromAppBundle(bundle)
+        local name = app and app:name()
+        if not icon or not name or name == "" then return nil end
+        return {
+          text = name,
+          subText = win:title() or "",
+          image = icon,
+          windowID = win:id(),
+          window = win,
+          currentDesktop = currentIDs[win:id()] == true,
+        }
+      end)
+      if ok and choice then
+        local group = currentIDs[choice.windowID] and choices or others
+        group[#group + 1] = choice
+      end
+    end
+    for _, choice in ipairs(others) do choices[#choices + 1] = choice end
+    chooser:show(choices)
+  end
 
-  -- Previous window
-  hs.hotkey.bind(ctrl_shift, "tab",
-    function() switcher:previous() end,
-    nil,
-    function() switcher:previous() end)
+  app_hydra.bind("space", showWindowSearch)
+  hs.hotkey.bind(hyper, "space", showWindowSearch)
 end
 
 -- Menubar indicator for current Desktop Space (focused screen)

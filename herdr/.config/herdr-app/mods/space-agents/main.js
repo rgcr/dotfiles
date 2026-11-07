@@ -6,7 +6,7 @@
 
 import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { spaces, machines, panes, agents, terminals, setAgentOrder, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, notify } from "herdr";
+import { spaces, machines, panes, agents, terminals, setAgentOrder, run, openOverlay, exec, hc, theme, shared, setShared, watchFolder, window, layout, notify, nextCommand, focused } from "herdr";
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -44,6 +44,21 @@ export function tone(t, status) {
 
 export default class Spaces extends View {
   init(_props, cx) {
+    this.handle = cx.focus_handle();
+    this.navigation = [];
+    cx.spawn(async cx => {
+      for (;;) {
+        const command = await nextCommand();
+        if (command !== "focus") continue;
+        this.returnPane = focused()?.pane;
+        const current = focused();
+        this.cursor = this.navigation.find(r => r.terminal === current?.terminal)?.id
+          ?? this.navigation.find(r => r.tab === current?.tab)?.id
+          ?? `space-${current?.space}`;
+        this.handle.focus();
+        cx.notify();
+      }
+    });
     this.sessionBusy = false;
     this.sessionError = "";
     this.restoreSession(cx);
@@ -81,6 +96,41 @@ export default class Spaces extends View {
     const due = this.due(now, sp, panes());
     if (due.size) this.refreshGit(due, cx);
     if (sp.some((s) => !this.shown.has(s.id))) cx.notify();
+  }
+
+  navigate(event, cx) {
+    if (event.modifiers.control || event.modifiers.alt || event.modifiers.platform) return;
+    const key = event.keystroke;
+    if (!["up", "down", "left", "right", "enter", "escape"].includes(key)) return;
+    cx.stop_propagation();
+    const index = this.navigation.findIndex(r => r.id === this.cursor);
+    const row = this.navigation[index];
+    if (key === "escape") {
+      if (this.returnPane) run("pane.focus", { pane: this.returnPane });
+      else run("pane.go", { direction: "right" });
+    } else if (key === "up" || key === "down") {
+      const next = Math.max(0, Math.min(this.navigation.length - 1, index + (key === "up" ? -1 : 1)));
+      this.cursor = this.navigation[next]?.id;
+    } else if (row && key === "enter") {
+      run(row.command, row.args);
+    } else if (row) {
+      if (key === "left") {
+        if (row.tab || row.terminal) this.cursor = `space-${row.space}`;
+        else this.foldedSpaces.add(row.space);
+      } else if (this.foldedSpaces.has(row.space)) {
+        this.foldedSpaces.delete(row.space);
+      } else if (!row.tab && !row.terminal) {
+        this.cursor = this.navigation[index + 1]?.id ?? row.id;
+      }
+      localStorage.setItem("spaces.agents.folded", JSON.stringify([...this.foldedSpaces]));
+    }
+    cx.notify();
+  }
+
+  keyboardRow(element, row, t) {
+    this.navigation.push(row);
+    return element.when(this.handle.is_focused() && this.cursor === row.id,
+      el => el.bg(t.hover).border(1).border_color(t.accent));
   }
 
   restoreSession(cx) {
@@ -319,7 +369,8 @@ export default class Spaces extends View {
     if (JSON.stringify(shared("navigation.tabShortcuts")) !== JSON.stringify(shortcuts))
       setShared("navigation.tabShortcuts", shortcuts);
     const draw = (r) => v_flex().flex_none()
-      .child(collapsed ? this.compact(r, t) : this.row(r, t))
+      .child(this.keyboardRow(collapsed ? this.compact(r, t) : this.row(r, t),
+        { id: `space-${r.w.id}`, space: r.w.id, command: "space.select", args: { id: r.w.id } }, t))
       .children(this.foldedSpaces.has(r.w.id) ? [] : this.agentRows(r, t, collapsed));
     const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name), ...Object.keys(this.reconnecting)])].sort();
     const loading = m => {
@@ -501,7 +552,7 @@ export default class Spaces extends View {
       const pic = a.program?.icon
         ? (a.program.tint ? svg(a.program.icon).size(14).text_color(t.foreground)
           : image(a.program.icon).w(14).h(14)) : div().size(14).child("·");
-      rows.push(h_flex().id(`nested-agent-${a.address}`).h(28).flex_none()
+      rows.push(this.keyboardRow(h_flex().id(`nested-agent-${a.address}`).h(28).flex_none()
         .ml(collapsed ? 6 : 26 + (tree ? 22 : 0) + depth * 14).px(7).gap(7)
         .rounded(6).items_center().cursor_pointer()
         .when(a.focused, el => el.bg(t.selected))
@@ -513,7 +564,8 @@ export default class Spaces extends View {
         .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate().text_size(12)
           .text_color(a.focused ? t.foreground : t.muted).child(name))
           .when(a.pinned, el => el.child(svg("mods/workspace-chrome/pin.svg").size(11).text_color(t.dim))))
-        .child(state));
+        .child(state), { id: `agent-${a.address}`, space: w.id, tab: a.tab, terminal: a.address,
+          command: child ? "terminal.peek" : "agent.focus", args: { terminal: a.address } }, t));
       for (const sub of this.liveTerminals.filter(k => k.parent === a.address && !this.agentList.some(top => top.address === k.address)))
         append(sub, depth + 1, true);
     };
@@ -522,14 +574,15 @@ export default class Spaces extends View {
       if (tabAgents.length) { tabAgents.forEach(a => append(a)); continue; }
       const pane = panes().find(p => p.tab === tab.id);
       const name = tab.named ? tab.name : pane?.program?.name || "Terminal";
-      rows.push(h_flex().id(`nested-tab-${tab.id}`).h(28).flex_none()
+      rows.push(this.keyboardRow(h_flex().id(`nested-tab-${tab.id}`).h(28).flex_none()
         .ml(collapsed ? 6 : 26 + (tree ? 22 : 0)).px(7).gap(7)
         .rounded(6).items_center().cursor_pointer()
         .when(w.active && tab.active, el => el.bg(t.selected)).hover(el => el.bg(t.hover))
         .tooltip(name).on_click(() => run("tab.select", { id: tab.id }))
         .child(this.tabBadge(tab.id, t))
         .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate()
-          .text_size(12).text_color(t.muted).child(name))));
+          .text_size(12).text_color(t.muted).child(name))),
+        { id: `tab-${tab.id}`, space: w.id, tab: tab.id, command: "tab.select", args: { id: tab.id } }, t));
     }
     return rows;
   }
@@ -562,9 +615,11 @@ export default class Spaces extends View {
     const expandOthers = otherSpaces.length > 0 && otherSpaces.every(s => this.foldedSpaces.has(s.id));
     this.liveTerminals = terminals().filter(a => a.state === "live");
     this.agentOrder = [];
+    this.navigation = [];
     const rows = this.grouped(t, collapsed);
     setAgentOrder(this.agentOrder);
     return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
+      .track_focus(this.handle).on_key_down((event, cx) => this.navigate(event, cx))
       .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
         .when(!collapsed, el => el.child(div().flex_1().child("Spaces")))
         .when(!collapsed && otherSpaces.length > 0, el => el.child(div().id("spaces-fold-all").size(26).flex_none()

@@ -13,6 +13,7 @@ export function actionFor(event, shortcuts = {}) {
   if (character === "<" || k === "shift-,") return ["move", -1];
   if (character === ">" || k === "shift-.") return ["move", 1];
   if (k === "shift-x" || character === "X") return ["space.close"];
+  if (k === "shift-w" || character === "W") return ["space.new"];
   if (k === "shift-e" || character === "E") return ["scrollback"];
   if (k === "shift-tab") return ["space.prev"];
   if (event.modifiers.shift) return null;
@@ -21,7 +22,7 @@ export function actionFor(event, shortcuts = {}) {
     return ["quick-tab", shortcuts[k]];
   return {
     c: ["tab.new"],
-    w: ["space.new"],
+    w: ["space-agents.focus"],
     s: ["mod.open", { name: "session-manager" }],
     x: ["tab.close"],
     g: ["mod.open", { name: "tab-finder" }],
@@ -90,6 +91,7 @@ export default class LegacyPrefix extends View {
     }
     closeOverlay(props().overlay);
     if (command === "cancel") return;
+    if (command === "space-agents.focus") run("layout.show", { id: "sidebar" });
     if (command === "quick-tab") {
       // Use the displayed ID, never a position that could have shifted meanwhile.
       if (spaces().some(s => s.id === args.space && s.tabs.some(t => t.id === args.tab)))

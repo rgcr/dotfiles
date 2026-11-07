@@ -1,0 +1,7 @@
+^/session-manager(/|$)
+^\.gitignore$
+^__pycache__$
+\.pyc$
+^/\.config/herdr/\.config\.toml\.gpui-lock$
+^/\.config/herdr-app/mods/[^/]+/(gpui-kit\.d\.ts|herdr\.d\.ts|jsconfig\.json)$
+^\.DS_Store$

@@ -33,8 +33,14 @@ _backup(){
 _deploy(){
     # deploy dotfiles with stow
     printf "\nRestow dotfiles\n"
-    for d in $(find . -mindepth 1 -maxdepth 1 ! -path ./.git ! -path i3-hibernate ! -path sway-hibernate -type d -printf "%f\n"); do
-        stow --no-folding -vR ${d} -d . -t ~
+    local d
+    for d in */; do
+        [ -d "$d" ] || continue
+        d=${d%/}
+        case "$d" in
+            i3-hibernate|sway-hibernate) continue ;;
+        esac
+        stow --no-folding -vR "$d" -d . -t "$HOME" || return
     done
 }
 

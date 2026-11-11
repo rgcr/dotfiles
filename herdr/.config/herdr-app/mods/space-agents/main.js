@@ -356,22 +356,22 @@ export default class Spaces extends View {
   grouped(t, collapsed) {
     const rows = this.ordered();
     // Assign before folding so hiding a space never renumbers the remaining tabs.
-    const keys = "1234567890bfimnopqrtuvyz";
+    const keys = "abcdefghijklmnopqrstuvwxyz";
     const shortcuts = {};
     this.tabKeys = {};
     let index = 0;
-    for (const { w } of rows) for (const tab of w.tabs) {
+    for (const { w } of rows) for (const [tabIndex, tab] of w.tabs.entries()) {
+      this.tabKeys[tab.id] = "1234567890"[tabIndex] ?? "";
       const key = keys[index++];
       if (!key) continue;
       shortcuts[key] = { space: w.id, tab: tab.id };
-      this.tabKeys[tab.id] = key;
     }
     if (JSON.stringify(shared("navigation.tabShortcuts")) !== JSON.stringify(shortcuts))
       setShared("navigation.tabShortcuts", shortcuts);
     const draw = (r) => v_flex().flex_none()
       .child(this.keyboardRow(collapsed ? this.compact(r, t) : this.row(r, t),
         { id: `space-${r.w.id}`, space: r.w.id, command: "space.select", args: { id: r.w.id } }, t))
-      .children(this.foldedSpaces.has(r.w.id) ? [] : this.agentRows(r, t, collapsed));
+      .children(!this.targetMode && this.foldedSpaces.has(r.w.id) ? [] : this.agentRows(r, t, collapsed));
     const remote = [...new Set([...rows.map(r => r.w.machine).filter(Boolean), ...this.machines.map(m => m.name), ...Object.keys(this.reconnecting)])].sort();
     const loading = m => {
       const layout = machines().find(k => k.name === m)?.layout;
@@ -387,7 +387,7 @@ export default class Spaces extends View {
       const machine = this.machines.find(k => k.name === m) ?? repair?.machine;
       const connected = !m || machine?.state === "connected";
       const rebuilt = this.rebuilt(machine) || !!repair;
-      const folded = this.folded.has(m);
+      const folded = !this.targetMode && this.folded.has(m);
       const head = h_flex().id(`machine-${m ?? "local"}`).h(26).flex_none().px(collapsed ? 2 : 8).gap(7).items_center().text_size(11).text_color(t.dim)
         .cursor_pointer().hover(s => s.bg(t.hover))
         .on_click((_e, cx) => {
@@ -588,15 +588,19 @@ export default class Spaces extends View {
   }
 
   tabBadge(id, t) {
-    const key = this.tabKeys[id];
+    const key = this.targetMode
+      ? Object.entries(this.targetMode.targets).find(([, target]) => target.tab === id)?.[0]
+      : this.tabKeys[id];
     return div().w(18).h(18).flex_none().flex().items_center().justify_center()
-      .text_size(10).text_color(t.dim).opacity(0.75)
-      .tooltip(key ? `Ctrl+A → ${key}` : "Open Go To: Ctrl+A → g")
+      .text_size(10).text_color(this.targetMode ? t.accent : t.dim).opacity(this.targetMode ? 1 : 0.75)
+      .tooltip(key ? `Ctrl+A → ${this.targetMode ? "Space → " : ""}${key}` : "Open Go To: Ctrl+A → g")
       .child(key || "·");
   }
 
   render() {
     const t = theme();
+    const targets = shared("navigation.sidebarTargets");
+    this.targetMode = targets?.until > Date.now() ? targets : null;
     const collapsed = narrow();
     const palette = ["ansi6", "ansi3", "ansi4", "ansi5", "ansi2", "ansi1"];
     const sp = spaces();

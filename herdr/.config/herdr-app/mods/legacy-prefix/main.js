@@ -1,6 +1,6 @@
 import { View, div } from "gpui-kit";
 import { v_flex, EditorState, Editor } from "gpui-base";
-import { focused, spaces, run, theme, props, closeOverlay, hc, notify, shared } from "herdr";
+import { focused, spaces, run, theme, props, closeOverlay, hc, notify, shared, setShared, exec } from "herdr";
 
 // Compatibility with the Ctrl+A bindings in ../herdr/config.toml.
 export function actionFor(event, shortcuts = {}) {
@@ -14,19 +14,20 @@ export function actionFor(event, shortcuts = {}) {
   if (character === ">" || k === "shift-.") return ["move", 1];
   if (k === "shift-x" || character === "X") return ["space.close"];
   if (k === "shift-w" || character === "W") return ["space.new"];
+  if (k === "shift-r" || character === "R") return ["resize-mode"];
   if (k === "shift-e" || character === "E") return ["scrollback"];
   if (k === "shift-tab") return ["space.prev"];
   if (event.modifiers.shift) return null;
-  // Only unused keys can select tabs; existing prefix commands always win.
-  if ("1234567890bfimnopqrtuvyz".includes(k) && k.length === 1 && shortcuts[k])
+  if ("1234567890".includes(k) && k.length === 1 && shortcuts[k])
     return ["quick-tab", shortcuts[k]];
   return {
     c: ["tab.new"],
     w: ["space-agents.focus"],
+    z: ["pane.zoom"],
     s: ["mod.open", { name: "session-manager" }],
     x: ["tab.close"],
     g: ["mod.open", { name: "tab-finder" }],
-    space: ["mod.open", { name: "tab-finder" }],
+    space: ["sidebar-targets"],
     d: ["cancel"],
     ",": ["tab.rename"],
     enter: ["tab.next"],
@@ -50,7 +51,9 @@ export function actionFor(event, shortcuts = {}) {
 export default class LegacyPrefix extends View {
   init(initial, cx) {
     this.context = focused();
-    this.shortcuts = shared("navigation.tabShortcuts") ?? {};
+    const space = spaces().find(s => s.id === this.context?.space);
+    this.shortcuts = Object.fromEntries((space?.tabs ?? []).slice(0, 10)
+      .map((tab, i) => ["1234567890"[i], { space: space.id, tab: tab.id }]));
     this.handle = cx.focus_handle();
     this.scrollback = initial?.scrollback || props()?.scrollback;
     if (this.scrollback) {
@@ -72,10 +75,67 @@ export default class LegacyPrefix extends View {
 
   dispatch(event, cx) {
     cx.stop_propagation();
+    if (this.targets) {
+      if (event.is_held) return;
+      if (event.keystroke === "escape") {
+        this.clearTargets();
+        closeOverlay(props().overlay);
+        return;
+      }
+      if (event.modifiers.control || event.modifiers.alt || event.modifiers.platform || event.modifiers.shift) return;
+      const target = this.targets[event.keystroke];
+      if (!target) return;
+      this.clearTargets();
+      closeOverlay(props().overlay);
+      if (spaces().some(s => s.id === target.space && s.tabs.some(t => t.id === target.tab)))
+        run("tab.select", { id: target.tab });
+      return;
+    }
+    if (this.resizing) {
+      if (["escape", "enter"].includes(event.keystroke)) {
+        this.resizing = false;
+        closeOverlay(props().overlay);
+        return;
+      }
+      if (this.busy || event.modifiers.control || event.modifiers.alt || event.modifiers.platform) return;
+      const direction = { left: "left", right: "right", up: "up", down: "down", h: "left", l: "right", k: "up", j: "down" }[event.keystroke];
+      if (!direction) return;
+      this.busy = true;
+      cx.spawn(async () => {
+        try {
+          const result = await exec("herdr-session", ["resize-pane", this.context.pane, direction]);
+          const data = JSON.parse(result.stdout);
+          if (result.code !== 0 || data.error) throw new Error(data.error || result.stderr);
+        } catch (error) {
+          notify({ title: "Could not resize pane", body: String(error), level: "error" });
+        } finally { this.busy = false; }
+      });
+      return;
+    }
     if (event.is_held || this.busy) return;
     const action = actionFor(event, this.shortcuts);
     if (!action) return;
     const [command, args] = action;
+    if (command === "sidebar-targets") {
+      this.targets = shared("navigation.tabShortcuts") ?? {};
+      this.targetToken = Date.now();
+      setShared("navigation.sidebarTargets", { token: this.targetToken, until: Date.now() + 30000, targets: this.targets });
+      run("layout.show", { id: "sidebar" });
+      cx.timer.after(30000, () => {
+        if (this.targets) { this.clearTargets(); closeOverlay(props().overlay); }
+      });
+      return;
+    }
+    if (command === "resize-mode") {
+      if (!this.context?.pane || this.context.pane.includes("/")) {
+        closeOverlay(props().overlay);
+        notify({ title: "Select a local split pane to resize", level: "info" });
+        return;
+      }
+      this.resizing = true;
+      notify({ title: "Resize mode", body: "Arrows or h/j/k/l · Enter or Esc to finish", level: "info" });
+      return;
+    }
     if (command === "send-prefix") {
       const terminal = this.context?.terminal;
       if (!terminal) { closeOverlay(props().overlay); return; }
@@ -112,6 +172,14 @@ export default class LegacyPrefix extends View {
       run(command, args);
     }
   }
+
+  clearTargets() {
+    if (shared("navigation.sidebarTargets")?.token === this.targetToken)
+      setShared("navigation.sidebarTargets", null);
+    this.targets = null;
+  }
+
+  close() { this.clearTargets(); }
 
   render() {
     const t = theme();

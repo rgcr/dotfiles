@@ -325,16 +325,64 @@ def restore(s, apply=False, automatic=False):
     atomic_json(STATE/'latest.json',continuation)
     return {'message':'Session restored','actions':actions,'warnings':warnings}
 
+def resize_document(document, pane, direction):
+    """Move the nearest split boundary on this axis; preserve all other layout data."""
+    axis = 'row' if direction in ('left', 'right') else 'column'
+    def ancestors(node):
+        if node.get('id') == pane: return []
+        for i, child in enumerate(node.get('children', [])):
+            path = ancestors(child)
+            if path is not None: return [(node, i)] + path
+        return None
+    for space in document.get('spaces', []):
+        for tab in space.get('tabs', []):
+            path = ancestors(tab.get('root', {}))
+            if path is None: continue
+            for node, index in reversed(path):
+                children = node.get('children', [])
+                if node.get('type') != axis or len(children) < 2: continue
+                # Prefer the boundary after this pane, otherwise the one before it.
+                left = index if index < len(children) - 1 else index - 1
+                weights = [(c.get('size') or {}).get('weight', 1) for c in children]
+                if any('px' in (c.get('size') or {}) for c in children):
+                    raise SessionError('This split uses fixed sizes; resize it with the mouse')
+                if any(not isinstance(w, (int, float)) or w <= 0 for w in weights):
+                    raise SessionError('Invalid split weights')
+                total = sum(weights)
+                pair = weights[left] + weights[left + 1]
+                minimum = min(total * .10, pair * .25)
+                delta = total * .05 * (1 if direction in ('right', 'down') else -1)
+                first = max(minimum, min(pair - minimum, weights[left] + delta))
+                if abs(first - weights[left]) < 1e-9: return False
+                for i, weight in ((left, first), (left + 1, pair - first)):
+                    children[i]['size'] = {**(children[i].get('size') or {}), 'weight': weight}
+                return True
+            return False
+    raise SessionError('The selected pane no longer exists')
+
+def resize_pane(pane, direction):
+    if '/' in pane: raise SessionError('Keyboard resize currently supports local panes only')
+    state = rpc('doc.get', {'name': 'herdr-app'})
+    document = state.get('value') or {}
+    changed = resize_document(document, pane, direction)
+    if changed:
+        # Reject concurrent layout edits instead of overwriting them.
+        rpc('doc.set', {'name': 'herdr-app', 'value': document, 'version': state['version']})
+    return {'changed': changed}
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     sub=parser.add_subparsers(dest='action',required=True)
     sub.add_parser('save');sub.add_parser('status');sub.add_parser('auto-restore')
     p=sub.add_parser('restore');p.add_argument('--apply',action='store_true');p.add_argument('--snapshot')
+    p=sub.add_parser('resize-pane');p.add_argument('pane');p.add_argument('direction',choices=['left','right','up','down'])
     p=sub.add_parser('bind');p.add_argument('terminal');p.add_argument('--agent',choices=['codex','claude','pi'],required=True);p.add_argument('--session',required=True)
     args=parser.parse_args();os.umask(0o077);STATE.mkdir(parents=True,exist_ok=True,mode=0o700)
     with (STATE/'.lock').open('a') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
-        if args.action=='save':
+        if args.action=='resize-pane':
+            out=resize_pane(args.pane,args.direction)
+        elif args.action=='save':
             s=snapshot();atomic_json(STATE/'snapshots'/(s['saved_at'].replace(':','-')+'.json'),s);atomic_json(STATE/'latest.json',s);prune_snapshots();out=summary(s)
         elif args.action=='bind':
             t=get_terminal(args.terminal);fg=t.get('foreground') or {};pid=fg.get('pid');birth=process_birth(pid)

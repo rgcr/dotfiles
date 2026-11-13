@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Manual Herdr Core snapshots. Stores references, never conversation contents."""
+"""Controls for Herdr App: saved sessions and pane resizing."""
 import argparse
 import copy
 import datetime as dt
@@ -370,18 +370,153 @@ def resize_pane(pane, direction):
         rpc('doc.set', {'name': 'herdr-app', 'value': document, 'version': state['version']})
     return {'changed': changed}
 
-def main():
+def tui_call(session, *args):
+    # Explicit session only: never inherit a pane/socket from the invoking terminal.
+    env = {k:v for k,v in os.environ.items() if not k.startswith('HERDR_')}
+    result = subprocess.run(['herdr', '--session', session, *args], env=env,
+                            capture_output=True, text=True, timeout=45)
+    if result.returncode:
+        raise SessionError(result.stderr.strip() or result.stdout.strip() or 'Herdr TUI command failed')
+    data = json.loads(result.stdout)
+    if data.get('error'): raise SessionError(str(data['error']))
+    return data.get('result', data)
+
+def tui_tree(node, records):
+    """Validate and translate App's n-way split tree before creating anything."""
+    address = (node.get('content') or {}).get('terminal')
+    if address:
+        if address not in records: raise SessionError('Snapshot lacks terminal '+address)
+        return {'terminal':address}
+    children = node.get('children', [])
+    if not children or node.get('type') not in ('row','column'):
+        raise SessionError('TUI restore supports terminal panes only; this snapshot contains a mod pane or unsupported layout')
+    converted = [tui_tree(c,records) for c in children]
+    if len(converted)==1: return converted[0]
+    weights = [(c.get('size') or {}).get('weight',1) for c in children]
+    if any('px' in (c.get('size') or {}) for c in children) or any(not isinstance(w,(int,float)) or w<=0 for w in weights):
+        raise SessionError('TUI restore requires positive weighted splits')
+    def split(items, sizes):
+        if len(items)==1:return items[0]
+        ratio=sizes[0]/sum(sizes)
+        if not .1 <= ratio <= .9: raise SessionError('A saved split is too narrow for TUI restore')
+        return {'direction':'right' if node['type']=='row' else 'down', 'ratio':ratio,
+                'first':items[0], 'second':split(items[1:],sizes[1:])}
+    return split(converted,weights)
+
+def tui_first(tree):
+    return tree['terminal'] if 'terminal' in tree else tui_first(tree['first'])
+
+def restore_tui(s, session, apply=False):
+    if not session or not re.fullmatch(r'[A-Za-z0-9_-]+',session):
+        raise SessionError('Use --tui-session NAME with letters, numbers, underscores or hyphens')
+    if s.get('schema')!=1: raise SessionError('Unsupported snapshot schema')
+    records=s['terminals']; work=[]; used=[]; blockers=[]
+    for space in s['document'].get('spaces',[]):
+        if space.get('machine'): raise SessionError('Remote spaces cannot be restored to a local TUI')
+        tabs=[]
+        for tab in space.get('tabs',[]):
+            tree=tui_tree(tab['root'],records)
+            tabs.append({'name':tab.get('name') or '', 'tree':tree})
+        if tabs:work.append({'name':space.get('name') or '', 'tabs':tabs})
+    for _,_,_,address in leaves(s['document']): used.append(address)
+    if len(set(used))!=len(used): raise SessionError('A terminal appears in more than one pane')
+    for address in used:
+        r=records[address]
+        if not r.get('cwd') or not Path(r['cwd']).is_dir(): raise SessionError(address+': saved directory is unavailable')
+        if r.get('agent'):
+            try: validate_ref(r['agent'],r.get('ref') or '')
+            except SessionError as error:
+                blockers.append(address+': '+r['agent']+' session reference is missing or invalid: '+str(error))
+            if s['boot_id']==boot_id() and not r.get('foreground_birth'):
+                blockers.append(address+': saved process identity is missing; save again before migrating')
+            if s['boot_id']==boot_id() and r.get('foreground_birth') and process_birth(r.get('foreground_pid'))==r['foreground_birth']:
+                blockers.append(address+': saved agent is still running; exit it before restoring into TUI')
+    plan={'target':'tui','session':session,'snapshot':s['id'],'spaces':len(work),
+          'tabs':sum(len(w['tabs']) for w in work),'panes':len(used),'blockers':blockers,
+          'warnings':s.get('warnings',[]),'attach':['herdr','--session',session]}
+    if not apply:return {**plan,'message':'Preview only; no TUI changes'}
+    if blockers:raise SessionError('; '.join(blockers))
+    if not work:raise SessionError('The saved session is empty')
+    # A journal is written before the first mutation. Partial restores are never replayed.
+    journal_path=STATE/('tui-'+session+'.json')
+    journal=read_json(journal_path)
+    if journal:
+        return {**plan,'message':'This TUI target already has a restore record; attach to it or choose another --tui-session',
+                'restore_state':journal.get('state'),'workspaces':journal.get('workspaces',[])}
+    # A named server must already be running; this never starts/stops a server.
+    existing=tui_call(session,'agent','list')
+    if existing.get('agents'):raise SessionError('The target TUI session already has agents; choose a separate named session')
+    launches={}
+    for address in used:
+        r=records[address]; agent=r.get('agent')
+        args=([agent,'resume',r['ref']] if agent=='codex' else ['claude','--resume',r['ref']] if agent=='claude' else ['pi','--session',r['ref']] if agent=='pi' else [])
+        if args:launches[address]=agent_launch(args,r['cwd'])
+    journal={'snapshot':s['id'],'session':session,'state':'building','workspaces':[], 'panes':{},'started':[]}
+    atomic_json(journal_path,journal)
+    def save():atomic_json(journal_path,journal)
+    def creation_args(address):
+        args=['--cwd',records[address]['cwd'],'--no-focus']
+        if address in launches:args+=['--env',launches[address][1]]
+        return args
+    def build(tree,pane):
+        if 'terminal' in tree:
+            journal['panes'][tree['terminal']]=pane;save();return
+        second=tui_call(session,'pane','split','--pane',pane,'--direction',tree['direction'],
+                        '--ratio',str(tree['ratio']),*creation_args(tui_first(tree['second'])))['pane']['pane_id']
+        build(tree['first'],pane);build(tree['second'],second)
+    try:
+        for workspace in work:
+            first=workspace['tabs'][0]
+            made=tui_call(session,'workspace','create','--label',workspace['name'],*creation_args(tui_first(first['tree'])))
+            wid=made['workspace']['workspace_id'];journal['workspaces'].append(wid);save()
+            for i,tab in enumerate(workspace['tabs']):
+                created=made if i==0 else tui_call(session,'tab','create','--workspace',wid,'--label',tab['name'],*creation_args(tui_first(tab['tree'])))
+                if i==0 and tab['name']:tui_call(session,'tab','rename',created['tab']['tab_id'],tab['name'])
+                build(tab['tree'],created['root_pane']['pane_id'])
+        journal['state']='starting';save()
+        for i,address in enumerate(used):
+            r=records[address]
+            if not r.get('agent'):continue
+            # Recheck immediately before launching; never type into old/existing panes.
+            if s['boot_id']==boot_id() and r.get('foreground_birth') and process_birth(r.get('foreground_pid'))==r['foreground_birth']:
+                raise SessionError(address+': original agent is still running')
+            native=launches[address][3:]
+            tui_call(session,'agent','start','hctl-'+s['id'][:8]+'-'+str(i),'--kind',r['agent'],
+                     '--pane',journal['panes'][address],'--',*native)
+            journal['started'].append(address);save()
+        journal['state']='complete';save()
+    except Exception as error:
+        journal['state']='incomplete';save()
+        raise SessionError('TUI restore stopped; created panes were preserved. Inspect '+str(journal_path)+': '+str(error)) from error
+    return {**plan,'message':'Session restored into Herdr TUI','workspaces':journal['workspaces']}
+
+def parse_args(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
-    sub=parser.add_subparsers(dest='action',required=True)
-    sub.add_parser('save');sub.add_parser('status');sub.add_parser('auto-restore')
+    groups=parser.add_subparsers(dest='group',required=True)
+    session=groups.add_parser('session',help='Save, list and restore agent sessions')
+    sub=session.add_subparsers(dest='action',required=True)
+    sub.add_parser('save');sub.add_parser('status');sub.add_parser('list');sub.add_parser('auto-restore')
     p=sub.add_parser('restore');p.add_argument('--apply',action='store_true');p.add_argument('--snapshot')
-    p=sub.add_parser('resize-pane');p.add_argument('pane');p.add_argument('direction',choices=['left','right','up','down'])
+    p.add_argument('--target',choices=['app','tui'],default='app')
+    p.add_argument('--tui-session',help='Explicit named TUI session (required for --target tui)')
     p=sub.add_parser('bind');p.add_argument('terminal');p.add_argument('--agent',choices=['codex','claude','pi'],required=True);p.add_argument('--session',required=True)
-    args=parser.parse_args();os.umask(0o077);STATE.mkdir(parents=True,exist_ok=True,mode=0o700)
+    pane=groups.add_parser('pane',help='Control Herdr App panes')
+    panes=pane.add_subparsers(dest='action',required=True)
+    p=panes.add_parser('resize',help='Move a split boundary in 5% steps')
+    p.add_argument('direction',choices=['left','right','up','down'])
+    p.add_argument('--pane',help='Pane ID; defaults to the focused Herdr App pane')
+    return parser.parse_args(argv)
+
+def main():
+    args=parse_args();os.umask(0o077);STATE.mkdir(parents=True,exist_ok=True,mode=0o700)
     with (STATE/'.lock').open('a') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
-        if args.action=='resize-pane':
-            out=resize_pane(args.pane,args.direction)
+        if args.group=='pane':
+            pane=args.pane or json.loads(command(['herdr-app','status'])).get('focused_pane')
+            if not pane: raise SessionError('No focused Herdr App pane; pass --pane PANE-ID')
+            out=resize_pane(pane,args.direction)
+        elif args.action=='list':
+            out={'snapshots':[summary(item) for item in saved_snapshots()]}
         elif args.action=='save':
             s=snapshot();atomic_json(STATE/'snapshots'/(s['saved_at'].replace(':','-')+'.json'),s);atomic_json(STATE/'latest.json',s);prune_snapshots();out=summary(s)
         elif args.action=='bind':
@@ -394,6 +529,7 @@ def main():
             s=selected_snapshot(args.snapshot if args.action=='restore' else None)
             if not s:out={'message':'No saved session yet'}
             elif args.action=='status':out=summary(s)
+            elif args.action=='restore' and args.target=='tui':out=restore_tui(s,args.tui_session,args.apply)
             else:out=restore(s, True, automatic=True) if args.action=='auto-restore' else restore(s,args.apply)
         if args.action in ('save', 'status'):
             out['snapshots'] = [summary(item) for item in saved_snapshots()]

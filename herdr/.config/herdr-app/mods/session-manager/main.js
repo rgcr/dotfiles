@@ -25,7 +25,7 @@ export default class SessionManager extends View {
         const args = action === "apply" ? ["restore", "--apply"] : [action];
         if ((action === "restore" || action === "apply") && this.saved?.id)
           args.push("--snapshot", this.saved.id);
-        const result = await exec("herdr-session", args);
+        const result = await exec("hctl", ["session", ...args]);
         const data = JSON.parse(result.stdout);
         if (result.code !== 0 || data.error) throw new Error(data.error || result.stderr);
         if (action === "status" || action === "save") {

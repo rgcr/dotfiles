@@ -145,7 +145,7 @@ export default class Spaces extends View {
     cx.notify();
     cx.spawn(async cx => {
       try {
-        const result = await exec("herdr-session", [action]);
+        const result = await exec("hctl", ["session", action]);
         const data = JSON.parse(result.stdout);
         if (result.code !== 0 || data.error) throw new Error(data.error || result.stderr);
         this.sessionError = "";

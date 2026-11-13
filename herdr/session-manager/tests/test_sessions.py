@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-path=pathlib.Path(__file__).parents[2]/'.local/bin/herdr-session'
+path=pathlib.Path(__file__).parents[2]/'.local/bin/hctl'
 loader=importlib.machinery.SourceFileLoader('sessions',str(path))
 spec=importlib.util.spec_from_loader(loader.name,loader);m=importlib.util.module_from_spec(spec);loader.exec_module(m)
 
@@ -17,6 +17,68 @@ def snap(cwd):
   'terminals':{'t1':{'address':'t1','space':'s1','tab':'tab1','pane':'pane1','cwd':cwd,'agent':'codex','ref':'11111111-1111-1111-1111-111111111111','created_ms':1,'pid':10}}}
 
 class Tests(unittest.TestCase):
+ def test_tui_preview_has_no_server_calls(self):
+  with patch.object(m,'tui_call',side_effect=AssertionError('unexpected command')),patch.object(m,'boot_id',return_value='new-boot'):
+   result=m.restore_tui(self.s,'restored')
+  self.assertEqual(result['panes'],1)
+  self.assertEqual(result['blockers'],[])
+ def test_tui_requires_explicit_target(self):
+  with self.assertRaises(m.SessionError):m.restore_tui(self.s,None)
+ def test_tui_missing_ref_is_visible_in_preview_and_blocks_apply(self):
+  self.s['terminals']['t1']['ref']=None
+  with patch.object(m,'boot_id',return_value='new-boot'),patch.object(m,'tui_call',side_effect=AssertionError('unexpected command')):
+   self.assertIn('t1: codex',m.restore_tui(self.s,'restored')['blockers'][0])
+   with self.assertRaises(m.SessionError):m.restore_tui(self.s,'restored',True)
+ def test_tui_refuses_live_original_before_mutation(self):
+  self.s['terminals']['t1'].update(foreground_birth='birth',foreground_pid=123)
+  with patch.object(m,'boot_id',return_value='old-boot'),patch.object(m,'process_birth',return_value='birth'),patch.object(m,'tui_call',side_effect=AssertionError('unexpected command')):
+   self.assertEqual(len(m.restore_tui(self.s,'restored')['blockers']),1)
+   with self.assertRaises(m.SessionError):m.restore_tui(self.s,'restored',True)
+ def test_tui_rejects_mod_panes(self):
+  with self.assertRaises(m.SessionError):m.tui_tree({'type':'block','content':{'mod':'files'}},{})
+ def test_tui_preserves_nary_split_ratios(self):
+  node={'type':'row','children':[{'type':'block','content':{'terminal':t},'size':{'weight':w}} for t,w in [('a',2),('b',3),('c',5)]]}
+  tree=m.tui_tree(node,{'a':{},'b':{},'c':{}})
+  self.assertEqual(tree['ratio'],.2)
+  self.assertEqual(tree['second']['ratio'],3/8)
+  self.assertEqual(m.tui_first(tree),'a')
+ def test_tui_apply_journals_and_does_not_repeat(self):
+  calls=[]
+  def cli(session,*args):
+   calls.append(args)
+   if args[:2]==('agent','list'):return {'agents':[]}
+   if args[:2]==('workspace','create'):return {'workspace':{'workspace_id':'w9'},'tab':{'tab_id':'w9:t1'},'root_pane':{'pane_id':'w9:p1'}}
+   return {}
+  with patch.object(m,'STATE',pathlib.Path(self.temp.name)),patch.object(m,'boot_id',return_value='new-boot'),patch.object(m,'tui_call',side_effect=cli),patch.object(m,'agent_launch',return_value=['/usr/bin/env','PATH=/bin','/bin/codex','resume',self.s['terminals']['t1']['ref']]):
+   result=m.restore_tui(self.s,'restored',True)
+   start=next(c for c in calls if c[:2]==('agent','start'))
+   self.assertEqual(start[-2:],('resume',self.s['terminals']['t1']['ref']))
+   self.assertEqual(result['workspaces'],['w9'])
+   count=len(calls)
+   self.assertEqual(m.restore_tui(self.s,'restored',True)['restore_state'],'complete')
+   self.assertEqual(len(calls),count)
+ def test_tui_failed_agent_start_preserves_partial_journal(self):
+  def cli(session,*args):
+   if args[:2]==('agent','list'):return {'agents':[]}
+   if args[:2]==('workspace','create'):return {'workspace':{'workspace_id':'w9'},'tab':{'tab_id':'w9:t1'},'root_pane':{'pane_id':'w9:p1'}}
+   if args[:2]==('agent','start'):raise m.SessionError('agent not ready')
+   return {}
+  with patch.object(m,'STATE',pathlib.Path(self.temp.name)),patch.object(m,'boot_id',return_value='new-boot'),patch.object(m,'tui_call',side_effect=cli),patch.object(m,'agent_launch',return_value=['/usr/bin/env','PATH=/bin','/bin/codex','resume','id']):
+   with self.assertRaises(m.SessionError):m.restore_tui(self.s,'restored',True)
+   self.assertEqual(m.read_json(pathlib.Path(self.temp.name)/'tui-restored.json')['state'],'incomplete')
+ def test_cli_groups_keep_restore_preview_explicit(self):
+  args=m.parse_args(['session','restore','--snapshot','saved-id'])
+  self.assertEqual(args.group,'session')
+  self.assertFalse(args.apply)
+  self.assertEqual(args.snapshot,'saved-id')
+  self.assertTrue(m.parse_args(['session','restore','--apply']).apply)
+ def test_cli_resize_supports_explicit_or_focused_pane(self):
+  args=m.parse_args(['pane','resize','left'])
+  self.assertEqual(args.group,'pane')
+  self.assertIsNone(args.pane)
+  self.assertEqual(m.parse_args(['pane','resize','right','--pane','p1']).pane,'p1')
+ def test_cli_lists_saved_sessions(self):
+  self.assertEqual(m.parse_args(['session','list']).action,'list')
  def auto_probe(self, terminal, boot='old-boot'):
   def rpc(method,params):
    if method=='doc.get':return {'version':1,'value':doc()}

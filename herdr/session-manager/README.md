@@ -37,8 +37,8 @@ load it automatically.
 For Codex, get the exact Session UUID with `/status` in each tab, then bind it:
 
 ```sh
-herdr-session bind t1 --agent codex --session SESSION-UUID
-herdr-session save
+hctl session bind t1 --agent codex --session SESSION-UUID
+hctl session save
 ```
 
 Use the correct terminal address from `herdr-core ls --json`. Rebind after switching
@@ -48,13 +48,20 @@ Do not reboot until the saved-session screen has no unresolved agents.
 ## CLI and storage
 
 ```sh
-herdr-session save
-herdr-session status
-herdr-session restore          # preview, no changes
-herdr-session restore --apply
-herdr-session restore --snapshot SNAPSHOT-ID        # preview a selected save
-herdr-session restore --snapshot SNAPSHOT-ID --apply
+hctl session save
+hctl session list
+hctl session status
+hctl session restore          # preview, no changes
+hctl session restore --apply
+hctl session restore --snapshot SNAPSHOT-ID        # preview a selected save
+hctl session restore --snapshot SNAPSHOT-ID --apply
+hctl pane resize left         # focused Herdr App pane
+hctl pane resize right --pane PANE-ID
 ```
+
+`hctl` is the entry point for custom Herdr controls. Add future command groups here.
+App buttons and keyboard resizing use `hctl`.
+Resize moves a split boundary in 5% steps; it currently supports local weighted splits.
 
 Private snapshots live in `~/.local/state/herdr-app-sessions/`, outside this repo.
 They contain paths, layout and session references, never conversation contents.
@@ -69,6 +76,37 @@ replacement terminals. Extra spaces/tabs remain. Recovery shells are unlabelled
 and unkept, but left alive. Failed document commits attempt rollback of created
 terminals and recovery-shell metadata. No remote-machine restore is supported.
 
+## Restore into legacy Herdr TUI
+
+This copies a snapshot into a separate, explicitly named legacy Herdr session.
+It recreates workspaces, named tabs, weighted terminal splits and saved working
+directories, then resumes Codex, Claude and Pi using the saved references.
+It does not move running processes, transfer scrollback or restore App mod panes.
+Ordinary commands return as shells. Remote spaces and fixed-size splits are rejected.
+
+Save while the agents still have their exact session references, then exit the
+original agents before applying a TUI restore. Preview reports saved agents still
+running on this boot; apply refuses those duplicates. Do not manually resume the
+same conversations elsewhere during migration.
+
+```sh
+hctl session restore --target tui --tui-session restored   # read-only preview
+herdr --session restored                                 # start/open target TUI
+# In a separate shell, or a plain shell pane in that named session:
+hctl session restore --target tui --tui-session restored --apply
+```
+
+Add `--snapshot SNAPSHOT-ID` to select an older save. The target server must already
+be running and have no agents; existing shell workspaces are preserved. The helper
+never stops Core, changes its App layout, or starts/stops a TUI server. Creation
+uses `--no-focus`; select the restored workspace in the TUI after completion.
+
+`tui-NAME.json` in the private snapshot directory journals created workspace/pane
+IDs and launch progress. Repeating apply does not create duplicates. On a partial
+failure, inspect the target and journal: created panes and any started agents stay
+alive, and automatic replay is refused. Do not delete a journal and retry over a
+partially restored session. The App restore checkpoint and snapshots stay unchanged.
+
 ## Install from this checkout
 
 From the repository root, deploy with GNU Stow:
@@ -79,7 +117,7 @@ stow --no-folding -vR herdr -d . -t "$HOME"
 ```
 
 `./bootstrap.sh --stow` includes this package too. Stow installs the app configs,
-`~/.local/bin/herdr-session`, and the Pi extension at
+`~/.local/bin/hctl`, and the Pi extension at
 `~/.pi/agent/extensions/herdr-session-registry.ts`. Source for the extension lives
 in `herdr/.pi/agent/extensions/`. The `session-manager/` documentation and tests,
 generated mod types/configs, Python caches and runtime locks are excluded by

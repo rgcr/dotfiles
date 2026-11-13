@@ -103,7 +103,7 @@ export default class LegacyPrefix extends View {
       this.busy = true;
       cx.spawn(async () => {
         try {
-          const result = await exec("herdr-session", ["resize-pane", this.context.pane, direction]);
+          const result = await exec("hctl", ["pane", "resize", direction, "--pane", this.context.pane]);
           const data = JSON.parse(result.stdout);
           if (result.code !== 0 || data.error) throw new Error(data.error || result.stderr);
         } catch (error) {

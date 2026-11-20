@@ -1,5 +1,0 @@
-{
-  "place": "none",
-  "title": "Saved session",
-  "overlay": {"kind":"popup", "at":"top", "offset":60, "width":560, "height":0.7}
-}

@@ -1,8 +1,8 @@
 # Manual Herdr sessions
 
-Use **Auto-restore · Save · Restore** below the Spaces header, or press **Ctrl+A, S**
+Use **Auto-restore · Save · Restore** in the sidebar footer, or press **Ctrl+A, S**
 to open the session manager. Save writes a snapshot immediately; Restore opens
-the snapshot selector and preview. Auto-restore is off until you enable it and
+the session window. Auto-restore is off until you enable it and
 the toggle persists in Herdr's shared mod state.
 
 When enabled, the sidebar checks after startup and every 15 seconds while the
@@ -15,12 +15,13 @@ attention. The sidebar must be loaded for automatic restore to run.
 Saving stays manual, including when closing the window or quitting. No close
 confirmation or background autosave is installed.
 
-Choose **Save current** before restarting the laptop. After opening Herdr again,
-use **Preview restore**, then **Restore saved**. Existing live terminals stay running.
+Choose **Save** before restarting the laptop. After opening Herdr again,
+use **Restore**. Existing live terminals stay running.
 Expand **Saved sessions** to choose one of the three retained snapshots by date,
-time and counts. The newest is selected by default. Preview and Restore use that
-selection; choosing another snapshot clears the previous preview. Existing live
-work and changed layouts still trigger the same restore protections.
+time and counts. The newest is selected by default. Restore uses that selection.
+Save and App restore complete what they can and report omissions under **Skipped**.
+Missing agent references do not block other agents. Unavailable terminal metadata
+and remote terminals are omitted when saving. Expand the report for reasons.
 
 The snapshot preserves local spaces, tab names, pane splits, working folders,
 and exact Codex, Claude and Pi conversation references. Ordinary commands return
@@ -71,8 +72,9 @@ the latest three saves. Older archives are removed after a successful save.
 `before-restore.json` backs up the Core document before a restore. Do not overwrite
 the saved snapshot with fresh recovery shells after a reboot: restore first.
 
-Restore rejects changed saved pane layouts, missing folders/references and busy
-replacement terminals. Extra spaces/tabs remain. Recovery shells are unlabelled
+App restore skips changed saved pane layouts, missing folders/references, missing
+executables and busy replacement terminals. Failed terminal starts are reported
+while other starts continue. Extra spaces/tabs remain. Recovery shells are unlabelled
 and unkept, but left alive. Failed document commits attempt rollback of created
 terminals and recovery-shell metadata. No remote-machine restore is supported.
 
@@ -123,7 +125,9 @@ in `herdr/.pi/agent/extensions/`. The `session-manager/` documentation and tests
 generated mod types/configs, Python caches and runtime locks are excluded by
 `herdr/.stow-local-ignore`. Private saved sessions are not part of this package.
 
-The custom `legacy-prefix` and `space-agents` mods provide the shortcut and button.
+The custom `prefix-shortcuts` and `spaces-sidebar` mods provide the shortcut and button.
+The session window is `saved-sessions`, Go To is `tab-switcher`, and the sidebar
+header is `sidebar-header`.
 Use Python 3, herdr-core, and the native agent executables on PATH.
 Restore falls back to the interactive login shell's PATH when an agent is absent
 from the desktop app's PATH, and forwards it to Core for runtimes such as mise Node.

@@ -149,8 +149,8 @@ export default class Spaces extends View {
         const data = JSON.parse(result.stdout);
         if (result.code !== 0 || data.error) throw new Error(data.error || result.stderr);
         this.sessionError = "";
-        if (action === "save") notify({title: "Session saved", body: `${data.spaces} spaces · ${data.tabs} tabs${data.unresolved?.length ? ` · ${data.unresolved.length} agents need session references` : ""}`, level: data.unresolved?.length ? "warning" : "info"});
-        else if (data.message === "Session restored") notify({title: "Session restored", body: "Recovered from your latest manual save.", level: "info"});
+        const skipped = action === "save" ? (data.unresolved?.length || 0) + (data.skipped?.length || 0) : (data.actions || []).filter(a => a.action === "skip").length;
+        if (action === "save" || data.message?.startsWith("Restored ")) notify({title: action === "save" ? "Session saved" : "Session restored", body: `${action === "save" ? `${data.spaces} spaces · ${data.tabs} tabs` : data.message}${skipped ? ` · ${skipped} skipped (see Session)` : ""}`, level: skipped ? "warning" : "info"});
       } catch (error) {
         const message = String(error);
         if (action === "save" || message !== this.sessionError)
@@ -368,7 +368,10 @@ export default class Spaces extends View {
     }
     if (JSON.stringify(shared("navigation.tabShortcuts")) !== JSON.stringify(shortcuts))
       setShared("navigation.tabShortcuts", shortcuts);
-    const draw = (r) => v_flex().flex_none()
+    const draw = (r, index) => v_flex().flex_none()
+      .when(!collapsed && index > 0, el => el.child(
+        div().mx(8).py(4).flex_none()
+          .child(div().h(1).bg(t.border).opacity(0.5))))
       .child(this.keyboardRow(collapsed ? this.compact(r, t) : this.row(r, t),
         { id: `space-${r.w.id}`, space: r.w.id, command: "space.select", args: { id: r.w.id } }, t))
       .children(!this.targetMode && this.foldedSpaces.has(r.w.id) ? [] : this.agentRows(r, t, collapsed));
@@ -378,7 +381,7 @@ export default class Spaces extends View {
       return layout === "loading" || (!layout && this.machines.some(k => k.name === m && k.state === "connected"))
         || spaces().some(s => (s.machine ?? null) === m && !this.shown.has(s.id));
     };
-    const loadingRow = m => div().id(`machine-loading-${m ?? "local"}`).h(28).flex_none().px(8).text_size(12).text_color(t.dim).child(collapsed ? "…" : "Loading…");
+    const loadingRow = m => div().id(`machine-loading-${m ?? "local"}`).h(28).flex_none().px(8).text_size(this.font(12)).text_color(t.dim).child(collapsed ? "…" : "Loading…");
     if (!remote.length) return loading(null) && !rows.length ? [loadingRow(null)] : rows.map(draw);
     const machineNames = [null, ...remote];
     return machineNames.flatMap((m) => {
@@ -388,7 +391,7 @@ export default class Spaces extends View {
       const connected = !m || machine?.state === "connected";
       const rebuilt = this.rebuilt(machine) || !!repair;
       const folded = !this.targetMode && this.folded.has(m);
-      const head = h_flex().id(`machine-${m ?? "local"}`).h(26).flex_none().px(collapsed ? 2 : 8).gap(7).items_center().text_size(11).text_color(t.dim)
+      const head = h_flex().id(`machine-${m ?? "local"}`).h(26).flex_none().px(collapsed ? 2 : 8).gap(7).items_center().text_size(this.font(11)).text_color(t.dim)
         .cursor_pointer().hover(s => s.bg(t.hover))
         .on_click((_e, cx) => {
           folded ? this.folded.delete(m) : this.folded.add(m);
@@ -410,7 +413,7 @@ export default class Spaces extends View {
           .child(div().size(6).rounded(3).flex_none().bg(connected ? t.ansi2 : t.dim))
           .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(11).flex_none()));
       const empty = h_flex().id(`machine-new-${m ?? "local"}`).h(28).flex_none().px(8).gap(7).items_center().rounded(7)
-        .text_size(12).text_color(t.dim).hover(s => s.bg(t.hover).text_color(t.foreground))
+        .text_size(this.font(12)).text_color(t.dim).hover(s => s.bg(t.hover).text_color(t.foreground))
         .on_click(() => run("space.new", { machine: m ?? "" }))
         .child(svg("mods/workspace-chrome/plus.svg").size(12)).when(!collapsed, el => el.child("New space there"));
       if (!collapsed && rebuilt) return [head];
@@ -433,7 +436,7 @@ export default class Spaces extends View {
       .gap(5)
       .justify_end()
       .items_center()
-      .text_size(11.5)
+      .text_size(this.font(11.5))
       .text_color(t.dim)
       .when(Boolean(where), (el) => el.child(div().min_w(0).truncate().child(where)))
       .when(g.ahead > 0, (el) => el.child(div().flex_none().text_color(t.ansi2).child(`\u2191${g.ahead}`)))
@@ -457,7 +460,7 @@ export default class Spaces extends View {
         localStorage.setItem("spaces.agents.folded", JSON.stringify([...this.foldedSpaces]));
         cx.notify();
       })
-      .when(folded && !compact, el => el.child(div().text_size(10).child(String(count))))
+      .when(folded && !compact, el => el.child(div().text_size(this.font(10)).child(String(count))))
       .child(svg(`mods/workspace-chrome/chevron-${folded ? "right" : "down"}.svg`).size(12));
   }
 
@@ -473,8 +476,7 @@ export default class Spaces extends View {
       .flex_none()
       .justify_center()
       .rounded(8)
-      .when(on, (el) => el.bg(t.selected))
-      .when(!on, (el) => el.hover((s) => s.bg(t.hover)))
+      .hover((s) => s.bg(t.hover))
       .when(this.pressed === i && this.over !== i, (el) => el.opacity(0.5))
       .when(this.pressed !== null && this.over === i && this.pressed !== i, (el) => el.child(
         div().absolute().left(0).right(0).h(2).bg(t.accent)
@@ -509,7 +511,8 @@ export default class Spaces extends View {
           .items_center()
           .when(Boolean(tree), el => el.pl(22).child(svg("mods/workspace-chrome/branch.svg").size(13).text_color(t.dim)))
           .child(div().w(3).h(16).flex_none().rounded(2).bg(markerColor))
-          .child(div().flex_shrink(0).max_w(150).truncate().text_color(t.foreground).child(w.name))
+          .child(div().flex_shrink(0).max_w(150).truncate().text_color(on ? t.foreground : t.muted)
+            .when(on, el => el.font_semibold()).child(w.name))
           .child(g ? this.gitTail(g, tree, w.name, t) : div().flex_1())
           .child(this.spaceFold(w, t)),
       );
@@ -522,11 +525,10 @@ export default class Spaces extends View {
       .flex_none()
       .justify_center()
       .gap(4)
-      .when(w.active, (el) => el.bg(t.raised))
       .hover((s) => s.bg(t.hover))
       .on_click(() => run("space.select", { id: w.id }))
       .child(div().text_color(w.active ? t.foreground : t.muted).child(String(i + 1)))
-      .child(div().text_color(tone(t, w.status)).child(glyph(w.status)))
+      .when(Boolean(w.status) && w.status !== "idle", el => el.child(div().text_color(tone(t, w.status)).child(glyph(w.status))))
       .child(this.spaceFold(w, t, true));
   }
 
@@ -546,9 +548,7 @@ export default class Spaces extends View {
       const color = t[status] ?? t.dim;
       const state = status === "working"
         ? svg("mods/workspace-chrome/spinner.svg").size(12).text_color(color).spin(900)
-        : div().size(7).rounded(4)
-          .when(status === "idle", el => el.border(1.5).border_color(color))
-          .when(status !== "idle", el => el.bg(color));
+        : div().size(7).rounded(4).bg(color);
       const pic = a.program?.icon
         ? (a.program.tint ? svg(a.program.icon).size(14).text_color(t.foreground)
           : image(a.program.icon).w(14).h(14)) : div().size(14).child("·");
@@ -561,10 +561,10 @@ export default class Spaces extends View {
         .on_click(() => run(child ? "terminal.peek" : "agent.focus", { terminal: a.address }))
         .when(!child, el => el.child(this.tabBadge(a.tab, t)))
         .child(pic)
-        .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate().text_size(12)
+        .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate().text_size(this.font(12))
           .text_color(a.focused ? t.foreground : t.muted).child(name))
           .when(a.pinned, el => el.child(svg("mods/workspace-chrome/pin.svg").size(11).text_color(t.dim))))
-        .child(state), { id: `agent-${a.address}`, space: w.id, tab: a.tab, terminal: a.address,
+        .when(status !== "idle", el => el.child(state)), { id: `agent-${a.address}`, space: w.id, tab: a.tab, terminal: a.address,
           command: child ? "terminal.peek" : "agent.focus", args: { terminal: a.address } }, t));
       for (const sub of this.liveTerminals.filter(k => k.parent === a.address && !this.agentList.some(top => top.address === k.address)))
         append(sub, depth + 1, true);
@@ -581,7 +581,7 @@ export default class Spaces extends View {
         .tooltip(name).on_click(() => run("tab.select", { id: tab.id }))
         .child(this.tabBadge(tab.id, t))
         .when(!collapsed, el => el.child(div().flex_1().min_w(0).truncate()
-          .text_size(12).text_color(t.muted).child(name))),
+          .text_size(this.font(12)).text_color(t.muted).child(name))),
         { id: `tab-${tab.id}`, space: w.id, tab: tab.id, command: "tab.select", args: { id: tab.id } }, t));
     }
     return rows;
@@ -592,13 +592,32 @@ export default class Spaces extends View {
       ? Object.entries(this.targetMode.targets).find(([, target]) => target.tab === id)?.[0]
       : this.tabKeys[id];
     return div().w(18).h(18).flex_none().flex().items_center().justify_center()
-      .text_size(10).text_color(this.targetMode ? t.accent : t.dim).opacity(this.targetMode ? 1 : 0.75)
+      .text_size(this.font(10)).text_color(this.targetMode ? t.accent : t.dim).opacity(this.targetMode ? 1 : 0.75)
       .tooltip(key ? `Ctrl+A → ${this.targetMode ? "Space → " : ""}${key}` : "Open Go To: Ctrl+A → g")
       .child(key || "·");
   }
 
+  font(base) { return base + this.fontOffset; }
+
+  fontButton(label, step, t) {
+    const next = Math.max(-2, Math.min(4, this.fontOffset + step));
+    return div().id(`sidebar-font-${step}`).size(22).flex_none()
+      .flex().items_center().justify_center().rounded(4).border(1).border_color(t.chrome).text_size(11)
+      .text_color(next === this.fontOffset ? t.dim : t.muted).cursor_pointer()
+      .hover(el => el.bg(t.hover).border_color(t.border).text_color(t.foreground))
+      .tooltip(`${step < 0 ? "Decrease" : "Increase"} sidebar font`)
+      .on_click((_e, cx) => {
+        cx.stop_propagation();
+        setShared("sidebar.fontOffset", next);
+        cx.notify();
+      }).child(label);
+  }
+
   render() {
     const t = theme();
+    const offset = shared("sidebar.fontOffset");
+    this.fontOffset = typeof offset === "number" && Number.isFinite(offset)
+      ? Math.max(-2, Math.min(4, offset)) : 0;
     const targets = shared("navigation.sidebarTargets");
     this.targetMode = targets?.until > Date.now() ? targets : null;
     const collapsed = narrow();
@@ -622,9 +641,9 @@ export default class Spaces extends View {
     this.navigation = [];
     const rows = this.grouped(t, collapsed);
     setAgentOrder(this.agentOrder);
-    return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
+    return v_flex().size_full().min_h(0).bg(t.chrome).text_size(this.font(13))
       .track_focus(this.handle).on_key_down((event, cx) => this.navigate(event, cx))
-      .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(11.5).text_color(t.dim)
+      .child(h_flex().h(31).pl(16).pr(10).items_center().justify_between().text_size(this.font(11.5)).text_color(t.dim)
         .when(!collapsed, el => el.child(div().flex_1().child("Spaces")))
         .when(!collapsed && otherSpaces.length > 0, el => el.child(div().id("spaces-fold-all").size(26).flex_none()
           .flex().items_center().justify_center().rounded(6).cursor_pointer()
@@ -641,22 +660,33 @@ export default class Spaces extends View {
           .child(svg(`mods/workspace-chrome/chevron-${expandOthers ? "down" : "right"}.svg`).size(14))))
         .child(div().id("space-new").size(26).flex_none().flex().items_center().justify_center().rounded(6).hover(s => s.bg(t.hover).text_color(t.foreground))
           .on_click(() => run("space.new")).child(svg("mods/workspace-chrome/plus.svg").size(14))))
+      .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
+        .on_mouse_up("left", (_e, cx) => { this.pressed = null; cx.notify(); })
+        .children(rows))
       .when(!collapsed, el => el.child(div().mx(12).h(1).flex_none().bg(t.border)))
-      .when(!collapsed, el => el.child(h_flex().px(12).py(10).gap(6).items_center().text_size(11)
-        .child(div().flex_1().cursor_pointer().text_color(shared("session.autoRestore") ? t.accent : t.dim)
-          .tooltip("Resume the latest saved session after terminal recovery. Saving stays manual.")
+      .when(!collapsed, el => el.child(h_flex().px(10).h(36).gap(1).flex_none().items_center()
+        .child(h_flex().id("sidebar-auto-restore").h(24).px(3).gap(5).flex_none().items_center().rounded(4).cursor_pointer()
+          .text_size(9).text_color(t.muted).hover(s => s.bg(t.hover).text_color(t.foreground))
+          .tooltip(`Auto-restore ${shared("session.autoRestore") ? "on" : "off"} · Resume the latest saved session after recovery. Saving stays manual.`)
           .on_click((_e, cx) => {
             setShared("session.autoRestore", !shared("session.autoRestore"));
             this.restoreSession(cx); cx.notify();
-          }).child(`${shared("session.autoRestore") ? "☑" : "☐"} Auto-restore`))
-        .child(div().px(4).py(1).text_size(10).rounded(3).border(1).border_color(t.border).cursor_pointer().text_color(this.sessionBusy ? t.dim : t.muted)
-          .hover(s => s.bg(t.hover).text_color(t.foreground))
+          }).child("Auto")
+          .child(h_flex().w(24).h(14).px(2).flex_none().items_center().rounded(7)
+            .bg(shared("session.autoRestore") ? t.accent : t.border)
+            .when(Boolean(shared("session.autoRestore")), el => el.justify_end())
+            .child(div().size(10).rounded(5).bg(t.foreground))))
+        .child(div().h(24).px(4).flex_none().flex().items_center().justify_center().text_size(9).rounded(4).border(1).border_color(t.chrome).cursor_pointer().text_color(this.sessionBusy ? t.dim : t.muted)
+          .tooltip("Save the current session")
+          .hover(s => s.bg(t.hover).border_color(t.border).text_color(t.foreground))
           .on_click((_e, cx) => this.sessionCommand("save", cx)).child("Save"))
-        .child(div().px(4).py(1).text_size(10).rounded(3).border(1).border_color(t.border).cursor_pointer().text_color(t.muted)
-          .hover(s => s.bg(t.hover).text_color(t.foreground))
-          .on_click(() => run("mod.open", {name: "session-manager"})).child("Restore"))))
-      .child(v_flex().flex_1().min_h(0).px(8).pb(14).overflow_y_scrollbar().mode("always")
-        .on_mouse_up("left", (_e, cx) => { this.pressed = null; cx.notify(); })
-        .children(rows));
+        .child(div().h(24).px(4).flex_none().flex().items_center().justify_center().text_size(9).rounded(4).border(1).border_color(t.chrome).cursor_pointer().text_color(t.muted)
+          .tooltip("Choose a saved session to restore")
+          .hover(s => s.bg(t.hover).border_color(t.border).text_color(t.foreground))
+          .on_click(() => run("mod.open", {name: "saved-sessions"})).child("Restore"))
+        .child(div().flex_1())
+        .child(div().w(1).h(12).mx(5).flex_none().bg(t.border).opacity(0.6))
+        .child(this.fontButton("−", -1, t))
+        .child(this.fontButton("+", 1, t))));
   }
 }

@@ -170,13 +170,20 @@ def agent_launch(argv, cwd):
 def snapshot():
     state = rpc('doc.get', {'name': 'herdr-app'}); doc = state.get('value') or {'spaces': []}
     bindings = read_json(STATE/'bindings.json', {})
-    records = {}; warnings = []
+    records = {}; warnings = []; skipped = []
     for space, tab, node, address in leaves(doc):
         if address in records: continue
         if '/' in address or space.get('machine'):
-            raise SessionError('Remote terminals need a separate snapshot on their own machine')
-        t = get_terminal(address); fg = t.get('foreground') or {}
-        agent, ref, source = resolve_ref(t, bindings)
+            skipped.append({'terminal':address,'action':'skip','reason':'Remote terminal'});continue
+        try: t = get_terminal(address)
+        except SessionError as error:
+            skipped.append({'terminal':address,'action':'skip','reason':str(error)});continue
+        fg = t.get('foreground') or {}
+        try:
+            agent, ref, source = resolve_ref(t, bindings)
+        except SessionError as error:
+            agent, ref, source = agent_kind(t), None, None
+            warnings.append(address + ': ' + str(error))
         cwd = fg.get('cwd') or t.get('cwd') or space.get('folder')
         fg_program = Path((fg.get('argv') or [''])[0]).name
         if not agent and fg_program and fg_program not in SHELLS:
@@ -189,14 +196,31 @@ def snapshot():
     if rpc('doc.get', {'name': 'herdr-app'}).get('version') != state.get('version'):
         raise SessionError('Layout changed while saving. Please save again.')
     return {'schema': 1, 'id': str(uuid.uuid4()), 'saved_at': dt.datetime.now(dt.timezone.utc).isoformat(),
-        'boot_id': boot_id(), 'document': doc, 'terminals': records, 'warnings': warnings}
+        'boot_id': boot_id(), 'document': restorable_document(doc, {'spaces':[]}, skipped, {}),
+        'terminals': records, 'warnings': warnings, 'skipped': [dict(a, **terminal_label(
+            {'document':doc,'terminals':records}, a['terminal'])) for a in skipped]}
+
+def terminal_label(snapshot, address):
+    record=snapshot.get('terminals',{}).get(address,{})
+    for space,tab,node,terminal in leaves(snapshot['document']):
+        if terminal!=address:continue
+        cwd=record.get('cwd') or space.get('folder') or ''
+        folder=Path(cwd).name if cwd else space.get('name') or 'Unknown folder'
+        tab_name=tab.get('name') or 'Tab '+str(space['tabs'].index(tab)+1)
+        peers=[a for w,t,n,a in leaves(snapshot['document']) if w['id']==space['id'] and t['id']==tab['id']]
+        pane=' · pane '+str(peers.index(address)+1) if len(peers)>1 else ''
+        return {'label':f"{record.get('agent') or 'Terminal'} · {folder} [{tab_name}]{pane}",
+                'location':cwd, 'space':space['id'], 'tab':tab['id'], 'pane':node['id']}
+    return {'label':address, 'location':record.get('cwd') or ''}
 
 def summary(s):
     records = list(s['terminals'].values()); missing = [r for r in records if r['agent'] and not r['ref']]
     return {'id': s['id'], 'saved_at': s['saved_at'], 'spaces': len(s['document'].get('spaces', [])),
         'tabs': sum(len(w.get('tabs', [])) for w in s['document'].get('spaces', [])),
         'panes': len(records), 'ready_agents': sum(bool(r['agent'] and r['ref']) for r in records),
-        'unresolved': [{'terminal': r['address'], 'agent': r['agent']} for r in missing], 'warnings': s['warnings']}
+        'unresolved': [{'terminal': r['address'], 'agent': r['agent'], **terminal_label(s,r['address']),
+            'reason': 'Session reference unavailable'} for r in missing],
+        'skipped': s.get('skipped',[]), 'warnings': s['warnings']}
 
 def plan_restore(s, current_doc, live, current_boot):
     if s.get('schema') != 1: raise SessionError('Unsupported snapshot schema')
@@ -209,11 +233,15 @@ def plan_restore(s, current_doc, live, current_boot):
         if t and t.get('state')=='live':
             fg=t.get('foreground') or {};argv=fg.get('argv') or t.get('argv') or []
             if agent_kind(t) or not argv or Path(argv[0]).name not in SHELLS:
-                raise SessionError(address+': a different program is running; refusing to replace it')
+                actions.append({'terminal':address,'action':'skip','reason':'Another program is running'});continue
         if r['agent'] and not r['ref']:
-            raise SessionError(address+': missing exact '+r['agent']+' session reference; bind it and save again before reboot')
-        if not r['cwd'] or not Path(r['cwd']).is_dir():raise SessionError(address+': saved directory is unavailable')
-        if r['agent']: validate_ref(r['agent'],r['ref'])
+            actions.append({'terminal':address,'action':'skip','reason':r['agent']+' session reference unavailable'});continue
+        if not r['cwd'] or not Path(r['cwd']).is_dir():
+            actions.append({'terminal':address,'action':'skip','reason':'Saved folder is unavailable'});continue
+        if r['agent']:
+            try: validate_ref(r['agent'],r['ref'])
+            except SessionError as error:
+                actions.append({'terminal':address,'action':'skip','reason':str(error)});continue
         actions.append({'terminal':address,'action':'resume' if r['agent'] else 'shell','agent':r['agent']})
     # Do not erase workspaces/tabs opened since the saved session.
     old_spaces={w['id'] for w in s['document'].get('spaces',[])}
@@ -225,8 +253,34 @@ def plan_restore(s, current_doc, live, current_boot):
             if tab['id'] not in old_tabs:continue
             saved=next(t for t in old['tabs'] if t['id']==tab['id'])
             if tab.get('root')!=saved.get('root'):
-                raise SessionError('A saved tab layout changed; save again or restore to a separate Core session')
-    return actions
+                for action in actions:
+                    if s['terminals'][action['terminal']]['tab']==tab['id']:
+                        action.update(action='skip',reason='Tab layout has changed')
+    return [dict(a, **terminal_label(s,a['terminal'])) for a in actions]
+
+def restorable_document(saved, current, actions, live):
+    """Keep current skipped tabs; omit unavailable leaves instead of dangling IDs."""
+    out=copy.deepcopy(saved)
+    skipped={a['terminal'] for a in actions if a['action']=='skip'}
+    def prune(node):
+        address=(node.get('content') or {}).get('terminal')
+        if address in skipped and live.get(address,{}).get('state')!='live':return None
+        if 'children' in node:
+            node['children']=[n for c in node['children'] if (n:=prune(c)) is not None]
+            if not node['children']:return None
+        return node
+    for space in out['spaces']:
+        current_space=next((w for w in current.get('spaces',[]) if w['id']==space['id']),{})
+        tabs=[]
+        for tab in space.get('tabs',[]):
+            existing=next((t for t in current_space.get('tabs',[]) if t['id']==tab['id']),None)
+            if existing and existing.get('root')!=tab.get('root'):
+                tabs.append(copy.deepcopy(existing));continue
+            root=prune(tab['root'])
+            if root:tab['root']=root;tabs.append(tab)
+        space['tabs']=tabs
+    out['spaces']=[w for w in out['spaces'] if w['tabs']]
+    return out
 
 def merge_document(saved, current, mapping):
     out=copy.deepcopy(saved)
@@ -242,7 +296,7 @@ def merge_document(saved, current, mapping):
 def restore(s, apply=False, automatic=False):
     checkpoint=read_json(STATE/'restored.json',{})
     if not automatic and checkpoint.get('snapshot')==s['id'] and checkpoint.get('boot_id')==boot_id():
-        return {'message':'This snapshot has already been restored on this boot','actions':[]}
+        return {'message':'Already restored', 'actions':checkpoint.get('actions',[])}
     state=rpc('doc.get',{'name':'herdr-app'});current=state.get('value') or {'spaces':[]}
     live={}
     for a in s['terminals']:
@@ -260,8 +314,7 @@ def restore(s, apply=False, automatic=False):
             return {'message': 'Saved terminals are still running', 'actions': []}
     actions=plan_restore(s,current,live,boot_id())
     if not apply:return {'message':'Preview only; no terminals changed','actions':actions}
-    pending=[a for a in actions if a['action']!='keep-live']
-    if not pending:return {'message':'All saved terminals are still running; nothing changed','actions':actions}
+    pending=[a for a in actions if a['action'] in ('resume','shell')]
     launches = {}
     # Resolve every executable before starting any agent.
     for action in pending:
@@ -269,7 +322,10 @@ def restore(s, apply=False, automatic=False):
         argv = ([agent, 'resume', r['ref']] if agent == 'codex' else
                 ['claude', '--resume', r['ref']] if agent == 'claude' else
                 ['pi', '--session', r['ref']] if agent == 'pi' else [])
-        launches[r['address']] = agent_launch(argv, r['cwd']) if agent else []
+        try: launches[r['address']] = agent_launch(argv, r['cwd']) if agent else []
+        except SessionError as error: action.update(action='skip',reason=str(error))
+    pending=[a for a in pending if a['action']!='skip']
+    if not pending:return {'message':'Nothing to restore','actions':actions}
     atomic_json(STATE/'before-restore.json',state)
     mapping={};created=[];parked={};spawned={}
     try:
@@ -277,8 +333,11 @@ def restore(s, apply=False, automatic=False):
             r=s['terminals'][action['terminal']];agent=r['agent']
             argv=launches[r['address']]
             # No space/tab labels until commit: prevents premature auto-adoption.
-            result=rpc('terminal.run',{'argv':argv,'cwd':r['cwd'],'keep':True,'no_parent':True,
-                'no_notify':True,'labels':{'session.snapshot':s['id']}})
+            try:
+                result=rpc('terminal.run',{'argv':argv,'cwd':r['cwd'],'keep':True,'no_parent':True,
+                    'no_notify':True,'labels':{'session.snapshot':s['id']}})
+            except SessionError as error:
+                action.update(action='skip',reason=str(error));continue
             terminal=result.get('terminal',result)
             address=terminal.get('address') if isinstance(terminal,dict) else terminal
             if not address:raise SessionError('Core did not return a new terminal address')
@@ -293,7 +352,9 @@ def restore(s, apply=False, automatic=False):
                 parked[old]=now
                 rpc('terminal.label',{'terminal':old,'labels':{'herdr.space':'','herdr.tab':''}})
                 rpc('terminal.keep',{'terminal':old,'keep':False})
-        doc=merge_document(s['document'],current,mapping)
+        if not created:return {'message':'Nothing restored','actions':actions}
+        base=restorable_document(s['document'],current,actions,live)
+        doc=merge_document(base,current,mapping)
         rpc('doc.set',{'name':'herdr-app','value':doc,'version':state['version']})
     except Exception:
         for address,t in parked.items():
@@ -306,7 +367,8 @@ def restore(s, apply=False, automatic=False):
             try:rpc('terminal.kill',{'terminal':address})
             except SessionError:pass
         raise
-    atomic_json(STATE/'restored.json',{'snapshot':s['id'],'boot_id':boot_id(),'mapping':mapping})
+    atomic_json(STATE/'restored.json',{'snapshot':s['id'],'boot_id':boot_id(),'mapping':mapping,
+        'actions':[a for a in actions if a['action']=='skip']})
     warnings=[]
     for old,new in mapping.items():
         r=s['terminals'][old]
@@ -323,7 +385,7 @@ def restore(s, apply=False, automatic=False):
             record['pid']=spawned[new].get('pid');record['created_ms']=spawned[new].get('created_ms')
         continuation['terminals'][new]=record
     atomic_json(STATE/'latest.json',continuation)
-    return {'message':'Session restored','actions':actions,'warnings':warnings}
+    return {'message':f'Restored {len(created)} panes', 'actions':actions,'warnings':warnings}
 
 def resize_document(document, pane, direction):
     """Move the nearest split boundary on this axis; preserve all other layout data."""

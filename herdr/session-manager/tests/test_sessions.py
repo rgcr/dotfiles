@@ -17,6 +17,46 @@ def snap(cwd):
   'terminals':{'t1':{'address':'t1','space':'s1','tab':'tab1','pane':'pane1','cwd':cwd,'agent':'codex','ref':'11111111-1111-1111-1111-111111111111','created_ms':1,'pid':10}}}
 
 class Tests(unittest.TestCase):
+ def test_report_identifies_tab_in_older_snapshot(self):
+  self.s['terminals']['t1']['ref']=None
+  label=m.summary(self.s)['unresolved'][0]['label']
+  self.assertEqual(label,f'codex · {pathlib.Path(self.temp.name).name} [Named]')
+  self.s['document']['spaces'][0]['tabs'][0]['name']=''
+  self.assertIn('[Tab 1]',m.terminal_label(self.s,'t1')['label'])
+ def test_partial_restore_starts_valid_agent_and_reports_missing_one(self):
+  second=copy.deepcopy(self.s['terminals']['t1']);second.update(address='t2',pane='pane2',ref=None)
+  self.s['terminals']['t2']=second
+  self.s['document']['spaces'][0]['tabs'][0]['root']['children'].append({'id':'pane2','type':'block','content':{'terminal':'t2'}})
+  calls=[]
+  def rpc(method,params):
+   calls.append((method,params))
+   if method=='doc.get':return {'version':1,'value':{'spaces':[]}}
+   if method=='terminal.get':raise m.SessionError('gone')
+   if method=='terminal.run':return {'address':'t9','pid':90,'created_ms':9}
+   if method in ('doc.set','terminal.label'):return {}
+   raise AssertionError(method)
+  with patch.object(m,'STATE',pathlib.Path(self.temp.name)),patch.object(m,'rpc',rpc),patch.object(m,'boot_id',return_value='new-boot'),patch.object(m.shutil,'which',return_value='/bin/codex'):
+   result=m.restore(self.s,True)
+   self.assertEqual([a['action'] for a in result['actions']],['resume','skip'])
+   committed=next(p['value'] for method,p in calls if method=='doc.set')
+   self.assertEqual([a for _,_,_,a in m.leaves(committed)],['t9'])
+   self.assertEqual(m.restore(self.s,True)['actions'][0]['terminal'],'t2')
+ def test_changed_tab_is_preserved_while_other_tabs_restore(self):
+  current=doc('new-terminal')
+  actions=m.plan_restore(self.s,current,{},'new-boot')
+  self.assertEqual(m.restorable_document(self.s['document'],current,actions,{}),current)
+ def test_save_keeps_other_panes_when_one_is_unavailable(self):
+  document=doc()
+  document['spaces'][0]['tabs'][0]['root']['children'].append({'id':'pane2','type':'block','content':{'terminal':'t2'}})
+  def rpc(method,params):
+   if method=='doc.get':return {'version':1,'value':document}
+   if params['terminal']=='t2':raise m.SessionError('unavailable')
+   return {'address':'t1','cwd':self.temp.name}
+  with patch.object(m,'rpc',rpc),patch.object(m,'STATE',pathlib.Path(self.temp.name)),patch.object(m,'resolve_ref',return_value=(None,None,None)),patch.object(m,'boot_id',return_value='test-boot'):
+   result=m.snapshot()
+  self.assertEqual(list(result['terminals']),['t1'])
+  self.assertEqual(result['skipped'][0]['terminal'],'t2')
+  self.assertEqual([a for _,_,_,a in m.leaves(result['document'])],['t1'])
  def test_tui_preview_has_no_server_calls(self):
   with patch.object(m,'tui_call',side_effect=AssertionError('unexpected command')),patch.object(m,'boot_id',return_value='new-boot'):
    result=m.restore_tui(self.s,'restored')
@@ -99,7 +139,7 @@ class Tests(unittest.TestCase):
   m.atomic_json(pathlib.Path(self.temp.name)/'restored.json',{'snapshot':self.s['id'],'boot_id':'old-boot'})
   terminal={'state':'live','pid':20,'created_ms':1,'argv':['/bin/zsh','-l']}
   with patch.object(m,'agent_launch',side_effect=m.SessionError('preflight reached')):
-   with self.assertRaisesRegex(m.SessionError,'preflight reached'):self.auto_probe(terminal)
+   self.assertEqual(self.auto_probe(terminal)['actions'][0]['reason'],'preflight reached')
  def test_select_archive_by_id_and_keep_restored_addresses(self):
   with tempfile.TemporaryDirectory() as temp,patch.object(m,'STATE',pathlib.Path(temp)):
    older=snap(temp);older.update(id='older',saved_at='2026-11-01')
@@ -124,7 +164,7 @@ class Tests(unittest.TestCase):
    if method=='doc.get':return {'version':1,'value':doc()}
    raise m.SessionError('not found')
   with tempfile.TemporaryDirectory() as temp,patch.object(m,'STATE',pathlib.Path(temp)),patch.object(m,'rpc',rpc),patch.object(m,'boot_id',return_value='new-boot'),patch.object(m,'agent_launch',side_effect=m.SessionError('missing executable')):
-   with self.assertRaises(m.SessionError):m.restore(self.s,True)
+   self.assertEqual(m.restore(self.s,True)['actions'][0]['action'],'skip')
   self.assertNotIn('terminal.run',calls)
  def test_retention_keeps_three_newest_archives_and_latest(self):
   with tempfile.TemporaryDirectory() as temp:
@@ -142,19 +182,19 @@ class Tests(unittest.TestCase):
   self.assertEqual(m.plan_restore(self.s,doc(),live,'old-boot')[0]['action'],'keep-live')
  def test_unresolved_session_blocks_reboot_restore(self):
   self.s['terminals']['t1']['ref']=None
-  with self.assertRaises(m.SessionError):m.plan_restore(self.s,doc(),{},'new-boot')
+  self.assertEqual(m.plan_restore(self.s,doc(),{},'new-boot')[0]['action'],'skip')
  def test_replacement_agent_is_not_overwritten(self):
-  with self.assertRaises(m.SessionError):m.plan_restore(self.s,doc(),{'t1':{'state':'live','status':{'app':'pi'}}},'new-boot')
+  self.assertEqual(m.plan_restore(self.s,doc(),{'t1':{'state':'live','status':{'app':'pi'}}},'new-boot')[0]['action'],'skip')
  def test_busy_recovery_terminal_is_not_overwritten(self):
-  with self.assertRaises(m.SessionError):m.plan_restore(self.s,doc(),{'t1':{'state':'live','foreground':{'argv':['npm','test']}}},'new-boot')
+  self.assertEqual(m.plan_restore(self.s,doc(),{'t1':{'state':'live','foreground':{'argv':['npm','test']}}},'new-boot')[0]['action'],'skip')
  def test_recovery_shell_can_be_replaced(self):
   live={'t1':{'state':'live','pid':20,'argv':['/bin/zsh','-l'],'foreground':{'argv':['/bin/zsh','-l']}}}
   self.assertEqual(m.plan_restore(self.s,doc(),live,'new-boot')[0]['action'],'resume')
  def test_missing_directory_blocks_restore(self):
   self.s['terminals']['t1']['cwd']=self.temp.name+'/missing'
-  with self.assertRaises(m.SessionError):m.plan_restore(self.s,doc(),{},'new-boot')
+  self.assertEqual(m.plan_restore(self.s,doc(),{},'new-boot')[0]['action'],'skip')
  def test_changed_pane_layout_blocks_restore(self):
-  with self.assertRaises(m.SessionError):m.plan_restore(self.s,doc('t2'),{},'new-boot')
+  self.assertEqual(m.plan_restore(self.s,doc('t2'),{},'new-boot')[0]['action'],'skip')
  def test_merge_preserves_extra_work_and_split_properties(self):
   current=doc();extra=copy.deepcopy(current['spaces'][0]);extra['id']='s2';current['spaces'].append(extra)
   self.s['document']['spaces'][0]['tabs'][0]['root']['weights']=[0.4,0.6]

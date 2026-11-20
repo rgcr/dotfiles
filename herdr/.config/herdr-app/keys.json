@@ -15,7 +15,7 @@
     "cmd-[": "agent.prev",
     "cmd-shift-l": "layout.switch",
     "cmd-n": "space.new",
-    "cmd-p": "mod.open:tab-finder",
+    "cmd-p": "mod.open:tab-switcher",
     "cmd-shift-p": "app.palette",
     "cmd-,": "app.settings",
     "cmd-d": "pane.split:right",
@@ -57,7 +57,7 @@
     "ctrl-7": "space.select:7",
     "ctrl-8": "space.select:8",
     "ctrl-9": "space.select:9",
-    "ctrl-a": "mod.open:legacy-prefix"
+    "ctrl-a": "mod.open:prefix-shortcuts"
   },
   "terminal": {
     "cmd-c": "terminal.copy",

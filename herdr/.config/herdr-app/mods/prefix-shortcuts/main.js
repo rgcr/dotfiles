@@ -22,11 +22,11 @@ export function actionFor(event, shortcuts = {}) {
     return ["quick-tab", shortcuts[k]];
   return {
     c: ["tab.new"],
-    w: ["space-agents.focus"],
+    w: ["spaces-sidebar.focus"],
     z: ["pane.zoom"],
-    s: ["mod.open", { name: "session-manager" }],
+    s: ["mod.open", { name: "saved-sessions" }],
     x: ["tab.close"],
-    g: ["mod.open", { name: "tab-finder" }],
+    g: ["mod.open", { name: "tab-switcher" }],
     space: ["sidebar-targets"],
     d: ["cancel"],
     ",": ["tab.rename"],
@@ -151,7 +151,7 @@ export default class LegacyPrefix extends View {
     }
     closeOverlay(props().overlay);
     if (command === "cancel") return;
-    if (command === "space-agents.focus") run("layout.show", { id: "sidebar" });
+    if (command === "spaces-sidebar.focus") run("layout.show", { id: "sidebar" });
     if (command === "quick-tab") {
       // Use the displayed ID, never a position that could have shifted meanwhile.
       if (spaces().some(s => s.id === args.space && s.tabs.some(t => t.id === args.tab)))
@@ -166,7 +166,7 @@ export default class LegacyPrefix extends View {
         run("tab.move", { id: this.context.tab, index: destination + 1 });
     } else if (command === "scrollback") {
       if (this.context?.terminal && this.context?.pane)
-        run("pane.split", { pane: this.context.pane, direction: "right", mod: "legacy-prefix",
+        run("pane.split", { pane: this.context.pane, direction: "right", mod: "prefix-shortcuts",
           props: { scrollback: this.context.terminal } });
     } else {
       run(command, args);

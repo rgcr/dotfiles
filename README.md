@@ -48,7 +48,7 @@ stow --no-folding -d . -t ~ -vR zsh
 Or deploy all normal home dotfiles with:
 
 ```bash
-./setup.sh --stow
+./deploy.sh install
 ```
 
 ### To remove a specific config
@@ -63,7 +63,7 @@ stow --no-folding -d . -t ~ -vD <config>
 stow --no-folding -d . -t ~ -vD *
 ```
 
-Run `./setup.sh` with no parameters to show usage.
+Run `./deploy.sh` with no parameters to show usage.
 
 ---
 
@@ -72,13 +72,13 @@ Run `./setup.sh` with no parameters to show usage.
 ### `i3-hibernate` config requires `sudo` privileges
 
 ```bash
-./setup.sh --i3-hibernate
+./deploy.sh install --i3-hibernate
 ```
 
 ### `sway-hibernate` system sleep config requires `sudo` privileges
 
 ```bash
-./setup.sh --sway-hibernate
+./deploy.sh install --sway-hibernate
 ```
 
 This uses `suspend-then-hibernate`: the laptop suspends first, then writes RAM to

@@ -19,7 +19,8 @@ short aliases. GNU Stow and Bash are required; Make is optional.
 
 Package lists live directly in deploy.sh. Tooling, caches and
 reference directories are not packages. System hibernation setup remains an
-explicit sudo operation in setup.sh; never include it in normal deployment.
+explicit Linux-only operation via `deploy.sh install --i3-hibernate` or
+`deploy.sh install --sway-hibernate`; never include it in normal deployment.
 
 Never adopt files, overwrite conflicts, or delete unrelated links. Preserve live
 configuration differences and local edits. Keep secrets, runtime snapshots and

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P) || exit 1
+cd -- "$repo_dir" || exit 1
+
 BACKUPDIR=${HOME}/.dotfiles.bak
 
 _has(){
@@ -31,17 +34,7 @@ _backup(){
 }
 
 _deploy(){
-    # deploy dotfiles with stow
-    printf "\nRestow dotfiles\n"
-    local d
-    for d in */; do
-        [ -d "$d" ] || continue
-        d=${d%/}
-        case "$d" in
-            i3-hibernate|sway-hibernate) continue ;;
-        esac
-        stow --no-folding -vR "$d" -d . -t "$HOME" || return
-    done
+    make -C "$repo_dir" deploy
 }
 
 _deploy_i3_hibernate(){
@@ -69,10 +62,10 @@ _EOL_
 _help(){
     cat <<_EOL_
 Usage:
-    ./bootstrap.sh --stow
-    ./bootstrap.sh --i3-hibernate
-    ./bootstrap.sh --sway-hibernate
-    ./bootstrap.sh --help
+    ./setup.sh --stow
+    ./setup.sh --i3-hibernate
+    ./setup.sh --sway-hibernate
+    ./setup.sh --help
 
 Options:
     --stow              Deploy normal home dotfiles with GNU Stow.

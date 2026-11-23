@@ -27,3 +27,5 @@ secrets/
 
 *.md
 !README.md
+!AGENTS.md
+__pycache__/

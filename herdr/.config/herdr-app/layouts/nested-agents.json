@@ -83,7 +83,12 @@
                 "pane": {
                   "header": {
                     "content": {
-                      "mod": "pane"
+                      "mod": "herdr-nvim-header",
+                      "props": {
+                        "replaces": {
+                          "mod": "pane"
+                        }
+                      }
                     },
                     "reveal": "always",
                     "height": 30,
@@ -116,14 +121,28 @@
                       "id": "files",
                       "type": "block",
                       "content": {
-                        "mod": "files"
+                        "mod": "herdr-nvim",
+                        "props": {
+                          "replaces": {
+                            "mod": "files"
+                          },
+                          "panel_width_was": {
+                            "px": 368
+                          },
+                          "panel_width": 300
+                        }
                       }
                     },
                     {
                       "id": "changes",
                       "type": "block",
                       "content": {
-                        "mod": "changes"
+                        "mod": "gitview",
+                        "props": {
+                          "replaces": {
+                            "mod": "changes"
+                          }
+                        }
                       }
                     }
                   ],
@@ -131,7 +150,7 @@
                 }
               ],
               "size": {
-                "px": 368
+                "px": 300
               },
               "min": 280,
               "max": 900,
@@ -169,5 +188,18 @@
     12,
     16
   ],
-  "preview": "layouts/nested-agents.svg"
+  "preview": "layouts/nested-agents.svg",
+  "floating": [
+    {
+      "id": "herdr-nvim-sync",
+      "content": {
+        "mod": "herdr-nvim",
+        "props": {
+          "role": "sync"
+        }
+      },
+      "edge": "bottom",
+      "align": "end"
+    }
+  ]
 }

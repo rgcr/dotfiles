@@ -57,7 +57,12 @@
     "ctrl-7": "space.select:7",
     "ctrl-8": "space.select:8",
     "ctrl-9": "space.select:9",
-    "ctrl-a": "mod.open:prefix-shortcuts"
+    "ctrl-a": "mod.open:prefix-shortcuts",
+    "cmd-e": "mod.open:herdr-nvim",
+    "cmd-o": "herdr-nvim.pick",
+    "cmd-shift-e": "herdr-nvim.reveal",
+    "cmd-shift-g": "mod.open:gitview-sidebar",
+    "cmd-g": "mod.open:gitview-tab"
   },
   "terminal": {
     "cmd-c": "terminal.copy",

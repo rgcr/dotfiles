@@ -1,4 +1,3 @@
-^/session-manager(/|$)
 ^\.gitignore$
 ^__pycache__$
 \.pyc$

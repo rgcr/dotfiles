@@ -187,6 +187,9 @@ lazy.setup({
       opts = {
         default_file_explorer = true,
         delete_to_trash = true,
+        -- Keep Oil available when switching between file buffers
+        buf_options = { buflisted = true },
+        cleanup_delay_ms = false,
         -- columns = { "size", "mtime", "icon" },
         win_options = {
           signcolumn = "yes:2",

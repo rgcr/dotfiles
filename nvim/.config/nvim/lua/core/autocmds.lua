@@ -309,7 +309,17 @@ autocmd("FileType", {
   callback = function()
     vim.keymap.set("n", "Q", "<cmd>qa<cr>", { buffer = true, silent = true, desc = "Quit all" })
     vim.opt_local.winbar = "%#OilWinbar# %{v:lua.require'oil'.get_current_dir()}%="
-    vim.keymap.set("n", "<BS>", function() require("oil").open("..") end, { buffer = true, silent = true, desc = "Parent dir" })
+    vim.api.nvim_buf_create_user_command(0, "Open", function()
+      local oil = require("oil")
+      local entry = oil.get_cursor_entry()
+      local dir = oil.get_current_dir()
+      if not (entry and dir) then return end
+
+      local _, err = vim.ui.open(dir .. entry.name)
+      if err then
+        vim.notify(err, vim.log.levels.ERROR)
+      end
+    end, { desc = "Open the Oil entry in its default application" })
     vim.keymap.set("n", "<Space>", function()
       local entry = require("oil").get_cursor_entry()
       local dir = require("oil").get_current_dir()

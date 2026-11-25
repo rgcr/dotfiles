@@ -186,6 +186,27 @@ utils.nnoremap('<space>o', function()
 end, { desc = "Open Oil" })
 -- utils.nnoremap('<space>o', ':Oil<CR>', { desc = "Open Oil" })
 
+-- Apply after Oil has installed its default buffer mappings
+vim.api.nvim_create_autocmd("User", {
+  group = vim.api.nvim_create_augroup("OilKeymaps", { clear = true }),
+  pattern = "OilEnter",
+  callback = function(event)
+    vim.keymap.set("n", "<BS>", function()
+      require("oil.actions").parent.callback()
+    end, {
+      buffer = event.data.buf,
+      silent = true,
+      desc = "Parent directory",
+    })
+    vim.keymap.set("n", "<CR>", function()
+      require("oil").select()
+    end, {
+      buffer = event.data.buf,
+      desc = "Enter directory or open file in a buffer",
+    })
+  end,
+})
+
 
 -- goto-preview keeymaps
 -- utils.nnoremap('gpd', ':lua require("goto-preview").goto_preview_definition()<CR>') -- preview definition
